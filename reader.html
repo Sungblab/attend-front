@@ -11,6 +11,11 @@
     <div class="bg-white p-8 rounded-lg shadow-md text-center max-w-md w-full">
       <h1 class="text-2xl font-bold mb-6 text-gray-800">QR 코드 출석 확인</h1>
       <div id="qr-reader" class="mx-auto mb-4"></div>
+      <div class="mb-4">
+        <select id="camera-select" class="w-full p-2 border rounded">
+          <option value="">카메라 선택</option>
+        </select>
+      </div>
       <div
         id="scan-result"
         class="text-lg font-semibold text-gray-700 mb-4"
@@ -20,10 +25,10 @@
         class="text-sm text-gray-600 mb-4 h-40 overflow-y-auto"
       ></div>
       <button
-        id="stop-button"
-        class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded"
+        id="start-stop-button"
+        class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded"
       >
-        스캔 중지
+        스캔 시작
       </button>
     </div>
 
@@ -31,9 +36,11 @@
       const html5QrCode = new Html5Qrcode("qr-reader");
       const scanResult = document.getElementById("scan-result");
       const attendanceLog = document.getElementById("attendance-log");
-      const stopButton = document.getElementById("stop-button");
+      const startStopButton = document.getElementById("start-stop-button");
+      const cameraSelect = document.getElementById("camera-select");
       let lastScannedCode = "";
       let scanTimeout = null;
+      let currentlyScanning = false;
 
       const qrCodeSuccessCallback = (decodedText, decodedResult) => {
         if (decodedText !== lastScannedCode) {
@@ -48,17 +55,26 @@
 
           scanTimeout = setTimeout(() => {
             lastScannedCode = "";
-          }, 5000); // 5초 후에 같은 코드를 다시 스캔할 수 있도록 함
+          }, 5000);
         }
       };
 
       const config = { fps: 10, qrbox: { width: 250, height: 250 } };
 
-      html5QrCode.start(
-        { facingMode: "environment" },
-        config,
-        qrCodeSuccessCallback
-      );
+      Html5Qrcode.getCameras()
+        .then((devices) => {
+          if (devices && devices.length) {
+            devices.forEach((device) => {
+              const option = document.createElement("option");
+              option.value = device.id;
+              option.text = device.label || `카메라 ${cameraSelect.length + 1}`;
+              cameraSelect.add(option);
+            });
+          }
+        })
+        .catch((err) => {
+          console.error("카메라 목록을 가져오는 데 실패했습니다:", err);
+        });
 
       const userInfo = JSON.parse(localStorage.getItem("userInfo"));
 
@@ -95,7 +111,6 @@
             data.isLate ? "text-yellow-600" : "text-green-600"
           );
 
-          // 출석 로그 추가
           const logEntry = document.createElement("div");
           logEntry.textContent = `${new Date().toLocaleTimeString()} - ${
             data.message
@@ -112,8 +127,8 @@
         }
       }
 
-      stopButton.addEventListener("click", () => {
-        if (html5QrCode.isScanning) {
+      startStopButton.addEventListener("click", () => {
+        if (currentlyScanning) {
           html5QrCode.stop().then(() => {
             scanResult.innerText = "스캔이 중지되었습니다.";
             scanResult.classList.remove(
@@ -122,20 +137,34 @@
               "text-blue-600"
             );
             scanResult.classList.add("text-gray-600");
-            stopButton.innerText = "스캔 재개";
-            stopButton.classList.remove("bg-red-500", "hover:bg-red-600");
-            stopButton.classList.add("bg-green-500", "hover:bg-green-600");
+            startStopButton.innerText = "스캔 시작";
+            startStopButton.classList.remove("bg-red-500", "hover:bg-red-600");
+            startStopButton.classList.add("bg-green-500", "hover:bg-green-600");
+            currentlyScanning = false;
           });
         } else {
+          const selectedCameraId = cameraSelect.value;
+          if (!selectedCameraId) {
+            alert("카메라를 선택해주세요.");
+            return;
+          }
           html5QrCode
-            .start({ facingMode: "environment" }, config, qrCodeSuccessCallback)
+            .start(
+              { deviceId: selectedCameraId },
+              config,
+              qrCodeSuccessCallback
+            )
             .then(() => {
               scanResult.innerText = "스캔 준비 완료";
               scanResult.classList.remove("text-gray-600");
               scanResult.classList.add("text-blue-600");
-              stopButton.innerText = "스캔 중지";
-              stopButton.classList.remove("bg-green-500", "hover:bg-green-600");
-              stopButton.classList.add("bg-red-500", "hover:bg-red-600");
+              startStopButton.innerText = "스캔 중지";
+              startStopButton.classList.remove(
+                "bg-green-500",
+                "hover:bg-green-600"
+              );
+              startStopButton.classList.add("bg-red-500", "hover:bg-red-600");
+              currentlyScanning = true;
             });
         }
       });
