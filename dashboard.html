@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>관리자 대시보드 - 완도고 출결관리 시스템</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  </head>
+  <body class="bg-gray-100">
+    <div class="min-h-screen flex flex-col">
+      <header class="bg-white shadow-md py-4">
+        <div class="container mx-auto px-4">
+          <h1 class="text-2xl font-semibold text-primary">관리자 대시보드</h1>
+        </div>
+      </header>
+
+      <main class="flex-grow container mx-auto px-4 py-8">
+        <div class="bg-white shadow-md rounded-lg p-6">
+          <h2 class="text-xl font-semibold mb-4">사용자 관리</h2>
+
+          <div class="mb-4 flex space-x-4">
+            <div>
+              <label for="grade" class="block text-sm font-medium text-gray-700"
+                >학년</label
+              >
+              <select
+                id="grade"
+                class="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary"
+              >
+                <option value="">전체</option>
+                <option value="1">1학년</option>
+                <option value="2">2학년</option>
+                <option value="3">3학년</option>
+              </select>
+            </div>
+
+            <div>
+              <label for="class" class="block text-sm font-medium text-gray-700"
+                >반</label
+              >
+              <select
+                id="class"
+                class="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary"
+              >
+                <option value="">전체</option>
+                <option value="1">1반</option>
+                <option value="2">2반</option>
+                <option value="3">3반</option>
+                <option value="4">4반</option>
+                <option value="5">5반</option>
+                <option value="6">6반</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="mt-6">
+            <table class="min-w-full divide-y divide-gray-200">
+              <thead class="bg-gray-50">
+                <tr>
+                  <th
+                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  >
+                    학번
+                  </th>
+                  <th
+                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  >
+                    이름
+                  </th>
+                  <th
+                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  >
+                    학년
+                  </th>
+                  <th
+                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  >
+                    반
+                  </th>
+                  <th
+                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  >
+                    번호
+                  </th>
+                  <th
+                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  >
+                    승인 상태
+                  </th>
+                  <th
+                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  >
+                    관리자
+                  </th>
+                  <th
+                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  >
+                    리더
+                  </th>
+                  <th
+                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  >
+                    작업
+                  </th>
+                </tr>
+              </thead>
+              <tbody
+                id="userTableBody"
+                class="bg-white divide-y divide-gray-200"
+              >
+                <!-- 사용자 데이터가 여기에 동적으로 추가됩니다 -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </main>
+
+      <footer class="bg-white shadow-md py-4 mt-8">
+        <div class="container mx-auto px-4 text-center text-gray-600">
+          <p>&copy; 2024 완도고 출결관리 시스템. All rights reserved.</p>
+        </div>
+      </footer>
+    </div>
+
+    <script>
+      axios.defaults.baseURL = "http://localhost:5000";
+
+      const token = localStorage.getItem("token");
+      if (!token) {
+        window.location.href =
+          "index.html?error=" + encodeURIComponent("로그인이 필요합니다.");
+      }
+
+      axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+
+      const gradeSelect = document.getElementById("grade");
+      const classSelect = document.getElementById("class");
+      const userTableBody = document.getElementById("userTableBody");
+
+      gradeSelect.addEventListener("change", fetchUsers);
+      classSelect.addEventListener("change", fetchUsers);
+
+      async function fetchUsers() {
+        try {
+          const grade = gradeSelect.value;
+          const classNumber = classSelect.value;
+          const response = await axios.get("/api/admin/users", {
+            params: { grade, class: classNumber },
+          });
+          displayUsers(response.data);
+        } catch (error) {
+          console.error("Error fetching users:", error);
+          handleError(error);
+        }
+      }
+
+      function displayUsers(users) {
+        userTableBody.innerHTML = "";
+        users
+          .sort((a, b) => {
+            if (a.grade !== b.grade) return a.grade - b.grade;
+            if (a.class !== b.class) return a.class - b.class;
+            return a.number - b.number;
+          })
+          .forEach((user) => {
+            const row = document.createElement("tr");
+            row.innerHTML = `
+              <td class="px-6 py-4 whitespace-nowrap">${user.studentId}</td>
+              <td class="px-6 py-4 whitespace-nowrap">${user.name}</td>
+              <td class="px-6 py-4 whitespace-nowrap">${user.grade}</td>
+              <td class="px-6 py-4 whitespace-nowrap">${user.class}</td>
+              <td class="px-6 py-4 whitespace-nowrap">${user.number}</td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <input type="checkbox" ${
+                  user.isApproved ? "checked" : ""
+                } onchange="updateApproval('${user._id}', this.checked)">
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <input type="checkbox" ${
+                  user.isAdmin ? "checked" : ""
+                } onchange="updateAdmin('${user._id}', this.checked)">
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <input type="checkbox" ${
+                  user.isReader ? "checked" : ""
+                } onchange="updateReader('${user._id}', this.checked)">
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <button onclick="deleteUser('${
+                  user._id
+                }')" class="text-red-600 hover:text-red-900">삭제</button>
+              </td>
+            `;
+            userTableBody.appendChild(row);
+          });
+      }
+
+      async function updateApproval(userId, isApproved) {
+        try {
+          await axios.post("/api/admin/approve-user", { userId, isApproved });
+          alert("사용자 승인 상태가 업데이트되었습니다.");
+        } catch (error) {
+          console.error("Error updating approval status:", error);
+          alert("승인 상태 업데이트에 실패했습니다.");
+        }
+      }
+
+      async function updateAdmin(userId, isAdmin) {
+        try {
+          await axios.post("/api/admin/set-admin", { userId, isAdmin });
+          alert("관리자 권한이 업데이트되었습니다.");
+        } catch (error) {
+          console.error("Error updating admin status:", error);
+          alert("관리자 권한 업데이트에 실패했습니다.");
+        }
+      }
+
+      async function updateReader(userId, isReader) {
+        try {
+          await axios.post("/api/admin/set-reader", { userId, isReader });
+          alert("리더 권한이 업데이트되었습니다.");
+        } catch (error) {
+          console.error("Error updating reader status:", error);
+          alert("리더 권한 업데이트에 실패했습니다.");
+        }
+      }
+
+      async function deleteUser(userId) {
+        if (confirm("정말로 이 사용자를 삭제하시겠습니까?")) {
+          try {
+            await axios.delete(`/api/admin/users/${userId}`);
+            alert("사용자가 삭제되었습니다.");
+            fetchUsers();
+          } catch (error) {
+            console.error("Error deleting user:", error);
+            alert("사용자 삭제에 실패했습니다.");
+          }
+        }
+      }
+
+      function handleError(error) {
+        if (error.response) {
+          console.error("Server responded with error:", error.response.data);
+          alert(
+            `사용자 정보를 불러오는데 실패했습니다. 오류: ${
+              error.response.data.message || "알 수 없는 오류"
+            }`
+          );
+        } else if (error.request) {
+          console.error("No response received:", error.request);
+          alert(
+            "서버로부터 응답을 받지 못했습니다. 네트워크 연결을 확인해주세요."
+          );
+        } else {
+          console.error("Error setting up request:", error.message);
+          alert(`요청 설정 중 오류가 발생했습니다: ${error.message}`);
+        }
+      }
+
+      // 초기 사용자 목록 로드
+      fetchUsers();
+    </script>
+  </body>
+</html>
