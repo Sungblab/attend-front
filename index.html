@@ -125,13 +125,16 @@
 
           if (studentId && password) {
             try {
-              const response = await fetch("http://localhost:5000/api/login", {
-                method: "POST",
-                headers: {
-                  "Content-Type": "application/json",
-                },
-                body: JSON.stringify({ studentId, password }),
-              });
+              const response = await fetch(
+                "https://port-0-attend-backend-lz9cd9taff85e9dc.sel4.cloudtype.app/api/login",
+                {
+                  method: "POST",
+                  headers: {
+                    "Content-Type": "application/json",
+                  },
+                  body: JSON.stringify({ studentId, password }),
+                }
+              );
 
               const data = await response.json();
 
