@@ -7,8 +7,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   </head>
   <body class="bg-gray-100">
     <div class="min-h-screen flex flex-col">
@@ -78,6 +77,52 @@
                 <option value="month">이번 달</option>
                 <option value="semester">이번 학기</option>
               </select>
+            </div>
+
+            <div>
+              <label
+                for="attendanceStatus"
+                class="block text-sm font-medium text-gray-700"
+                >출석 상태</label
+              >
+              <select
+                id="attendanceStatus"
+                class="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary"
+              >
+                <option value="">전체</option>
+                <option value="present">출석</option>
+                <option value="late">지각</option>
+                <option value="absent">결석</option>
+              </select>
+            </div>
+
+            <div>
+              <label
+                for="lateCount"
+                class="block text-sm font-medium text-gray-700"
+                >지각 횟수</label
+              >
+              <input
+                type="number"
+                id="lateCount"
+                min="0"
+                class="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary"
+                placeholder="지각 횟수 이상"
+              />
+            </div>
+
+            <div>
+              <label
+                for="search"
+                class="block text-sm font-medium text-gray-700"
+                >학생 검색</label
+              >
+              <input
+                type="text"
+                id="search"
+                class="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary"
+                placeholder="이름 또는 학번"
+              />
             </div>
 
             <div>
@@ -166,16 +211,10 @@
 
           <div class="mt-4 flex justify-end space-x-2">
             <button
-              id="downloadImage"
+              id="downloadExcel"
               class="py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
             >
-              이미지 다운로드
-            </button>
-            <button
-              id="downloadPDF"
-              class="py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-            >
-              PDF 다운로드
+              Excel 다운로드
             </button>
           </div>
         </div>
@@ -225,6 +264,105 @@
         </div>
       </div>
     </div>
+
+    <!-- 출석 입력 모달 -->
+    <div
+      id="attendanceInputModal"
+      class="fixed z-10 inset-0 overflow-y-auto hidden"
+    >
+      <div
+        class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0"
+      >
+        <div class="fixed inset-0 transition-opacity" aria-hidden="true">
+          <div class="absolute inset-0 bg-gray-500 opacity-75"></div>
+        </div>
+        <span
+          class="hidden sm:inline-block sm:align-middle sm:h-screen"
+          aria-hidden="true"
+          >&#8203;</span
+        >
+        <div
+          class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full"
+        >
+          <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+            <h3 class="text-lg leading-6 font-medium text-gray-900">
+              출석 입력
+            </h3>
+            <form id="attendanceInputForm" class="mt-4">
+              <div class="mb-4">
+                <label
+                  for="inputStudentId"
+                  class="block text-sm font-medium text-gray-700"
+                  >학번</label
+                >
+                <input
+                  type="text"
+                  id="inputStudentId"
+                  required
+                  class="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary"
+                />
+              </div>
+              <div class="mb-4">
+                <label
+                  for="inputDate"
+                  class="block text-sm font-medium text-gray-700"
+                  >날짜</label
+                >
+                <input
+                  type="date"
+                  id="inputDate"
+                  required
+                  class="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary"
+                />
+              </div>
+              <div class="mb-4">
+                <label
+                  for="inputStatus"
+                  class="block text-sm font-medium text-gray-700"
+                  >출석 상태</label
+                >
+                <select
+                  id="inputStatus"
+                  required
+                  class="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary"
+                >
+                  <option value="present">출석</option>
+                  <option value="late">지각</option>
+                  <option value="absent">결석</option>
+                </select>
+              </div>
+              <div class="mb-4">
+                <label
+                  for="inputLateReason"
+                  class="block text-sm font-medium text-gray-700"
+                  >지각 사유</label
+                >
+                <textarea
+                  id="inputLateReason"
+                  class="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary"
+                  rows="3"
+                ></textarea>
+              </div>
+              <div class="flex justify-end space-x-2">
+                <button
+                  type="submit"
+                  class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                >
+                  제출
+                </button>
+                <button
+                  type="button"
+                  class="closeModal inline-flex justify-center py-2 px-4 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                >
+                  취소
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <script>
       // 차트 관련 변수들을 전역 범위로 이동하고 null로 초기화
       let attendancePieChart = null;
@@ -246,28 +384,32 @@
         const gradeSelect = document.getElementById("grade");
         const classSelect = document.getElementById("class");
         const periodSelect = document.getElementById("period");
+        const attendanceStatusSelect =
+          document.getElementById("attendanceStatus");
+        const lateCountInput = document.getElementById("lateCount");
+        const searchInput = document.getElementById("search");
         const fetchButton = document.getElementById("fetch");
         const attendanceTableBody = document.getElementById(
           "attendanceTableBody"
         );
         const weeklyCalendar = document.getElementById("weeklyCalendar");
         const dashboardSummary = document.getElementById("dashboardSummary");
-        const bestAttendanceSection = document.getElementById(
-          "bestAttendanceSection"
-        );
         const studentDetailModal =
           document.getElementById("studentDetailModal");
         const modalTitle = document.getElementById("modalTitle");
         const modalContent = document.getElementById("modalContent");
         const closeModalButtons = document.querySelectorAll(".closeModal");
+        const attendanceInputModal = document.getElementById(
+          "attendanceInputModal"
+        );
+        const attendanceInputForm = document.getElementById(
+          "attendanceInputForm"
+        );
 
         fetchButton.addEventListener("click", fetchAttendanceData);
         document
-          .getElementById("downloadImage")
-          .addEventListener("click", downloadImage);
-        document
-          .getElementById("downloadPDF")
-          .addEventListener("click", downloadPDF);
+          .getElementById("downloadExcel")
+          .addEventListener("click", downloadExcel);
 
         closeModalButtons.forEach((button) => {
           button.addEventListener("click", closeModal);
@@ -288,6 +430,30 @@
           })
         );
 
+        // 출석 입력 폼 제출 이벤트 리스너
+        attendanceInputForm.addEventListener("submit", async (e) => {
+          e.preventDefault();
+          const studentId = document.getElementById("inputStudentId").value;
+          const date = document.getElementById("inputDate").value;
+          const status = document.getElementById("inputStatus").value;
+          const lateReason = document.getElementById("inputLateReason").value;
+
+          try {
+            const response = await axios.post("/api/attendance/modify", {
+              studentId,
+              date,
+              status,
+              lateReason,
+            });
+            alert(response.data.message);
+            closeModal();
+            fetchAttendanceData();
+          } catch (error) {
+            console.error("출석 입력 중 오류 발생:", error);
+            alert("출석 입력에 실패했습니다.");
+          }
+        });
+
         // 초기 데이터 로드
         fetchAttendanceData();
       });
@@ -297,8 +463,20 @@
           const grade = document.getElementById("grade").value;
           const classNumber = document.getElementById("class").value;
           const period = document.getElementById("period").value;
+          const attendanceStatus =
+            document.getElementById("attendanceStatus").value;
+          const lateCount = document.getElementById("lateCount").value;
+          const search = document.getElementById("search").value;
+
           const response = await axios.get("/api/dashboard", {
-            params: { grade, class: classNumber, period },
+            params: {
+              grade,
+              class: classNumber,
+              period,
+              attendanceStatus,
+              lateCount,
+              search,
+            },
           });
           displayAttendanceData(response.data);
           updateStatisticsCharts(response.data);
@@ -379,7 +557,11 @@
                       (record) =>
                         `<li>${formatDate(record.date)} - ${formatTime(
                           record.time
-                        )} (${formatDuration(record.lateMinutes)})</li>`
+                        )} (${formatDuration(record.lateMinutes)})${
+                          record.lateReason
+                            ? ` - 사유: ${record.lateReason}`
+                            : ""
+                        }</li>`
                     )
                     .join("")
                 : "지각 기록 없음"
@@ -390,9 +572,8 @@
       }
 
       function closeModal() {
-        const studentDetailModal =
-          document.getElementById("studentDetailModal");
-        studentDetailModal.classList.add("hidden");
+        document.getElementById("studentDetailModal").classList.add("hidden");
+        document.getElementById("attendanceInputModal").classList.add("hidden");
       }
 
       function updateStatisticsCharts(data) {
@@ -671,32 +852,11 @@
         alert(errorMessage);
       }
 
-      function downloadImage() {
-        html2canvas(
-          document.querySelector(".bg-white.shadow-md.rounded-lg")
-        ).then((canvas) => {
-          const link = document.createElement("a");
-          link.download = "출석_통계_리포트.png";
-          link.href = canvas.toDataURL();
-          link.click();
-        });
-      }
-
-      function downloadPDF() {
-        const { jsPDF } = window.jspdf;
-        const doc = new jsPDF();
-
-        html2canvas(
-          document.querySelector(".bg-white.shadow-md.rounded-lg")
-        ).then((canvas) => {
-          const imgData = canvas.toDataURL("image/png");
-          const imgProps = doc.getImageProperties(imgData);
-          const pdfWidth = doc.internal.pageSize.getWidth();
-          const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
-
-          doc.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
-          doc.save("출석_통계_리포트.pdf");
-        });
+      function downloadExcel() {
+        const workbook = XLSX.utils.book_new();
+        const worksheet = XLSX.utils.json_to_sheet(attendanceData);
+        XLSX.utils.book_append_sheet(workbook, worksheet, "출석데이터");
+        XLSX.writeFile(workbook, "출석_통계_리포트.xlsx");
       }
 
       function comparer(idx, asc) {
