@@ -165,18 +165,6 @@
             </div>
           </div>
 
-          <div class="mt-8">
-            <h3 class="text-lg font-semibold mb-2">요일별 지각 빈도</h3>
-            <div style="height: 400px">
-              <canvas id="lateHeatmapChart"></canvas>
-            </div>
-          </div>
-
-          <div id="bestAttendanceSection" class="mt-8">
-            <h3 class="text-lg font-semibold mb-2">최우수 출석 학생</h3>
-            <!-- 최우수 출석 학생 정보가 여기에 동적으로 추가됩니다 -->
-          </div>
-
           <div class="mt-4 flex justify-end space-x-2">
             <button
               id="downloadImage"
@@ -242,7 +230,6 @@
       // 차트 관련 변수들을 전역 범위로 이동하고 null로 초기화
       let attendancePieChart = null;
       let attendanceLineChart = null;
-      let lateHeatmapChart = null;
 
       axios.defaults.baseURL =
         "https://port-0-attend-backend-lz9cd9taff85e9dc.sel4.cloudtype.app";
@@ -318,7 +305,6 @@
           updateStatisticsCharts(response.data);
           updateWeeklyCalendar(response.data);
           updateDashboardSummary(response.data);
-          updateBestAttendance(response.data);
           checkLateStudents(response.data);
         } catch (error) {
           console.error("Error fetching attendance data:", error);
@@ -535,106 +521,6 @@
         });
       }
 
-      function updateLateHeatmapChart(data) {
-        const ctx = document
-          .getElementById("lateHeatmapChart")
-          .getContext("2d");
-        const daysOfWeek = ["일", "월", "화", "수", "목", "금", "토"];
-        const lateData = data.attendanceData.flatMap((s) =>
-          s.lateDates.map((date) => ({
-            x: new Date(date).getDay(),
-            y: new Date(date).getHours(),
-            v: 1,
-          }))
-        );
-
-        const aggregatedData = lateData.reduce((acc, curr) => {
-          const key = `${curr.x}-${curr.y}`;
-          if (!acc[key]) {
-            acc[key] = { ...curr, v: 0 };
-          }
-          acc[key].v += curr.v;
-          return acc;
-        }, {});
-
-        if (lateHeatmapChart) {
-          lateHeatmapChart.destroy();
-        }
-
-        lateHeatmapChart = new Chart(ctx, {
-          type: "matrix",
-          data: {
-            datasets: [
-              {
-                label: "지각 빈도",
-                data: Object.values(aggregatedData),
-                backgroundColor(context) {
-                  const value = context.dataset.data[context.dataIndex].v;
-                  const alpha = Math.min(value / 10, 1);
-                  return `rgba(255, 99, 132, ${alpha})`;
-                },
-                width(context) {
-                  const a = context.chart.chartArea;
-                  return (a.right - a.left) / 7;
-                },
-                height(context) {
-                  const a = context.chart.chartArea;
-                  return (a.bottom - a.top) / 24;
-                },
-              },
-            ],
-          },
-          options: {
-            responsive: true,
-            plugins: {
-              legend: {
-                display: false,
-              },
-              tooltip: {
-                callbacks: {
-                  title() {
-                    return "";
-                  },
-                  label(context) {
-                    const v = context.dataset.data[context.dataIndex];
-                    return [
-                      `요일: ${daysOfWeek[v.x]}`,
-                      `시간: ${v.y}시`,
-                      `지각 학생 수: ${v.v}`,
-                    ];
-                  },
-                },
-              },
-            },
-            scales: {
-              x: {
-                type: "category",
-                labels: daysOfWeek,
-                offset: true,
-                ticks: {
-                  display: true,
-                },
-                grid: {
-                  display: false,
-                },
-              },
-              y: {
-                type: "category",
-                labels: Array.from({ length: 24 }, (_, i) => i),
-                offset: true,
-                reverse: true,
-                ticks: {
-                  display: true,
-                },
-                grid: {
-                  display: false,
-                },
-              },
-            },
-          },
-        });
-      }
-
       function updateWeeklyCalendar(data) {
         const weeklyCalendar = document.getElementById("weeklyCalendar");
         weeklyCalendar.innerHTML = "";
@@ -723,30 +609,6 @@
           100
         ).toFixed(1)}%)</p>
       <p>평균 지각 시간: ${formatDuration(averageLateTime)}</p>
-    </div>
-  `;
-      }
-
-      function updateBestAttendance(data) {
-        const bestAttendanceSection = document.getElementById(
-          "bestAttendanceSection"
-        );
-        const sortedStudents = [...data.attendanceData].sort((a, b) => {
-          if (b.totalAttendance !== a.totalAttendance) {
-            return b.totalAttendance - a.totalAttendance;
-          }
-          return a.totalLateMinutes - b.totalLateMinutes;
-        });
-
-        const bestStudent = sortedStudents[0];
-
-        bestAttendanceSection.innerHTML = `
-    <div class="bg-green-100 p-4 rounded-lg">
-      <h3 class="font-bold text-lg mb-2">최우수 출석 학생</h3>
-      <p>이름: ${bestStudent.name}</p>
-      <p>학번: ${bestStudent.studentId}</p>
-      <p>출석일수: ${bestStudent.totalAttendance}일</p>
-      <p>지각횟수: ${bestStudent.lateAttendance}회</p>
     </div>
   `;
       }
