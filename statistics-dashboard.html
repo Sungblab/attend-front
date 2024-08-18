@@ -8,12 +8,14 @@
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-chart-matrix"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   </head>
   <body class="bg-gray-100">
     <div class="min-h-screen flex flex-col">
       <header class="bg-white shadow-md py-4">
         <div class="container mx-auto px-4">
-          <h1 class="text-2xl font-semibold text-gray-800">
+          <h1 class="text-2xl font-semibold text-primary">
             출석 통계 대시보드
           </h1>
         </div>
@@ -21,8 +23,134 @@
 
       <main class="flex-grow container mx-auto px-4 py-8">
         <div class="bg-white shadow-md rounded-lg p-6">
-          <!-- 차트 컨테이너들 -->
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+          <div
+            id="dashboardSummary"
+            class="mb-6 grid grid-cols-1 md:grid-cols-3 gap-4"
+          >
+            <!-- 대시보드 요약 정보가 여기에 동적으로 추가됩니다 -->
+          </div>
+
+          <div class="mb-4 flex flex-wrap space-x-4">
+            <div>
+              <label for="grade" class="block text-sm font-medium text-gray-700"
+                >학년</label
+              >
+              <select
+                id="grade"
+                class="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary"
+              >
+                <option value="">전체</option>
+                <option value="1">1학년</option>
+                <option value="2">2학년</option>
+                <option value="3">3학년</option>
+              </select>
+            </div>
+
+            <div>
+              <label for="class" class="block text-sm font-medium text-gray-700"
+                >반</label
+              >
+              <select
+                id="class"
+                class="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary"
+              >
+                <option value="">전체</option>
+                <option value="1">1반</option>
+                <option value="2">2반</option>
+                <option value="3">3반</option>
+                <option value="4">4반</option>
+                <option value="5">5반</option>
+                <option value="6">6반</option>
+              </select>
+            </div>
+
+            <div>
+              <label
+                for="period"
+                class="block text-sm font-medium text-gray-700"
+                >기간</label
+              >
+              <select
+                id="period"
+                class="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary"
+              >
+                <option value="day">오늘</option>
+                <option value="week">이번 주</option>
+                <option value="month">이번 달</option>
+                <option value="semester">이번 학기</option>
+              </select>
+            </div>
+
+            <div>
+              <label for="fetch" class="block text-sm font-medium text-gray-700"
+                >&nbsp;</label
+              >
+              <button
+                id="fetch"
+                class="mt-1 py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+              >
+                조회
+              </button>
+            </div>
+          </div>
+
+          <div class="mt-6">
+            <h3 class="text-lg font-semibold mb-2">출석 현황</h3>
+            <div id="weeklyCalendar" class="grid grid-cols-7 gap-2 mb-4">
+              <!-- 주간 캘린더가 여기에 동적으로 추가됩니다 -->
+            </div>
+            <div class="overflow-x-auto">
+              <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                  <tr>
+                    <th
+                      class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
+                    >
+                      번호
+                    </th>
+                    <th
+                      class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
+                    >
+                      이름
+                    </th>
+                    <th
+                      class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
+                    >
+                      출석 상태
+                    </th>
+                    <th
+                      class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
+                    >
+                      출석 시간
+                    </th>
+                    <th
+                      class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
+                    >
+                      지각 시간
+                    </th>
+                    <th
+                      class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
+                    >
+                      누적 지각 시간
+                    </th>
+                    <th
+                      class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                    >
+                      상세 정보
+                    </th>
+                  </tr>
+                </thead>
+                <tbody
+                  id="attendanceTableBody"
+                  class="bg-white divide-y divide-gray-200"
+                >
+                  <!-- 출석 데이터가 여기에 동적으로 추가됩니다 -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               <h3 class="text-lg font-semibold mb-2">출석 비율</h3>
               <div style="height: 300px">
@@ -36,13 +164,33 @@
               </div>
             </div>
           </div>
-          <div class="mb-6">
+
+          <div class="mt-8">
             <h3 class="text-lg font-semibold mb-2">요일별 지각 빈도</h3>
             <div style="height: 400px">
               <canvas id="lateHeatmapChart"></canvas>
             </div>
           </div>
-          <!-- 나머지 대시보드 컨텐츠 -->
+
+          <div id="bestAttendanceSection" class="mt-8">
+            <h3 class="text-lg font-semibold mb-2">최우수 출석 학생</h3>
+            <!-- 최우수 출석 학생 정보가 여기에 동적으로 추가됩니다 -->
+          </div>
+
+          <div class="mt-4 flex justify-end space-x-2">
+            <button
+              id="downloadImage"
+              class="py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+            >
+              이미지 다운로드
+            </button>
+            <button
+              id="downloadPDF"
+              class="py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+            >
+              PDF 다운로드
+            </button>
+          </div>
         </div>
       </main>
 
