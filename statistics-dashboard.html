@@ -7,7 +7,9 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-chart-matrix"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   </head>
   <body class="bg-gray-100">
     <div class="min-h-screen flex flex-col">
@@ -21,9 +23,14 @@
 
       <main class="flex-grow container mx-auto px-4 py-8">
         <div class="bg-white shadow-md rounded-lg p-6">
-          <h2 class="text-xl font-semibold mb-4">출석 통계</h2>
+          <div
+            id="dashboardSummary"
+            class="mb-6 grid grid-cols-1 md:grid-cols-3 gap-4"
+          >
+            <!-- 대시보드 요약 정보가 여기에 동적으로 추가됩니다 -->
+          </div>
 
-          <div class="mb-4 flex space-x-4">
+          <div class="mb-4 flex flex-wrap space-x-4">
             <div>
               <label for="grade" class="block text-sm font-medium text-gray-700"
                 >학년</label
@@ -92,61 +99,90 @@
             <div id="weeklyCalendar" class="grid grid-cols-7 gap-2 mb-4">
               <!-- 주간 캘린더가 여기에 동적으로 추가됩니다 -->
             </div>
-            <table class="min-w-full divide-y divide-gray-200">
-              <thead class="bg-gray-50">
-                <tr>
-                  <th
-                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                  >
-                    번호
-                  </th>
-                  <th
-                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                  >
-                    이름
-                  </th>
-                  <th
-                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                  >
-                    출석 상태
-                  </th>
-                  <th
-                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                  >
-                    출석 시간
-                  </th>
-                  <th
-                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                  >
-                    지각 시간
-                  </th>
-                  <th
-                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                  >
-                    누적 지각 시간
-                  </th>
-                </tr>
-              </thead>
-              <tbody
-                id="attendanceTableBody"
-                class="bg-white divide-y divide-gray-200"
-              >
-                <!-- 출석 데이터가 여기에 동적으로 추가됩니다 -->
-              </tbody>
-            </table>
+            <div class="overflow-x-auto">
+              <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                  <tr>
+                    <th
+                      class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
+                    >
+                      번호
+                    </th>
+                    <th
+                      class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
+                    >
+                      이름
+                    </th>
+                    <th
+                      class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
+                    >
+                      출석 상태
+                    </th>
+                    <th
+                      class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
+                    >
+                      출석 시간
+                    </th>
+                    <th
+                      class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
+                    >
+                      지각 시간
+                    </th>
+                    <th
+                      class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
+                    >
+                      누적 지각 시간
+                    </th>
+                    <th
+                      class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                    >
+                      상세 정보
+                    </th>
+                  </tr>
+                </thead>
+                <tbody
+                  id="attendanceTableBody"
+                  class="bg-white divide-y divide-gray-200"
+                >
+                  <!-- 출석 데이터가 여기에 동적으로 추가됩니다 -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <h3 class="text-lg font-semibold mb-2">출석 비율</h3>
+              <canvas id="attendancePieChart"></canvas>
+            </div>
+            <div>
+              <h3 class="text-lg font-semibold mb-2">출석/지각 추이</h3>
+              <canvas id="attendanceLineChart"></canvas>
+            </div>
           </div>
 
           <div class="mt-8">
-            <h3 class="text-lg font-semibold mb-2">통계 그래프</h3>
-            <canvas id="statisticsChart"></canvas>
+            <h3 class="text-lg font-semibold mb-2">요일별 지각 빈도</h3>
+            <canvas id="lateHeatmapChart"></canvas>
           </div>
 
-          <div class="mt-4 flex justify-end">
+          <div id="bestAttendanceSection" class="mt-8">
+            <h3 class="text-lg font-semibold mb-2">최우수 출석 학생</h3>
+            <!-- 최우수 출석 학생 정보가 여기에 동적으로 추가됩니다 -->
+          </div>
+
+          <div class="mt-4 flex justify-end space-x-2">
             <button
-              id="downloadReport"
+              id="downloadImage"
               class="py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
             >
-              리포트 다운로드
+              이미지 다운로드
+            </button>
+            <button
+              id="downloadPDF"
+              class="py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+            >
+              PDF 다운로드
             </button>
           </div>
         </div>
@@ -159,6 +195,43 @@
       </footer>
     </div>
 
+    <!-- 학생 상세 정보 모달 -->
+    <div
+      id="studentDetailModal"
+      class="fixed z-10 inset-0 overflow-y-auto hidden"
+    >
+      <div
+        class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0"
+      >
+        <div class="fixed inset-0 transition-opacity" aria-hidden="true">
+          <div class="absolute inset-0 bg-gray-500 opacity-75"></div>
+        </div>
+        <span
+          class="hidden sm:inline-block sm:align-middle sm:h-screen"
+          aria-hidden="true"
+          >&#8203;</span
+        >
+        <div
+          class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full"
+        >
+          <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+            <h3
+              class="text-lg leading-6 font-medium text-gray-900"
+              id="modalTitle"
+            ></h3>
+            <div class="mt-2" id="modalContent"></div>
+          </div>
+          <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+            <button
+              type="button"
+              class="closeModal w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:ml-3 sm:w-auto sm:text-sm"
+            >
+              닫기
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
     <script>
       axios.defaults.baseURL =
         "https://port-0-attend-backend-lz9cd9taff85e9dc.sel4.cloudtype.app";
@@ -178,15 +251,43 @@
       const attendanceTableBody = document.getElementById(
         "attendanceTableBody"
       );
-      const statisticsChart = document.getElementById("statisticsChart");
       const weeklyCalendar = document.getElementById("weeklyCalendar");
+      const dashboardSummary = document.getElementById("dashboardSummary");
+      const bestAttendanceSection = document.getElementById(
+        "bestAttendanceSection"
+      );
+      const studentDetailModal = document.getElementById("studentDetailModal");
+      const modalTitle = document.getElementById("modalTitle");
+      const modalContent = document.getElementById("modalContent");
+      const closeModalButtons = document.querySelectorAll(".closeModal");
 
-      let chart;
+      let attendancePieChart, attendanceLineChart, lateHeatmapChart;
 
       fetchButton.addEventListener("click", fetchAttendanceData);
       document
-        .getElementById("downloadReport")
-        .addEventListener("click", downloadReport);
+        .getElementById("downloadImage")
+        .addEventListener("click", downloadImage);
+      document
+        .getElementById("downloadPDF")
+        .addEventListener("click", downloadPDF);
+      closeModalButtons.forEach((button) => {
+        button.addEventListener("click", closeModal);
+      });
+
+      // 테이블 정렬 이벤트 리스너 추가
+      document.querySelectorAll("th").forEach((th) =>
+        th.addEventListener("click", () => {
+          const table = th.closest("table");
+          Array.from(table.querySelectorAll("tr:nth-child(n+2)"))
+            .sort(
+              comparer(
+                Array.from(th.parentNode.children).indexOf(th),
+                (this.asc = !this.asc)
+              )
+            )
+            .forEach((tr) => table.appendChild(tr));
+        })
+      );
 
       async function fetchAttendanceData() {
         try {
@@ -197,8 +298,11 @@
             params: { grade, class: classNumber, period },
           });
           displayAttendanceData(response.data);
-          updateStatisticsChart(response.data);
+          updateStatisticsCharts(response.data);
           updateWeeklyCalendar(response.data);
+          updateDashboardSummary(response.data);
+          updateBestAttendance(response.data);
+          checkLateStudents(response.data);
         } catch (error) {
           console.error("Error fetching attendance data:", error);
           handleError(error);
@@ -207,70 +311,297 @@
 
       function displayAttendanceData(data) {
         attendanceTableBody.innerHTML = "";
-        // 학생 번호를 기준으로 정렬
         data.attendanceData.sort((a, b) => a.number - b.number);
         data.attendanceData.forEach((student) => {
           const row = document.createElement("tr");
           row.innerHTML = `
-      <td class="px-6 py-4 whitespace-nowrap">${student.number}</td>
-      <td class="px-6 py-4 whitespace-nowrap">${
-        student.name || "이름 없음"
-      }</td>
-      <td class="px-6 py-4 whitespace-nowrap">${
-        student.totalAttendance > 0 ? "출석" : "결석"
-      }</td>
-      <td class="px-6 py-4 whitespace-nowrap">${formatTime(
-        student.lastAttendanceTime
-      )}</td>
-      <td class="px-6 py-4 whitespace-nowrap">${
-        student.lateAttendance > 0
-          ? formatDuration(student.totalLateMinutes)
-          : "-"
-      }</td>
-      <td class="px-6 py-4 whitespace-nowrap">${formatDuration(
-        student.totalLateMinutes
-      )}</td>
-    `;
+            <td class="px-6 py-4 whitespace-nowrap">${student.number}</td>
+            <td class="px-6 py-4 whitespace-nowrap">${
+              student.name || "이름 없음"
+            }</td>
+            <td class="px-6 py-4 whitespace-nowrap">${
+              student.totalAttendance > 0 ? "출석" : "결석"
+            }</td>
+            <td class="px-6 py-4 whitespace-nowrap">${formatTime(
+              student.lastAttendanceTime
+            )}</td>
+            <td class="px-6 py-4 whitespace-nowrap">${
+              student.lateAttendance > 0
+                ? formatDuration(student.totalLateMinutes)
+                : "-"
+            }</td>
+            <td class="px-6 py-4 whitespace-nowrap">${formatDuration(
+              student.totalLateMinutes
+            )}</td>
+            <td class="px-6 py-4 whitespace-nowrap">
+                <button class="viewDetails bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded" data-student-id="${
+                  student.studentId
+                }">
+                    상세 정보
+                </button>
+            </td>
+        `;
           attendanceTableBody.appendChild(row);
+
+          // 상세 정보 버튼에 이벤트 리스너 추가
+          row
+            .querySelector(".viewDetails")
+            .addEventListener("click", () => showStudentDetails(student));
         });
       }
 
-      function updateStatisticsChart(data) {
-        const ctx = statisticsChart.getContext("2d");
+      function showStudentDetails(student) {
+        modalTitle.textContent = `${student.name} (학번: ${student.studentId})`;
+        modalContent.innerHTML = `
+        <p>학년: ${student.grade}</p>
+        <p>반: ${student.class}</p>
+        <p>번호: ${student.number}</p>
+        <p>총 출석 일수: ${student.totalAttendance}</p>
+        <p>지각 횟수: ${student.lateAttendance}</p>
+        <p>누적 지각 시간: ${formatDuration(student.totalLateMinutes)}</p>
+        <p>마지막 출석 시간: ${formatTime(student.lastAttendanceTime)}</p>
+        <h4 class="font-bold mt-4">지각 기록:</h4>
+        <ul>
+            ${
+              student.lateRecords
+                ? student.lateRecords
+                    .map(
+                      (record) =>
+                        `<li>${formatDate(record.date)} - ${formatTime(
+                          record.time
+                        )} (${formatDuration(record.lateMinutes)})</li>`
+                    )
+                    .join("")
+                : "지각 기록 없음"
+            }
+        </ul>
+    `;
+        studentDetailModal.classList.remove("hidden");
+      }
 
-        if (chart) {
-          chart.destroy();
+      function closeModal() {
+        studentDetailModal.classList.add("hidden");
+      }
+
+      function updateStatisticsCharts(data) {
+        updateAttendancePieChart(data);
+        updateAttendanceLineChart(data);
+        updateLateHeatmapChart(data);
+      }
+
+      function updateAttendancePieChart(data) {
+        const ctx = document
+          .getElementById("attendancePieChart")
+          .getContext("2d");
+        const totalStudents = data.attendanceData.length;
+        const presentStudents = data.attendanceData.filter(
+          (s) => s.totalAttendance > 0
+        ).length;
+        const lateStudents = data.attendanceData.filter(
+          (s) => s.lateAttendance > 0
+        ).length;
+        const absentStudents = totalStudents - presentStudents;
+
+        if (attendancePieChart) {
+          attendancePieChart.destroy();
         }
 
-        chart = new Chart(ctx, {
-          type: "bar",
+        attendancePieChart = new Chart(ctx, {
+          type: "pie",
           data: {
-            labels: data.attendanceData.map((student) => student.name),
+            labels: ["출석", "지각", "결석"],
             datasets: [
               {
-                label: "출석 횟수",
-                data: data.attendanceData.map(
-                  (student) => student.totalAttendance
-                ),
-                backgroundColor: "rgba(75, 192, 192, 0.6)",
-                borderColor: "rgba(75, 192, 192, 1)",
-                borderWidth: 1,
-              },
-              {
-                label: "지각 횟수",
-                data: data.attendanceData.map(
-                  (student) => student.lateAttendance
-                ),
-                backgroundColor: "rgba(255, 99, 132, 0.6)",
-                borderColor: "rgba(255, 99, 132, 1)",
-                borderWidth: 1,
+                data: [
+                  presentStudents - lateStudents,
+                  lateStudents,
+                  absentStudents,
+                ],
+                backgroundColor: ["#4CAF50", "#FFC107", "#F44336"],
               },
             ],
           },
           options: {
+            responsive: true,
+            plugins: {
+              legend: {
+                position: "top",
+              },
+              title: {
+                display: true,
+                text: "출석 현황",
+              },
+            },
+          },
+        });
+      }
+
+      function updateAttendanceLineChart(data) {
+        const ctx = document
+          .getElementById("attendanceLineChart")
+          .getContext("2d");
+        const dates = [
+          ...new Set(data.attendanceData.flatMap((s) => s.attendanceDates)),
+        ].sort();
+        const attendanceCounts = dates.map(
+          (date) =>
+            data.attendanceData.filter((s) => s.attendanceDates.includes(date))
+              .length
+        );
+        const lateCounts = dates.map(
+          (date) =>
+            data.attendanceData.filter((s) => s.lateDates.includes(date)).length
+        );
+
+        if (attendanceLineChart) {
+          attendanceLineChart.destroy();
+        }
+
+        attendanceLineChart = new Chart(ctx, {
+          type: "line",
+          data: {
+            labels: dates.map(formatDate),
+            datasets: [
+              {
+                label: "출석",
+                data: attendanceCounts,
+                borderColor: "#4CAF50",
+                fill: false,
+              },
+              {
+                label: "지각",
+                data: lateCounts,
+                borderColor: "#FFC107",
+                fill: false,
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            plugins: {
+              legend: {
+                position: "top",
+              },
+              title: {
+                display: true,
+                text: "출석/지각 추이",
+              },
+            },
             scales: {
+              x: {
+                display: true,
+                title: {
+                  display: true,
+                  text: "날짜",
+                },
+              },
               y: {
-                beginAtZero: true,
+                display: true,
+                title: {
+                  display: true,
+                  text: "학생 수",
+                },
+                suggestedMin: 0,
+              },
+            },
+          },
+        });
+      }
+
+      function updateLateHeatmapChart(data) {
+        const ctx = document
+          .getElementById("lateHeatmapChart")
+          .getContext("2d");
+        const daysOfWeek = ["일", "월", "화", "수", "목", "금", "토"];
+        const lateData = data.attendanceData.flatMap((s) =>
+          s.lateDates.map((date) => ({
+            x: new Date(date).getDay(),
+            y: new Date(date).getHours(),
+            v: 1,
+          }))
+        );
+
+        const aggregatedData = lateData.reduce((acc, curr) => {
+          const key = `${curr.x}-${curr.y}`;
+          if (!acc[key]) {
+            acc[key] = { ...curr, v: 0 };
+          }
+          acc[key].v += curr.v;
+          return acc;
+        }, {});
+
+        if (lateHeatmapChart) {
+          lateHeatmapChart.destroy();
+        }
+
+        lateHeatmapChart = new Chart(ctx, {
+          type: "matrix",
+          data: {
+            datasets: [
+              {
+                label: "지각 빈도",
+                data: Object.values(aggregatedData),
+                backgroundColor(context) {
+                  const value = context.dataset.data[context.dataIndex].v;
+                  const alpha = Math.min(value / 10, 1); // 최대 10명이 지각했을 때 색상이 가장 진해집니다
+                  return `rgba(255, 99, 132, ${alpha})`;
+                },
+                width(context) {
+                  const a = context.chart.chartArea;
+                  return (a.right - a.left) / 7;
+                },
+                height(context) {
+                  const a = context.chart.chartArea;
+                  return (a.bottom - a.top) / 24;
+                },
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            plugins: {
+              legend: {
+                display: false,
+              },
+              tooltip: {
+                callbacks: {
+                  title() {
+                    return "";
+                  },
+                  label(context) {
+                    const v = context.dataset.data[context.dataIndex];
+                    return [
+                      `요일: ${daysOfWeek[v.x]}`,
+                      `시간: ${v.y}시`,
+                      `지각 학생 수: ${v.v}`,
+                    ];
+                  },
+                },
+              },
+            },
+            scales: {
+              x: {
+                type: "category",
+                labels: daysOfWeek,
+                offset: true,
+                ticks: {
+                  display: true,
+                },
+                grid: {
+                  display: false,
+                },
+              },
+              y: {
+                type: "category",
+                labels: Array.from({ length: 24 }, (_, i) => i),
+                offset: true,
+                reverse: true,
+                ticks: {
+                  display: true,
+                },
+                grid: {
+                  display: false,
+                },
               },
             },
           },
@@ -279,7 +610,6 @@
 
       function updateWeeklyCalendar(data) {
         weeklyCalendar.innerHTML = "";
-
         const today = new Date();
         const dates = Array.from({ length: 7 }, (_, i) => {
           const date = new Date(today);
@@ -291,16 +621,16 @@
           const dayElement = document.createElement("div");
           dayElement.className = "text-center p-2 border rounded";
           dayElement.innerHTML = `
-      <div class="font-semibold">${date.toLocaleDateString("ko-KR", {
-        weekday: "short",
-      })}</div>
-      <div>${date.getDate()}</div>
-      <div class="mt-2 text-sm">
-        출석: ${getAttendanceCount(data, date, "present")}<br>
-        지각: ${getAttendanceCount(data, date, "late")}<br>
-        결석: ${getAttendanceCount(data, date, "absent")}
-      </div>
-    `;
+            <div class="font-semibold">${date.toLocaleDateString("ko-KR", {
+              weekday: "short",
+            })}</div>
+            <div>${date.getDate()}</div>
+            <div class="mt-2 text-sm">
+                출석: ${getAttendanceCount(data, date, "present")}<br>
+                지각: ${getAttendanceCount(data, date, "late")}<br>
+                결석: ${getAttendanceCount(data, date, "absent")}
+            </div>
+        `;
           weeklyCalendar.appendChild(dayElement);
         });
       }
@@ -333,6 +663,73 @@
           return false;
         }).length;
       }
+      function updateDashboardSummary(data) {
+        const totalStudents = data.attendanceData.length;
+        const presentStudents = data.attendanceData.filter(
+          (s) => s.totalAttendance > 0
+        ).length;
+        const lateStudents = data.attendanceData.filter(
+          (s) => s.lateAttendance > 0
+        ).length;
+        const absentStudents = totalStudents - presentStudents;
+        const averageLateTime =
+          data.attendanceData.reduce((sum, s) => sum + s.totalLateMinutes, 0) /
+            lateStudents || 0;
+
+        dashboardSummary.innerHTML = `
+        <div class="bg-blue-100 p-4 rounded-lg">
+            <h3 class="font-bold text-lg mb-2">요약 정보</h3>
+            <p>전체 학생 수: ${totalStudents}</p>
+            <p>출석 학생 수: ${presentStudents} (${(
+          (presentStudents / totalStudents) *
+          100
+        ).toFixed(1)}%)</p>
+            <p>지각 학생 수: ${lateStudents} (${(
+          (lateStudents / totalStudents) *
+          100
+        ).toFixed(1)}%)</p>
+            <p>결석 학생 수: ${absentStudents} (${(
+          (absentStudents / totalStudents) *
+          100
+        ).toFixed(1)}%)</p>
+            <p>평균 지각 시간: ${formatDuration(averageLateTime)}</p>
+        </div>
+    `;
+      }
+
+      function updateBestAttendance(data) {
+        const sortedStudents = [...data.attendanceData].sort((a, b) => {
+          if (b.totalAttendance !== a.totalAttendance) {
+            return b.totalAttendance - a.totalAttendance;
+          }
+          return a.totalLateMinutes - b.totalLateMinutes;
+        });
+
+        const bestStudent = sortedStudents[0];
+
+        bestAttendanceSection.innerHTML = `
+        <div class="bg-green-100 p-4 rounded-lg">
+            <h3 class="font-bold text-lg mb-2">최우수 출석 학생</h3>
+            <p>이름: ${bestStudent.name}</p>
+            <p>학번: ${bestStudent.studentId}</p>
+            <p>출석일수: ${bestStudent.totalAttendance}일</p>
+            <p>지각횟수: ${bestStudent.lateAttendance}회</p>
+        </div>
+    `;
+      }
+
+      function checkLateStudents(data) {
+        const lateThreshold = 3; // 3회 이상 지각 시 알림
+        const lateStudents = data.attendanceData.filter(
+          (s) => s.lateAttendance >= lateThreshold
+        );
+
+        if (lateStudents.length > 0) {
+          alert(
+            `${lateStudents.length}명의 학생이 ${lateThreshold}회 이상 지각했습니다. 상담이 필요할 수 있습니다.`
+          );
+        }
+      }
 
       function formatTime(timestamp) {
         if (!timestamp) return "-";
@@ -348,6 +745,15 @@
           console.error("Invalid timestamp:", timestamp);
           return "-";
         }
+      }
+
+      function formatDate(dateString) {
+        const date = new Date(dateString);
+        return date.toLocaleDateString("ko-KR", {
+          year: "numeric",
+          month: "2-digit",
+          day: "2-digit",
+        });
       }
 
       function formatDuration(minutes) {
@@ -375,7 +781,7 @@
         }
       }
 
-      function downloadReport() {
+      function downloadImage() {
         html2canvas(
           document.querySelector(".bg-white.shadow-md.rounded-lg")
         ).then((canvas) => {
@@ -386,8 +792,39 @@
         });
       }
 
-      // 초기 데이터 로드
-      fetchAttendanceData();
+      function downloadPDF() {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+
+        html2canvas(
+          document.querySelector(".bg-white.shadow-md.rounded-lg")
+        ).then((canvas) => {
+          const imgData = canvas.toDataURL("image/png");
+          const imgProps = doc.getImageProperties(imgData);
+          const pdfWidth = doc.internal.pageSize.getWidth();
+          const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+
+          doc.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
+          doc.save("출석_통계_리포트.pdf");
+        });
+      }
+
+      function comparer(idx, asc) {
+        return (a, b) =>
+          ((v1, v2) =>
+            v1 !== "" && v2 !== "" && !isNaN(v1) && !isNaN(v2)
+              ? v1 - v2
+              : v1.toString().localeCompare(v2))(
+            getCellValue(asc ? a : b, idx),
+            getCellValue(asc ? b : a, idx)
+          );
+      }
+
+      function getCellValue(tr, idx) {
+        return tr.children[idx].innerText || tr.children[idx].textContent;
+      }
+
+      fetchAttendanceData(); // 초기 데이터 로드
     </script>
   </body>
 </html>
