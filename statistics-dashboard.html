@@ -158,15 +158,20 @@
         fetchAttendanceData();
       });
 
-      document.addEventListener("DOMContentLoaded", function () {
-        fetchAttendanceData();
-      });
-
       async function fetchAttendanceData() {
         try {
-          const response = await axios.get("/api/dashboard");
-          const data = response.data;
-          updateStatisticsCharts(data);
+          const grade = document.getElementById("grade").value;
+          const classNumber = document.getElementById("class").value;
+          const period = document.getElementById("period").value;
+          const response = await axios.get("/api/dashboard", {
+            params: { grade, class: classNumber, period },
+          });
+          displayAttendanceData(response.data);
+          updateStatisticsCharts(response.data);
+          updateWeeklyCalendar(response.data);
+          updateDashboardSummary(response.data);
+          updateBestAttendance(response.data);
+          checkLateStudents(response.data);
         } catch (error) {
           console.error("Error fetching attendance data:", error);
           handleError(error);
@@ -267,23 +272,45 @@
         const ctx = document
           .getElementById("attendancePieChart")
           .getContext("2d");
+        const totalStudents = data.attendanceData.length;
+        const presentStudents = data.attendanceData.filter(
+          (s) => s.totalAttendance > 0
+        ).length;
+        const lateStudents = data.attendanceData.filter(
+          (s) => s.lateAttendance > 0
+        ).length;
+        const absentStudents = totalStudents - presentStudents;
+
         if (attendancePieChart) {
           attendancePieChart.destroy();
         }
+
         attendancePieChart = new Chart(ctx, {
           type: "pie",
           data: {
             labels: ["출석", "지각", "결석"],
             datasets: [
               {
-                data: [data.presentCount, data.lateCount, data.absentCount],
+                data: [
+                  presentStudents - lateStudents,
+                  lateStudents,
+                  absentStudents,
+                ],
                 backgroundColor: ["#4CAF50", "#FFC107", "#F44336"],
               },
             ],
           },
           options: {
             responsive: true,
-            maintainAspectRatio: false,
+            plugins: {
+              legend: {
+                position: "top",
+              },
+              title: {
+                display: true,
+                text: "출석 현황",
+              },
+            },
           },
         });
       }
@@ -292,23 +319,37 @@
         const ctx = document
           .getElementById("attendanceLineChart")
           .getContext("2d");
+        const dates = [
+          ...new Set(data.attendanceData.flatMap((s) => s.attendanceDates)),
+        ].sort();
+        const attendanceCounts = dates.map(
+          (date) =>
+            data.attendanceData.filter((s) => s.attendanceDates.includes(date))
+              .length
+        );
+        const lateCounts = dates.map(
+          (date) =>
+            data.attendanceData.filter((s) => s.lateDates.includes(date)).length
+        );
+
         if (attendanceLineChart) {
           attendanceLineChart.destroy();
         }
+
         attendanceLineChart = new Chart(ctx, {
           type: "line",
           data: {
-            labels: data.dates,
+            labels: dates.map(formatDate),
             datasets: [
               {
                 label: "출석",
-                data: data.attendanceCounts,
+                data: attendanceCounts,
                 borderColor: "#4CAF50",
                 fill: false,
               },
               {
                 label: "지각",
-                data: data.lateCounts,
+                data: lateCounts,
                 borderColor: "#FFC107",
                 fill: false,
               },
@@ -316,7 +357,32 @@
           },
           options: {
             responsive: true,
-            maintainAspectRatio: false,
+            plugins: {
+              legend: {
+                position: "top",
+              },
+              title: {
+                display: true,
+                text: "출석/지각 추이",
+              },
+            },
+            scales: {
+              x: {
+                display: true,
+                title: {
+                  display: true,
+                  text: "날짜",
+                },
+              },
+              y: {
+                display: true,
+                title: {
+                  display: true,
+                  text: "학생 수",
+                },
+                suggestedMin: 0,
+              },
+            },
           },
         });
       }
@@ -325,35 +391,96 @@
         const ctx = document
           .getElementById("lateHeatmapChart")
           .getContext("2d");
+        const daysOfWeek = ["일", "월", "화", "수", "목", "금", "토"];
+        const lateData = data.attendanceData.flatMap((s) =>
+          s.lateDates.map((date) => ({
+            x: new Date(date).getDay(),
+            y: new Date(date).getHours(),
+            v: 1,
+          }))
+        );
+
+        const aggregatedData = lateData.reduce((acc, curr) => {
+          const key = `${curr.x}-${curr.y}`;
+          if (!acc[key]) {
+            acc[key] = { ...curr, v: 0 };
+          }
+          acc[key].v += curr.v;
+          return acc;
+        }, {});
+
         if (lateHeatmapChart) {
           lateHeatmapChart.destroy();
         }
+
         lateHeatmapChart = new Chart(ctx, {
           type: "matrix",
           data: {
             datasets: [
               {
                 label: "지각 빈도",
-                data: data.lateHeatmapData,
-                backgroundColor: (context) => {
+                data: Object.values(aggregatedData),
+                backgroundColor(context) {
                   const value = context.dataset.data[context.dataIndex].v;
                   const alpha = Math.min(value / 10, 1);
                   return `rgba(255, 99, 132, ${alpha})`;
+                },
+                width(context) {
+                  const a = context.chart.chartArea;
+                  return (a.right - a.left) / 7;
+                },
+                height(context) {
+                  const a = context.chart.chartArea;
+                  return (a.bottom - a.top) / 24;
                 },
               },
             ],
           },
           options: {
             responsive: true,
-            maintainAspectRatio: false,
+            plugins: {
+              legend: {
+                display: false,
+              },
+              tooltip: {
+                callbacks: {
+                  title() {
+                    return "";
+                  },
+                  label(context) {
+                    const v = context.dataset.data[context.dataIndex];
+                    return [
+                      `요일: ${daysOfWeek[v.x]}`,
+                      `시간: ${v.y}시`,
+                      `지각 학생 수: ${v.v}`,
+                    ];
+                  },
+                },
+              },
+            },
             scales: {
               x: {
                 type: "category",
-                labels: ["일", "월", "화", "수", "목", "금", "토"],
+                labels: daysOfWeek,
+                offset: true,
+                ticks: {
+                  display: true,
+                },
+                grid: {
+                  display: false,
+                },
               },
               y: {
                 type: "category",
                 labels: Array.from({ length: 24 }, (_, i) => i),
+                offset: true,
+                reverse: true,
+                ticks: {
+                  display: true,
+                },
+                grid: {
+                  display: false,
+                },
               },
             },
           },
