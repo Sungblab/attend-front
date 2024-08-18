@@ -367,6 +367,7 @@
       // 차트 관련 변수들을 전역 범위로 이동하고 null로 초기화
       let attendancePieChart = null;
       let attendanceLineChart = null;
+      let globalAttendanceData = null;
 
       axios.defaults.baseURL =
         "https://port-0-attend-backend-lz9cd9taff85e9dc.sel4.cloudtype.app";
@@ -478,11 +479,12 @@
               search,
             },
           });
-          displayAttendanceData(response.data);
-          updateStatisticsCharts(response.data);
-          updateWeeklyCalendar(response.data);
-          updateDashboardSummary(response.data);
-          checkLateStudents(response.data);
+          globalAttendanceData = response.data; // 데이터를 전역 변수에 저장
+          displayAttendanceData(globalAttendanceData);
+          updateStatisticsCharts(globalAttendanceData);
+          updateWeeklyCalendar(globalAttendanceData);
+          updateDashboardSummary(globalAttendanceData);
+          checkLateStudents(globalAttendanceData);
         } catch (error) {
           console.error("Error fetching attendance data:", error);
           handleError(error);
@@ -853,8 +855,14 @@
       }
 
       function downloadExcel() {
+        if (!globalAttendanceData) {
+          alert("다운로드할 데이터가 없습니다. 먼저 데이터를 조회해주세요.");
+          return;
+        }
         const workbook = XLSX.utils.book_new();
-        const worksheet = XLSX.utils.json_to_sheet(attendanceData);
+        const worksheet = XLSX.utils.json_to_sheet(
+          globalAttendanceData.attendanceData
+        );
         XLSX.utils.book_append_sheet(workbook, worksheet, "출석데이터");
         XLSX.writeFile(workbook, "출석_통계_리포트.xlsx");
       }
