@@ -156,16 +156,25 @@
           console.log("출석 처리 성공:", data);
           scanResult.innerText = data.message;
           scanResult.classList.remove("text-red-600", "text-blue-600");
-          scanResult.classList.add(
-            data.isLate ? "text-yellow-600" : "text-green-600"
-          );
+
+          if (data.message === "결석 처리되었습니다.") {
+            scanResult.classList.add("text-red-600");
+          } else if (data.isLate) {
+            scanResult.classList.add("text-yellow-600");
+          } else {
+            scanResult.classList.add("text-green-600");
+          }
 
           const logEntry = document.createElement("div");
           logEntry.textContent = `${new Date().toLocaleTimeString()} - ${
             data.message
           }`;
           logEntry.classList.add(
-            data.isLate ? "text-yellow-600" : "text-green-600"
+            data.message === "결석 처리되었습니다."
+              ? "text-red-600"
+              : data.isLate
+              ? "text-yellow-600"
+              : "text-green-600"
           );
           attendanceLog.prepend(logEntry);
         } catch (error) {
