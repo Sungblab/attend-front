@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>출석 통계 대시보드 - 완도고 출결관리 시스템</title>
+    <title>출석 통계 대시보드</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -153,17 +153,23 @@
           <div class="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               <h3 class="text-lg font-semibold mb-2">출석 비율</h3>
-              <canvas id="attendancePieChart"></canvas>
+              <div style="height: 300px">
+                <canvas id="attendancePieChart"></canvas>
+              </div>
             </div>
             <div>
               <h3 class="text-lg font-semibold mb-2">출석/지각 추이</h3>
-              <canvas id="attendanceLineChart"></canvas>
+              <div style="height: 300px">
+                <canvas id="attendanceLineChart"></canvas>
+              </div>
             </div>
           </div>
 
           <div class="mt-8">
             <h3 class="text-lg font-semibold mb-2">요일별 지각 빈도</h3>
-            <canvas id="lateHeatmapChart"></canvas>
+            <div style="height: 400px">
+              <canvas id="lateHeatmapChart"></canvas>
+            </div>
           </div>
 
           <div id="bestAttendanceSection" class="mt-8">
