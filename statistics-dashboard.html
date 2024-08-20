@@ -183,6 +183,9 @@
                       상세 정보
                     </th>
                   </tr>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    출결 인정
+                  </th>
                 </thead>
                 <tbody
                   id="attendanceTableBody"
@@ -363,6 +366,36 @@
       </div>
     </div>
 
+    <!-- 출결 인정 모달 -->
+    <div id="approvalModal" class="fixed z-10 inset-0 overflow-y-auto hidden">
+      <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+        <div class="fixed inset-0 transition-opacity" aria-hidden="true">
+          <div class="absolute inset-0 bg-gray-500 opacity-75"></div>
+        </div>
+        <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+        <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+          <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+            <h3 class="text-lg leading-6 font-medium text-gray-900" id="approvalModalTitle"></h3>
+            <div class="mt-2">
+              <p id="approvalModalContent"></p>
+              <div class="mt-4">
+                <label for="approvalReason" class="block text-sm font-medium text-gray-700">인정 사유</label>
+                <textarea id="approvalReason" rows="3" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm"></textarea>
+              </div>
+            </div>
+          </div>
+          <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+            <button type="button" id="confirmApproval" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:ml-3 sm:w-auto sm:text-sm">
+              인정
+            </button>
+            <button type="button" class="closeModal mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
+              취소
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <script>
       // 차트 관련 변수들을 전역 범위로 이동하고 null로 초기화
       let attendancePieChart = null;
@@ -492,86 +525,100 @@
       }
 
       function displayAttendanceData(data) {
-        const attendanceTableBody = document.getElementById(
-          "attendanceTableBody"
-        );
-        attendanceTableBody.innerHTML = "";
-        data.attendanceData.sort((a, b) => a.number - b.number);
-        data.attendanceData.forEach((student) => {
-          const row = document.createElement("tr");
-          row.innerHTML = `
-            <td class="px-6 py-4 whitespace-nowrap">${student.number}</td>
-            <td class="px-6 py-4 whitespace-nowrap">${
-              student.name || "이름 없음"
-            }</td>
-            <td class="px-6 py-4 whitespace-nowrap">${
-              student.totalAttendance > 0 ? "출석" : "결석"
-            }</td>
-            <td class="px-6 py-4 whitespace-nowrap">${formatTime(
-              student.lastAttendanceTime
-            )}</td>
-            <td class="px-6 py-4 whitespace-nowrap">${
-              student.lateAttendance > 0
-                ? formatDuration(student.totalLateMinutes)
-                : "-"
-            }</td>
-            <td class="px-6 py-4 whitespace-nowrap">${formatDuration(
-              student.totalLateMinutes
-            )}</td>
-            <td class="px-6 py-4 whitespace-nowrap">
-                <button class="viewDetails bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded" data-student-id="${
-                  student.studentId
-                }">
-                    상세 정보
-                </button>
-            </td>
-          `;
-          attendanceTableBody.appendChild(row);
+  const attendanceTableBody = document.getElementById("attendanceTableBody");
+  attendanceTableBody.innerHTML = "";
+  data.attendanceData.forEach((student) => {
+    const row = document.createElement("tr");
+    row.innerHTML = `
+      <td class="px-6 py-4 whitespace-nowrap">${student.number}</td>
+      <td class="px-6 py-4 whitespace-nowrap">${student.name || "이름 없음"}</td>
+      <td class="px-6 py-4 whitespace-nowrap">${student.totalAttendance > 0 ? "출석" : "결석"}</td>
+      <td class="px-6 py-4 whitespace-nowrap">${formatTime(student.lastAttendanceTime)}</td>
+      <td class="px-6 py-4 whitespace-nowrap">${student.lateAttendance > 0 ? formatDuration(student.dailyLateMinutes) : "-"}</td>
+      <td class="px-6 py-4 whitespace-nowrap">${formatDuration(student.totalLateMinutes)}</td>
+      <td class="px-6 py-4 whitespace-nowrap">
+        <button class="viewDetails bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded" data-student-id="${student.studentId}">
+          상세 정보
+        </button>
+      </td>
+      <td class="px-6 py-4 whitespace-nowrap">
+        <button class="approveAttendance bg-green-500 hover:bg-green-700 text-white font-bold py-1 px-2 rounded" data-student-id="${student.studentId}">
+          출결 인정
+        </button>
+      </td>
+    `;
+    attendanceTableBody.appendChild(row);
 
-          // 상세 정보 버튼에 이벤트 리스너 추가
-          row
-            .querySelector(".viewDetails")
-            .addEventListener("click", () => showStudentDetails(student));
-        });
-      }
+    row.querySelector(".viewDetails").addEventListener("click", () => showStudentDetails(student));
+    row.querySelector(".approveAttendance").addEventListener("click", () => showApprovalModal(student));
+  });
+}
 
-      function showStudentDetails(student) {
-        const modalTitle = document.getElementById("modalTitle");
-        const modalContent = document.getElementById("modalContent");
-        const studentDetailModal =
-          document.getElementById("studentDetailModal");
+function showApprovalModal(student) {
+  const modal = document.getElementById("approvalModal");
+  const modalTitle = document.getElementById("approvalModalTitle");
+  const modalContent = document.getElementById("approvalModalContent");
+  const approvalReason = document.getElementById("approvalReason");
+  const confirmButton = document.getElementById("confirmApproval");
 
-        modalTitle.textContent = `${student.name} (학번: ${student.studentId})`;
-        modalContent.innerHTML = `
-          <p>학년: ${student.grade}</p>
-          <p>반: ${student.class}</p>
-          <p>번호: ${student.number}</p>
-          <p>총 출석 일수: ${student.totalAttendance}</p>
-          <p>지각 횟수: ${student.lateAttendance}</p>
-          <p>누적 지각 시간: ${formatDuration(student.totalLateMinutes)}</p>
-          <p>마지막 출석 시간: ${formatTime(student.lastAttendanceTime)}</p>
-          <h4 class="font-bold mt-4">지각 기록:</h4>
-          <ul>
-            ${
-              student.lateRecords
-                ? student.lateRecords
-                    .map(
-                      (record) =>
-                        `<li>${formatDate(record.date)} - ${formatTime(
-                          record.time
-                        )} (${formatDuration(record.lateMinutes)})${
-                          record.lateReason
-                            ? ` - 사유: ${record.lateReason}`
-                            : ""
-                        }</li>`
-                    )
-                    .join("")
-                : "지각 기록 없음"
-            }
-          </ul>
-        `;
-        studentDetailModal.classList.remove("hidden");
-      }
+  modalTitle.textContent = `${student.name} 출결 인정`;
+  modalContent.textContent = `${student.name} (학번: ${student.studentId})의 출결을 인정하시겠습니까?`;
+  approvalReason.value = "";
+
+  modal.classList.remove("hidden");
+
+  confirmButton.onclick = () => {
+    approveAttendance(student.studentId, approvalReason.value);
+    modal.classList.add("hidden");
+  };
+
+  document.querySelectorAll(".closeModal").forEach(button => {
+    button.onclick = () => {
+      modal.classList.add("hidden");
+    };
+  });
+}
+
+async function approveAttendance(studentId, reason) {
+  try {
+    const response = await axios.post("/api/attendance/approve", {
+      studentId,
+      reason
+    });
+    alert(response.data.message);
+    fetchAttendanceData(); // 데이터 새로고침
+  } catch (error) {
+    console.error("출결 인정 중 오류 발생:", error);
+    alert("출결 인정에 실패했습니다.");
+  }
+}
+
+function showStudentDetails(student) {
+  const modalTitle = document.getElementById("modalTitle");
+  const modalContent = document.getElementById("modalContent");
+  const studentDetailModal = document.getElementById("studentDetailModal");
+
+  modalTitle.textContent = `${student.name} (학번: ${student.studentId})`;
+  modalContent.innerHTML = `
+    <p>학년: ${student.grade}</p>
+    <p>반: ${student.class}</p>
+    <p>번호: ${student.number}</p>
+    <p>총 출석 일수: ${student.totalAttendance}</p>
+    <p>지각 횟수: ${student.lateAttendance}</p>
+    <p>누적 지각 시간: ${formatDuration(student.totalLateMinutes)}</p>
+    <p>마지막 출석 시간: ${formatTime(student.lastAttendanceTime)}</p>
+    <h4 class="font-bold mt-4">지각 기록:</h4>
+    <ul>
+      ${student.lateRecords ? student.lateRecords.map(record => 
+        `<li>${formatDate(record.date)} - ${formatTime(record.date)} (${formatDuration(record.dailyLateMinutes)})${
+          record.lateReason ? ` - 사유: ${record.lateReason}` : ""
+        }</li>`
+      ).join("") : "지각 기록 없음"}
+    </ul>
+  `;
+  studentDetailModal.classList.remove("hidden");
+}
+
 
       function closeModal() {
         document.getElementById("studentDetailModal").classList.add("hidden");
@@ -760,39 +807,26 @@
       }
 
       function updateDashboardSummary(data) {
-        const dashboardSummary = document.getElementById("dashboardSummary");
-        const totalStudents = data.attendanceData.length;
-        const presentStudents = data.attendanceData.filter(
-          (s) => s.totalAttendance > 0
-        ).length;
-        const lateStudents = data.attendanceData.filter(
-          (s) => s.lateAttendance > 0
-        ).length;
-        const absentStudents = totalStudents - presentStudents;
-        const averageLateTime =
-          data.attendanceData.reduce((sum, s) => sum + s.totalLateMinutes, 0) /
-            lateStudents || 0;
+  const dashboardSummary = document.getElementById("dashboardSummary");
+  const totalStudents = data.attendanceData.length;
+  const presentStudents = data.attendanceData.filter(s => s.totalAttendance > 0).length;
+  const lateStudents = data.attendanceData.filter(s => s.lateAttendance > 0).length;
+  const absentStudents = totalStudents - presentStudents;
+  const totalLateMinutes = data.attendanceData.reduce((sum, s) => sum + s.totalLateMinutes, 0);
+  const averageLateTime = lateStudents > 0 ? totalLateMinutes / lateStudents : 0;
 
-        dashboardSummary.innerHTML = `
+  dashboardSummary.innerHTML = `
     <div class="bg-blue-100 p-4 rounded-lg">
       <h3 class="font-bold text-lg mb-2">요약 정보</h3>
       <p>전체 학생 수: ${totalStudents}</p>
-      <p>출석 학생 수: ${presentStudents} (${(
-          (presentStudents / totalStudents) *
-          100
-        ).toFixed(1)}%)</p>
-      <p>지각 학생 수: ${lateStudents} (${(
-          (lateStudents / totalStudents) *
-          100
-        ).toFixed(1)}%)</p>
-      <p>결석 학생 수: ${absentStudents} (${(
-          (absentStudents / totalStudents) *
-          100
-        ).toFixed(1)}%)</p>
+      <p>출석 학생 수: ${presentStudents} (${((presentStudents / totalStudents) * 100).toFixed(1)}%)</p>
+      <p>지각 학생 수: ${lateStudents} (${((lateStudents / totalStudents) * 100).toFixed(1)}%)</p>
+      <p>결석 학생 수: ${absentStudents} (${((absentStudents / totalStudents) * 100).toFixed(1)}%)</p>
+      <p>총 누적 지각 시간: ${formatDuration(totalLateMinutes)}</p>
       <p>평균 지각 시간: ${formatDuration(averageLateTime)}</p>
     </div>
   `;
-      }
+}
 
       function checkLateStudents(data) {
         const lateThreshold = 3; // 3회 이상 지각 시 알림
