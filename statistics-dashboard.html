@@ -147,45 +147,15 @@
               <table class="min-w-full divide-y divide-gray-200">
                 <thead class="bg-gray-50">
                   <tr>
-                    <th
-                      class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
-                    >
-                      번호
-                    </th>
-                    <th
-                      class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
-                    >
-                      이름
-                    </th>
-                    <th
-                      class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
-                    >
-                      출석 상태
-                    </th>
-                    <th
-                      class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
-                    >
-                      출석 시간
-                    </th>
-                    <th
-                      class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
-                    >
-                      지각 시간
-                    </th>
-                    <th
-                      class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
-                    >
-                      누적 지각 시간
-                    </th>
-                    <th
-                      class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                    >
-                      상세 정보
-                    </th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">번호</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">이름</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">출석 상태</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">출석 시간</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">지각 시간</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">누적 지각 시간</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">상세 정보</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">출결 인정</th>
                   </tr>
-                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    출결 인정
-                  </th>
                 </thead>
                 <tbody
                   id="attendanceTableBody"
@@ -525,34 +495,34 @@
       }
 
       function displayAttendanceData(data) {
-  const attendanceTableBody = document.getElementById("attendanceTableBody");
-  attendanceTableBody.innerHTML = "";
-  data.attendanceData.forEach((student) => {
-    const row = document.createElement("tr");
-    row.innerHTML = `
-      <td class="px-6 py-4 whitespace-nowrap">${student.number}</td>
-      <td class="px-6 py-4 whitespace-nowrap">${student.name || "이름 없음"}</td>
-      <td class="px-6 py-4 whitespace-nowrap">${student.totalAttendance > 0 ? "출석" : "결석"}</td>
-      <td class="px-6 py-4 whitespace-nowrap">${formatTime(student.lastAttendanceTime)}</td>
-      <td class="px-6 py-4 whitespace-nowrap">${student.lateAttendance > 0 ? formatDuration(student.dailyLateMinutes) : "-"}</td>
-      <td class="px-6 py-4 whitespace-nowrap">${formatDuration(student.totalLateMinutes)}</td>
-      <td class="px-6 py-4 whitespace-nowrap">
-        <button class="viewDetails bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded" data-student-id="${student.studentId}">
-          상세 정보
-        </button>
-      </td>
-      <td class="px-6 py-4 whitespace-nowrap">
-        <button class="approveAttendance bg-green-500 hover:bg-green-700 text-white font-bold py-1 px-2 rounded" data-student-id="${student.studentId}">
-          출결 인정
-        </button>
-      </td>
-    `;
-    attendanceTableBody.appendChild(row);
+        const attendanceTableBody = document.getElementById("attendanceTableBody");
+        attendanceTableBody.innerHTML = "";
+        data.attendanceData.forEach((student) => {
+          const row = document.createElement("tr");
+          row.innerHTML = `
+            <td class="px-6 py-4 whitespace-nowrap">${student.number}</td>
+            <td class="px-6 py-4 whitespace-nowrap">${student.name || "이름 없음"}</td>
+            <td class="px-6 py-4 whitespace-nowrap">${student.totalAttendance > 0 ? "출석" : "결석"}</td>
+            <td class="px-6 py-4 whitespace-nowrap">${formatTime(student.lastAttendanceTime)}</td>
+            <td class="px-6 py-4 whitespace-nowrap">${student.lateAttendance > 0 ? formatDuration(student.dailyLateMinutes || 0) : "-"}</td>
+            <td class="px-6 py-4 whitespace-nowrap">${formatDuration(student.totalLateMinutes || 0)}</td>
+            <td class="px-6 py-4 whitespace-nowrap">
+              <button class="viewDetails bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded" data-student-id="${student.studentId}">
+                상세 정보
+              </button>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap">
+              <button class="approveAttendance bg-green-500 hover:bg-green-700 text-white font-bold py-1 px-2 rounded" data-student-id="${student.studentId}">
+                출결 인정
+              </button>
+            </td>
+          `;
+          attendanceTableBody.appendChild(row);
 
-    row.querySelector(".viewDetails").addEventListener("click", () => showStudentDetails(student));
-    row.querySelector(".approveAttendance").addEventListener("click", () => showApprovalModal(student));
-  });
-}
+          row.querySelector(".viewDetails").addEventListener("click", () => showStudentDetails(student));
+          row.querySelector(".approveAttendance").addEventListener("click", () => showApprovalModal(student));
+        });
+      }
 
 function showApprovalModal(student) {
   const modal = document.getElementById("approvalModal");
@@ -592,16 +562,13 @@ async function approveAttendance(studentId, reason) {
   } catch (error) {
     console.error("출결 인정 중 오류 발생:", error);
     if (error.response) {
-      // 서버가 응답을 반환한 경우
       console.error("서버 응답 상태:", error.response.status);
       console.error("서버 응답 데이터:", error.response.data);
       alert("출결 인정에 실패했습니다. 오류: " + error.response.data.message);
     } else if (error.request) {
-      // 요청은 보냈지만 응답을 받지 못한 경우
       console.error("응답을 받지 못했습니다.");
       alert("서버로부터 응답을 받지 못했습니다.");
     } else {
-      // 요청 설정 중에 오류가 발생한 경우
       console.error("요청 설정 중 오류:", error.message);
       alert("요청 중 오류가 발생했습니다.");
     }
