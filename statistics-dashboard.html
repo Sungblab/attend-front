@@ -120,11 +120,10 @@ const endDateInput = document.getElementById("endDate");
 const fetchStatsButton = document.getElementById("fetchStats");
 const overallStatsDiv = document.getElementById("overallStats");
 const studentStatsBody = document.getElementById("studentStatsBody");
-
-fetchStatsButton.addEventListener("click", fetchAttendanceStats);
-
 const gradeSelect = document.getElementById("gradeSelect");
 const classSelect = document.getElementById("classSelect");
+
+fetchStatsButton.addEventListener("click", fetchAttendanceStats);
 
 async function fetchAttendanceStats() {
   try {
@@ -138,12 +137,12 @@ async function fetchAttendanceStats() {
       return;
     }
 
-    const response = await axios.get("/api/dashboard/advanced", {
+    const response = await axios.get("/api/dashboard", {
       params: { startDate, endDate, grade, class: classNumber }
     });
 
-    displayOverallStats(response.data.stats);
-    displayStudentDetails(response.data.studentDetails);
+    displayOverallStats(response.data.overallStats);
+    displayStudentDetails(response.data.attendanceData);
   } catch (error) {
     console.error("Error fetching attendance stats:", error);
     handleError(error);
@@ -170,6 +169,9 @@ function displayOverallStats(stats) {
     <div class="stat-item">
       <span class="font-bold">평균 지각률:</span> ${stats.averageLateRate}%
     </div>
+    <div class="stat-item">
+      <span class="font-bold">평균 지각 시간:</span> ${stats.averageLateMinutes}분
+    </div>
   `;
 }
 
@@ -184,12 +186,20 @@ function displayStudentDetails(students) {
       <td class="px-6 py-4 whitespace-nowrap">${student.class}</td>
       <td class="px-6 py-4 whitespace-nowrap">${student.number}</td>
       <td class="px-6 py-4 whitespace-nowrap">${student.totalAttendance}</td>
-      <td class="px-6 py-4 whitespace-nowrap">${student.totalLateAttendance}</td>
+      <td class="px-6 py-4 whitespace-nowrap">${student.lateAttendance}</td>
       <td class="px-6 py-4 whitespace-nowrap">${student.totalLateMinutes}분</td>
-      <td class="px-6 py-4 whitespace-nowrap">${formatAttendanceStatus(student)}</td>
+      <td class="px-6 py-4 whitespace-nowrap">${formatLastAttendance(student)}</td>
     `;
     studentStatsBody.appendChild(row);
   });
+}
+
+function formatLastAttendance(student) {
+  if (student.lastAttendanceTime) {
+    const date = new Date(student.lastAttendanceTime);
+    return `${date.toLocaleDateString()} ${date.toLocaleTimeString()} (${student.lastAttendanceStatus})`;
+  }
+  return '미출석';
 }
 
 function handleError(error) {
@@ -207,6 +217,7 @@ function handleError(error) {
     console.error("Error setting up request:", error.message);
     alert(`요청 설정 중 오류가 발생했습니다: ${error.message}`);
   }
-}    </script>
+}
+</script>
   </body>
 </html>
