@@ -76,9 +76,11 @@
                   <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">이름</th>
                   <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">학년</th>
                   <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">반</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">번호</th>
                   <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">출석 횟수</th>
                   <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">지각 횟수</th>
                   <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">총 지각 시간</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">최근 출석 시간</th>
                 </tr>
               </thead>
               <tbody id="studentStatsBody" class="bg-white divide-y divide-gray-200">
@@ -172,17 +174,40 @@ function displayOverallStats(stats) {
 }
 
 function displayStudentDetails(students) {
+  students.sort((a, b) => {
+    if (a.grade !== b.grade) return a.grade - b.grade;
+    if (a.class !== b.class) return a.class - b.class;
+    return a.number - b.number;
+  });
+
   studentStatsBody.innerHTML = "";
   students.forEach(student => {
     const row = document.createElement("tr");
+    const studentId = `${student.grade}${student.class.toString().padStart(2, '0')}${student.number.toString().padStart(2, '0')}`;
+    
+    // 출석 시간 및 상태 포맷팅
+    let attendanceTimeDisplay = '미출석';
+    let attendanceStatusClass = 'text-red-600';
+    if (student.lastAttendanceTime) {
+      const attendanceDate = new Date(student.lastAttendanceTime);
+      attendanceTimeDisplay = attendanceDate.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' });
+      if (student.lastAttendanceStatus === '정상') {
+        attendanceStatusClass = 'text-green-600';
+      } else if (student.lastAttendanceStatus === '지각') {
+        attendanceStatusClass = 'text-yellow-600';
+      }
+    }
+    
     row.innerHTML = `
-      <td class="px-6 py-4 whitespace-nowrap">${student.studentId}</td>
+      <td class="px-6 py-4 whitespace-nowrap">${studentId}</td>
       <td class="px-6 py-4 whitespace-nowrap">${student.name}</td>
       <td class="px-6 py-4 whitespace-nowrap">${student.grade}</td>
       <td class="px-6 py-4 whitespace-nowrap">${student.class}</td>
+      <td class="px-6 py-4 whitespace-nowrap">${student.number}</td>
       <td class="px-6 py-4 whitespace-nowrap">${student.totalAttendance}</td>
       <td class="px-6 py-4 whitespace-nowrap">${student.totalLateAttendance}</td>
       <td class="px-6 py-4 whitespace-nowrap">${student.totalLateMinutes}분</td>
+      <td class="px-6 py-4 whitespace-nowrap ${attendanceStatusClass}">${attendanceTimeDisplay} (${student.lastAttendanceStatus})</td>
     `;
     studentStatsBody.appendChild(row);
   });
