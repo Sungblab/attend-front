@@ -138,6 +138,9 @@
             </div>
           </div>
 
+
+          </div>
+
           <div class="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               <h3 class="text-lg font-semibold mb-2">출석 비율</h3>
@@ -342,97 +345,36 @@
       let attendancePieChart = null;
       let attendanceLineChart = null;
       let globalAttendanceData = null;
-
+  
       axios.defaults.baseURL =
         "https://port-0-attend-backend-lz9cd9taff85e9dc.sel4.cloudtype.app";
-
+  
       const token = localStorage.getItem("token");
       if (!token) {
         window.location.href =
           "index.html?error=" + encodeURIComponent("로그인이 필요합니다.");
       }
-
+  
       axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
-
+  
       // DOM이 완전히 로드된 후 실행되도록 변경
       document.addEventListener("DOMContentLoaded", function () {
-        const gradeSelect = document.getElementById("grade");
-        const classSelect = document.getElementById("class");
-        const periodSelect = document.getElementById("period");
-        const attendanceStatusSelect =
-          document.getElementById("attendanceStatus");
-        const lateCountInput = document.getElementById("lateCount");
-        const searchInput = document.getElementById("search");
         const fetchButton = document.getElementById("fetch");
-        const attendanceTableBody = document.getElementById(
-          "attendanceTableBody"
-        );
-        const weeklyCalendar = document.getElementById("weeklyCalendar");
-        const dashboardSummary = document.getElementById("dashboardSummary");
-        const studentDetailModal =
-          document.getElementById("studentDetailModal");
-        const modalTitle = document.getElementById("modalTitle");
-        const modalContent = document.getElementById("modalContent");
         const closeModalButtons = document.querySelectorAll(".closeModal");
-        const attendanceInputModal = document.getElementById(
-          "attendanceInputModal"
-        );
-        const attendanceInputForm = document.getElementById(
-          "attendanceInputForm"
-        );
-
+  
         fetchButton.addEventListener("click", fetchAttendanceData);
         document
           .getElementById("downloadExcel")
           .addEventListener("click", downloadExcel);
-
+  
         closeModalButtons.forEach((button) => {
           button.addEventListener("click", closeModal);
         });
-
-        // 테이블 정렬 이벤트 리스너 추가
-        document.querySelectorAll("th").forEach((th) =>
-          th.addEventListener("click", () => {
-            const table = th.closest("table");
-            Array.from(table.querySelectorAll("tr:nth-child(n+2)"))
-              .sort(
-                comparer(
-                  Array.from(th.parentNode.children).indexOf(th),
-                  (this.asc = !this.asc)
-                )
-              )
-              .forEach((tr) => table.appendChild(tr));
-          })
-        );
-
-        // 출석 입력 폼 제출 이벤트 리스너
-        attendanceInputForm.addEventListener("submit", async (e) => {
-          e.preventDefault();
-          const studentId = document.getElementById("inputStudentId").value;
-          const date = document.getElementById("inputDate").value;
-          const status = document.getElementById("inputStatus").value;
-          const lateReason = document.getElementById("inputLateReason").value;
-
-          try {
-            const response = await axios.post("/api/attendance/modify", {
-              studentId,
-              date,
-              status,
-              lateReason,
-            });
-            alert(response.data.message);
-            closeModal();
-            fetchAttendanceData();
-          } catch (error) {
-            console.error("출석 입력 중 오류 발생:", error);
-            alert("출석 입력에 실패했습니다.");
-          }
-        });
-
+  
         // 초기 데이터 로드
         fetchAttendanceData();
       });
-
+  
       async function fetchAttendanceData() {
         try {
           const grade = document.getElementById("grade").value;
@@ -442,7 +384,7 @@
             document.getElementById("attendanceStatus").value;
           const lateCount = document.getElementById("lateCount").value;
           const search = document.getElementById("search").value;
-
+  
           const response = await axios.get("/api/dashboard", {
             params: {
               grade,
@@ -454,9 +396,7 @@
             },
           });
           globalAttendanceData = response.data; // 데이터를 전역 변수에 저장
-          displayAttendanceData(globalAttendanceData);
           updateStatisticsCharts(globalAttendanceData);
-          updateWeeklyCalendar(globalAttendanceData);
           updateDashboardSummary(globalAttendanceData);
           checkLateStudents(globalAttendanceData);
         } catch (error) {
@@ -464,125 +404,12 @@
           handleError(error);
         }
       }
-
-      function displayAttendanceData(data) {
-        const attendanceTableBody = document.getElementById("attendanceTableBody");
-        attendanceTableBody.innerHTML = "";
-        data.attendanceData.forEach((student) => {
-          const row = document.createElement("tr");
-          row.innerHTML = `
-            <td class="px-6 py-4 whitespace-nowrap">${student.number}</td>
-            <td class="px-6 py-4 whitespace-nowrap">${student.name || "이름 없음"}</td>
-            <td class="px-6 py-4 whitespace-nowrap">${student.totalAttendance > 0 ? "출석" : "결석"}</td>
-            <td class="px-6 py-4 whitespace-nowrap">${formatTime(student.lastAttendanceTime)}</td>
-            <td class="px-6 py-4 whitespace-nowrap">${student.lateAttendance > 0 ? formatDuration(student.dailyLateMinutes || 0) : "-"}</td>
-            <td class="px-6 py-4 whitespace-nowrap">${formatDuration(student.totalLateMinutes || 0)}</td>
-            <td class="px-6 py-4 whitespace-nowrap">
-              <button class="viewDetails bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded" data-student-id="${student.studentId}">
-                상세 정보
-              </button>
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap">
-              <button class="approveAttendance bg-green-500 hover:bg-green-700 text-white font-bold py-1 px-2 rounded" data-student-id="${student.studentId}">
-                출결 인정
-              </button>
-            </td>
-          `;
-          attendanceTableBody.appendChild(row);
-
-          row.querySelector(".viewDetails").addEventListener("click", () => showStudentDetails(student));
-          row.querySelector(".approveAttendance").addEventListener("click", () => showApprovalModal(student));
-        });
-      }
-
-function showApprovalModal(student) {
-  const modal = document.getElementById("approvalModal");
-  const modalTitle = document.getElementById("approvalModalTitle");
-  const modalContent = document.getElementById("approvalModalContent");
-  const approvalReason = document.getElementById("approvalReason");
-  const confirmButton = document.getElementById("confirmApproval");
-
-  modalTitle.textContent = `${student.name} 출결 인정`;
-  modalContent.textContent = `${student.name} (학번: ${student.studentId})의 출결을 인정하시겠습니까?`;
-  approvalReason.value = "";
-
-  modal.classList.remove("hidden");
-
-  confirmButton.onclick = () => {
-    approveAttendance(student.studentId, approvalReason.value);
-    modal.classList.add("hidden");
-  };
-
-  document.querySelectorAll(".closeModal").forEach(button => {
-    button.onclick = () => {
-      modal.classList.add("hidden");
-    };
-  });
-}
-
-async function approveAttendance(studentId, reason) {
-  try {
-    const response = await axios.post("/api/attendance/approve", {
-      studentId,
-      reason,
-      date: new Date().toISOString()
-    });
-    console.log("서버 응답:", response.data);
-    alert(response.data.message);
-    fetchAttendanceData(); // 데이터 새로고침
-  } catch (error) {
-    console.error("출결 인정 중 오류 발생:", error);
-    if (error.response) {
-      console.error("서버 응답 상태:", error.response.status);
-      console.error("서버 응답 데이터:", error.response.data);
-      alert("출결 인정에 실패했습니다. 오류: " + error.response.data.message);
-    } else if (error.request) {
-      console.error("응답을 받지 못했습니다.");
-      alert("서버로부터 응답을 받지 못했습니다.");
-    } else {
-      console.error("요청 설정 중 오류:", error.message);
-      alert("요청 중 오류가 발생했습니다.");
-    }
-  }
-}
-
-function showStudentDetails(student) {
-  const modalTitle = document.getElementById("modalTitle");
-  const modalContent = document.getElementById("modalContent");
-  const studentDetailModal = document.getElementById("studentDetailModal");
-
-  modalTitle.textContent = `${student.name} (학번: ${student.studentId})`;
-  modalContent.innerHTML = `
-    <p>학년: ${student.grade}</p>
-    <p>반: ${student.class}</p>
-    <p>번호: ${student.number}</p>
-    <p>총 출석 일수: ${student.totalAttendance}</p>
-    <p>지각 횟수: ${student.lateAttendance}</p>
-    <p>누적 지각 시간: ${formatDuration(student.totalLateMinutes)}</p>
-    <p>마지막 출석 시간: ${formatTime(student.lastAttendanceTime)}</p>
-    <h4 class="font-bold mt-4">지각 기록:</h4>
-    <ul>
-      ${student.lateRecords ? student.lateRecords.map(record => 
-        `<li>${formatDate(record.date)} - ${formatTime(record.date)} (${formatDuration(record.dailyLateMinutes)})${
-          record.lateReason ? ` - 사유: ${record.lateReason}` : ""
-        }</li>`
-      ).join("") : "지각 기록 없음"}
-    </ul>
-  `;
-  studentDetailModal.classList.remove("hidden");
-}
-
-
-      function closeModal() {
-        document.getElementById("studentDetailModal").classList.add("hidden");
-        document.getElementById("attendanceInputModal").classList.add("hidden");
-      }
-
+  
       function updateStatisticsCharts(data) {
         updateAttendancePieChart(data);
         updateAttendanceLineChart(data);
       }
-
+  
       function updateAttendancePieChart(data) {
         const ctx = document
           .getElementById("attendancePieChart")
@@ -595,11 +422,11 @@ function showStudentDetails(student) {
           (s) => s.lateAttendance > 0
         ).length;
         const absentStudents = totalStudents - presentStudents;
-
+  
         if (attendancePieChart) {
           attendancePieChart.destroy();
         }
-
+  
         attendancePieChart = new Chart(ctx, {
           type: "pie",
           data: {
@@ -629,7 +456,7 @@ function showStudentDetails(student) {
           },
         });
       }
-
+  
       function updateAttendanceLineChart(data) {
         const ctx = document
           .getElementById("attendanceLineChart")
@@ -646,11 +473,11 @@ function showStudentDetails(student) {
           (date) =>
             data.attendanceData.filter((s) => s.lateDates.includes(date)).length
         );
-
+  
         if (attendanceLineChart) {
           attendanceLineChart.destroy();
         }
-
+  
         attendanceLineChart = new Chart(ctx, {
           type: "line",
           data: {
@@ -701,113 +528,42 @@ function showStudentDetails(student) {
           },
         });
       }
-
-      function updateWeeklyCalendar(data) {
-  const weeklyCalendar = document.getElementById("weeklyCalendar");
-  weeklyCalendar.innerHTML = "";
-  const now = new Date();
-  now.setHours(now.getHours() + 9); // KST로 변환
-  const dates = Array.from({ length: 7 }, (_, i) => {
-    const date = new Date(now);
-    date.setDate(date.getDate() - i);
-    return date;
-  }).reverse();
-
-  dates.forEach((date) => {
-    const dayElement = document.createElement("div");
-    dayElement.className = "text-center p-2 border rounded";
-    dayElement.innerHTML = `
-      <div class="font-semibold">${date.toLocaleDateString("ko-KR", {
-        weekday: "short",
-      })}</div>
-      <div>${date.getDate()}</div>
-      <div class="mt-2 text-sm">
-        출석: ${getAttendanceCount(data, date, "present")}<br>
-        지각: ${getAttendanceCount(data, date, "late")}<br>
-        결석: ${getAttendanceCount(data, date, "absent")}
-      </div>
-      <button class="mt-2 bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded text-xs view-date-details" data-date="${date.toISOString()}">
-        상세 보기
-      </button>
-    `;
-    weeklyCalendar.appendChild(dayElement);
-  });
-
-  // 버튼에 이벤트 리스너 추가
-  document.querySelectorAll('.view-date-details').forEach(button => {
-    button.addEventListener('click', (e) => {
-      const date = new Date(e.target.getAttribute('data-date'));
-      viewDateDetails(date);
-    });
-  });
-}
-
-
-
-      function getAttendanceCount(data, date, status) {
-        const targetDate = date.toISOString().split("T")[0];
-        return data.attendanceData.filter((student) => {
-          if (!student.lastAttendanceTime) return false;
-          let studentDate;
-          try {
-            studentDate = new Date(student.lastAttendanceTime);
-            if (isNaN(studentDate.getTime())) return false;
-            studentDate = studentDate.toISOString().split("T")[0];
-          } catch (error) {
-            console.error("Invalid date:", student.lastAttendanceTime);
-            return false;
-          }
-
-          if (status === "present") {
-            return (
-              studentDate === targetDate &&
-              student.totalAttendance > 0 &&
-              !student.lateAttendance
-            );
-          } else if (status === "late") {
-            return studentDate === targetDate && student.lateAttendance > 0;
-          } else if (status === "absent") {
-            return studentDate === targetDate && student.totalAttendance === 0;
-          }
-          return false;
-        }).length;
-      }
-
+  
       function updateDashboardSummary(data) {
-  const dashboardSummary = document.getElementById("dashboardSummary");
-  const totalStudents = data.attendanceData.length;
-  const presentStudents = data.attendanceData.filter(s => s.totalAttendance > 0).length;
-  const lateStudents = data.attendanceData.filter(s => s.lateAttendance > 0).length;
-  const absentStudents = totalStudents - presentStudents;
-  const totalLateMinutes = data.attendanceData.reduce((sum, s) => sum + s.totalLateMinutes, 0);
-  const averageLateTime = lateStudents > 0 ? totalLateMinutes / lateStudents : 0;
-
-  dashboardSummary.innerHTML = `
-    <div class="bg-blue-100 p-4 rounded-lg">
-      <h3 class="font-bold text-lg mb-2">요약 정보</h3>
-      <p>전체 학생 수: ${totalStudents}</p>
-      <p>출석 학생 수: ${presentStudents} (${((presentStudents / totalStudents) * 100).toFixed(1)}%)</p>
-      <p>지각 학생 수: ${lateStudents} (${((lateStudents / totalStudents) * 100).toFixed(1)}%)</p>
-      <p>결석 학생 수: ${absentStudents} (${((absentStudents / totalStudents) * 100).toFixed(1)}%)</p>
-      <p>총 누적 지각 시간: ${formatDuration(totalLateMinutes)}</p>
-      <p>평균 지각 시간: ${formatDuration(averageLateTime)}</p>
-    </div>
-  `;
-}
-
+        const dashboardSummary = document.getElementById("dashboardSummary");
+        const totalStudents = data.attendanceData.length;
+        const presentStudents = data.attendanceData.filter(s => s.totalAttendance > 0).length;
+        const lateStudents = data.attendanceData.filter(s => s.lateAttendance > 0).length;
+        const absentStudents = totalStudents - presentStudents;
+        const totalLateMinutes = data.attendanceData.reduce((sum, s) => sum + s.totalLateMinutes, 0);
+        const averageLateTime = lateStudents > 0 ? totalLateMinutes / lateStudents : 0;
+  
+        dashboardSummary.innerHTML = `
+          <div class="bg-blue-100 p-4 rounded-lg">
+            <h3 class="font-bold text-lg mb-2">요약 정보</h3>
+            <p>전체 학생 수: ${totalStudents}</p>
+            <p>출석 학생 수: ${presentStudents} (${((presentStudents / totalStudents) * 100).toFixed(1)}%)</p>
+            <p>지각 학생 수: ${lateStudents} (${((lateStudents / totalStudents) * 100).toFixed(1)}%)</p>
+            <p>결석 학생 수: ${absentStudents} (${((absentStudents / totalStudents) * 100).toFixed(1)}%)</p>
+            <p>총 누적 지각 시간: ${formatDuration(totalLateMinutes)}</p>
+            <p>평균 지각 시간: ${formatDuration(averageLateTime)}</p>
+          </div>
+        `;
+      }
+  
       function checkLateStudents(data) {
         const lateThreshold = 3; // 3회 이상 지각 시 알림
         const lateStudents = data.attendanceData.filter(
           (s) => s.lateAttendance >= lateThreshold
         );
-
+  
         if (lateStudents.length > 0) {
           alert(
             `${lateStudents.length}명의 학생이 ${lateThreshold}회 이상 지각했습니다. 상담이 필요할 수 있습니다.`
           );
         }
       }
-
+  
       function formatTime(timestamp) {
         if (!timestamp) return "-";
         let date;
@@ -823,7 +579,7 @@ function showStudentDetails(student) {
           return "-";
         }
       }
-
+  
       function formatDate(dateString) {
         const date = new Date(dateString);
         return date.toLocaleDateString("ko-KR", {
@@ -832,13 +588,13 @@ function showStudentDetails(student) {
           day: "2-digit",
         });
       }
-
+  
       function formatDuration(minutes) {
         const hours = Math.floor(minutes / 60);
         const mins = minutes % 60;
         return `${hours}시간 ${mins}분`;
       }
-
+  
       function handleError(error) {
         console.error("Error:", error);
         let errorMessage = "데이터를 불러오는데 실패했습니다.";
@@ -854,7 +610,7 @@ function showStudentDetails(student) {
         }
         alert(errorMessage);
       }
-
+  
       function downloadExcel() {
         if (!globalAttendanceData) {
           alert("다운로드할 데이터가 없습니다. 먼저 데이터를 조회해주세요.");
@@ -867,20 +623,11 @@ function showStudentDetails(student) {
         XLSX.utils.book_append_sheet(workbook, worksheet, "출석데이터");
         XLSX.writeFile(workbook, "출석_통계_리포트.xlsx");
       }
-
-      function comparer(idx, asc) {
-        return (a, b) =>
-          ((v1, v2) =>
-            v1 !== "" && v2 !== "" && !isNaN(v1) && !isNaN(v2)
-              ? v1 - v2
-              : v1.toString().localeCompare(v2))(
-            getCellValue(asc ? a : b, idx),
-            getCellValue(asc ? b : a, idx)
-          );
-      }
-
-      function getCellValue(tr, idx) {
-        return tr.children[idx].innerText || tr.children[idx].textContent;
+  
+      function closeModal() {
+        document.getElementById("studentDetailModal").classList.add("hidden");
+        document.getElementById("attendanceInputModal").classList.add("hidden");
+        document.getElementById("approvalModal").classList.add("hidden");
       }
     </script>
   </body>
