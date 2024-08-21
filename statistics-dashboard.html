@@ -17,8 +17,8 @@
 
       <main class="flex-grow container mx-auto px-4 py-8">
         <div class="bg-white shadow-md rounded-lg p-6 mb-6">
-          <h2 class="text-xl font-semibold mb-4">기간 선택</h2>
-          <div class="flex space-x-4">
+          <h2 class="text-xl font-semibold mb-4">기간 및 학년/반 선택</h2>
+          <div class="flex space-x-4 mb-4">
             <div>
               <label for="startDate" class="block text-sm font-medium text-gray-700">시작 날짜</label>
               <input type="date" id="startDate" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary">
@@ -27,13 +27,37 @@
               <label for="endDate" class="block text-sm font-medium text-gray-700">종료 날짜</label>
               <input type="date" id="endDate" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary">
             </div>
-            <div class="flex items-end">
-              <button id="fetchStats" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-                통계 조회
-              </button>
+          </div>
+          <div class="flex space-x-4 mb-4">
+            <div>
+              <label for="gradeSelect" class="block text-sm font-medium text-gray-700">학년</label>
+              <select id="gradeSelect" class="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary">
+                <option value="">전체</option>
+                <option value="1">1학년</option>
+                <option value="2">2학년</option>
+                <option value="3">3학년</option>
+              </select>
+            </div>
+            <div>
+              <label for="classSelect" class="block text-sm font-medium text-gray-700">반</label>
+              <select id="classSelect" class="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary">
+                <option value="">전체</option>
+                <option value="1">1반</option>
+                <option value="2">2반</option>
+                <option value="3">3반</option>
+                <option value="4">4반</option>
+                <option value="5">5반</option>
+                <option value="6">6반</option>
+              </select>
             </div>
           </div>
+          <div class="flex items-end">
+            <button id="fetchStats" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+              통계 조회
+            </button>
+          </div>
         </div>
+
 
         <div class="bg-white shadow-md rounded-lg p-6 mb-6">
           <h2 class="text-xl font-semibold mb-4">전체 통계 요약</h2>
@@ -97,10 +121,15 @@ const studentStatsBody = document.getElementById("studentStatsBody");
 
 fetchStatsButton.addEventListener("click", fetchAttendanceStats);
 
+const gradeSelect = document.getElementById("gradeSelect");
+const classSelect = document.getElementById("classSelect");
+
 async function fetchAttendanceStats() {
   try {
     const startDate = startDateInput.value;
     const endDate = endDateInput.value;
+    const grade = gradeSelect.value;
+    const classNumber = classSelect.value;
     
     if (!startDate || !endDate) {
       alert("시작 날짜와 종료 날짜를 모두 선택해주세요.");
@@ -108,7 +137,7 @@ async function fetchAttendanceStats() {
     }
 
     const response = await axios.get("/api/dashboard/advanced", {
-      params: { startDate, endDate }
+      params: { startDate, endDate, grade, class: classNumber }
     });
 
     displayOverallStats(response.data.stats);
