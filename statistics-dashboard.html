@@ -732,32 +732,91 @@ function showStudentDetails(student) {
       }
 
       function updateWeeklyCalendar(data) {
-        const weeklyCalendar = document.getElementById("weeklyCalendar");
-        weeklyCalendar.innerHTML = "";
-        const today = new Date();
-        const dates = Array.from({ length: 7 }, (_, i) => {
-          const date = new Date(today);
-          date.setDate(date.getDate() - i);
-          return date;
-        }).reverse();
+  const weeklyCalendar = document.getElementById("weeklyCalendar");
+  weeklyCalendar.innerHTML = "";
+  const now = new Date();
+  now.setHours(now.getHours() + 9); // KST로 변환
+  const dates = Array.from({ length: 7 }, (_, i) => {
+    const date = new Date(now);
+    date.setDate(date.getDate() - i);
+    return date;
+  }).reverse();
 
-        dates.forEach((date) => {
-          const dayElement = document.createElement("div");
-          dayElement.className = "text-center p-2 border rounded";
-          dayElement.innerHTML = `
-            <div class="font-semibold">${date.toLocaleDateString("ko-KR", {
-              weekday: "short",
-            })}</div>
-            <div>${date.getDate()}</div>
-            <div class="mt-2 text-sm">
-              출석: ${getAttendanceCount(data, date, "present")}<br>
-              지각: ${getAttendanceCount(data, date, "late")}<br>
-              결석: ${getAttendanceCount(data, date, "absent")}
-            </div>
-          `;
-          weeklyCalendar.appendChild(dayElement);
-        });
+  dates.forEach((date) => {
+    const dayElement = document.createElement("div");
+    dayElement.className = "text-center p-2 border rounded";
+    dayElement.innerHTML = `
+      <div class="font-semibold">${date.toLocaleDateString("ko-KR", {
+        weekday: "short",
+      })}</div>
+      <div>${date.getDate()}</div>
+      <div class="mt-2 text-sm">
+        출석: ${getAttendanceCount(data, date, "present")}<br>
+        지각: ${getAttendanceCount(data, date, "late")}<br>
+        결석: ${getAttendanceCount(data, date, "absent")}
+      </div>
+      <button class="mt-2 bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded text-xs view-date-details" data-date="${date.toISOString()}">
+        상세 보기
+      </button>
+    `;
+    weeklyCalendar.appendChild(dayElement);
+  });
+
+  // 버튼에 이벤트 리스너 추가
+  document.querySelectorAll('.view-date-details').forEach(button => {
+    button.addEventListener('click', (e) => {
+      const date = new Date(e.target.getAttribute('data-date'));
+      viewDateDetails(date);
+    });
+  });
+}
+
+async function viewDateDetails(date) {
+  try {
+    const response = await axios.get('/api/attendance/date', {
+      params: {
+        date: date.toISOString()
       }
+    });
+    
+    displayDateDetails(response.data, date);
+  } catch (error) {
+    console.error('날짜별 출석 데이터 조회 중 오류 발생:', error);
+    alert('데이터를 불러오는데 실패했습니다.');
+  }
+}
+
+function displayDateDetails(data, date) {
+  const modalTitle = document.getElementById("modalTitle");
+  const modalContent = document.getElementById("modalContent");
+  const studentDetailModal = document.getElementById("studentDetailModal");
+
+  modalTitle.textContent = `${date.toLocaleDateString()} 출석 상세 정보`;
+  
+  let content = `
+    <p>총 출석: ${data.totalAttendance}</p>
+    <p>정상 출석: ${data.onTimeAttendance}</p>
+    <p>지각: ${data.lateAttendance}</p>
+    <p>결석: ${data.absentCount}</p>
+    <h4 class="font-bold mt-4">학생별 상세 정보:</h4>
+    <ul>
+  `;
+
+  data.studentDetails.forEach(student => {
+    content += `
+      <li>
+        ${student.name} (${student.studentId}): 
+        ${student.status === 'present' ? '출석' : student.status === 'late' ? '지각' : '결석'}
+        ${student.status === 'late' ? ` (${student.lateMinutes}분 지각)` : ''}
+      </li>
+    `;
+  });
+
+  content += '</ul>';
+
+  modalContent.innerHTML = content;
+  studentDetailModal.classList.remove("hidden");
+}
 
       function getAttendanceCount(data, date, status) {
         const targetDate = date.toISOString().split("T")[0];
