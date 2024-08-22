@@ -83,12 +83,19 @@
               </select>
             </div>
           </div>
-          <div class="flex items-end">
+          <div class="flex items-end space-x-4">
             <button
               id="fetchStats"
               class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
             >
               통계 조회
+            </button>
+            <button
+              id="downloadExcel"
+              class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
+              disabled
+            >
+              엑셀 다운로드
             </button>
           </div>
         </div>
@@ -225,6 +232,8 @@
 
           console.log("Received response:", response.data);
 
+          downloadExcelButton.disabled = false;
+
           if (response.data.overallStats && response.data.attendanceData) {
             displayOverallStats(response.data.overallStats);
             displayStudentDetails(response.data.attendanceData);
@@ -343,6 +352,41 @@
         } else {
           console.error("Error setting up request:", error.message);
           alert(`요청 설정 중 오류가 발생했습니다: ${error.message}`);
+        }
+      }
+
+      const downloadExcelButton = document.getElementById("downloadExcel");
+
+      downloadExcelButton.addEventListener("click", downloadExcel);
+
+      async function downloadExcel() {
+        try {
+          const startDate = startDateInput.value;
+          const endDate = endDateInput.value;
+          const grade = gradeSelect.value;
+          const classNumber = classSelect.value;
+
+          if (!startDate || !endDate) {
+            alert("시작 날짜와 종료 날짜를 모두 선택해주세요.");
+            return;
+          }
+
+          const response = await axios.get("/api/download-excel", {
+            params: { startDate, endDate, grade, class: classNumber },
+            responseType: "blob", // 중요: 응답을 Blob으로 받습니다.
+          });
+
+          // Blob을 파일로 다운로드
+          const url = window.URL.createObjectURL(new Blob([response.data]));
+          const link = document.createElement("a");
+          link.href = url;
+          link.setAttribute("download", "attendance_data.xlsx");
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+        } catch (error) {
+          console.error("Error downloading Excel file:", error);
+          handleError(error);
         }
       }
     </script>
