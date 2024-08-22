@@ -99,7 +99,7 @@
     </div>
 
     <script>
-axios.defaults.baseURL = "https://port-0-attend-backend-lz9cd9taff85e9dc.sel4.cloudtype.app";
+  axios.defaults.baseURL = "https://port-0-attend-backend-lz9cd9taff85e9dc.sel4.cloudtype.app";
 
 function checkAuthAndRedirect() {
   const token = localStorage.getItem("token");
@@ -165,25 +165,25 @@ function displayOverallStats(stats) {
   }
   overallStatsDiv.innerHTML = `
     <div class="stat-item">
-      <span class="font-bold">총 학생 수:</span> ${stats.totalStudents || 'N/A'}
+      <span class="font-bold">총 학생 수:</span> ${stats.totalStudents || 0}
     </div>
     <div class="stat-item">
-      <span class="font-bold">총 출석 횟수:</span> ${stats.totalAttendance || 'N/A'}
+      <span class="font-bold">총 출석 횟수:</span> ${stats.totalAttendance || 0}
     </div>
     <div class="stat-item">
-      <span class="font-bold">총 지각 횟수:</span> ${stats.totalLateAttendance || 'N/A'}
+      <span class="font-bold">총 지각 횟수:</span> ${stats.totalLateAttendance || 0}
     </div>
     <div class="stat-item">
-      <span class="font-bold">총 지각 시간:</span> ${stats.totalLateMinutes || 'N/A'}분
+      <span class="font-bold">총 지각 시간:</span> ${stats.totalLateMinutes || 0}분
     </div>
     <div class="stat-item">
-      <span class="font-bold">평균 출석률:</span> ${stats.averageAttendanceRate || 'N/A'}%
+      <span class="font-bold">평균 출석률:</span> ${stats.averageAttendanceRate || '0.00'}%
     </div>
     <div class="stat-item">
-      <span class="font-bold">평균 지각률:</span> ${stats.averageLateRate || 'N/A'}%
+      <span class="font-bold">평균 지각률:</span> ${stats.averageLateRate || '0.00'}%
     </div>
     <div class="stat-item">
-      <span class="font-bold">평균 지각 시간:</span> ${stats.averageLateMinutes || 'N/A'}분
+      <span class="font-bold">평균 지각 시간:</span> ${stats.averageLateMinutes || '0.00'}분
     </div>
   `;
 }
@@ -197,14 +197,14 @@ function displayStudentDetails(students) {
   students.forEach(student => {
     const row = document.createElement("tr");
     row.innerHTML = `
-      <td class="px-6 py-4 whitespace-nowrap">${student.studentId || 'N/A'}</td>
-      <td class="px-6 py-4 whitespace-nowrap">${student.name || 'N/A'}</td>
-      <td class="px-6 py-4 whitespace-nowrap">${student.grade || 'N/A'}</td>
-      <td class="px-6 py-4 whitespace-nowrap">${student.class || 'N/A'}</td>
-      <td class="px-6 py-4 whitespace-nowrap">${student.number || 'N/A'}</td>
-      <td class="px-6 py-4 whitespace-nowrap">${student.totalAttendance || 'N/A'}</td>
-      <td class="px-6 py-4 whitespace-nowrap">${student.lateAttendance || 'N/A'}</td>
-      <td class="px-6 py-4 whitespace-nowrap">${student.totalLateMinutes || 'N/A'}분</td>
+      <td class="px-6 py-4 whitespace-nowrap">${student.studentId || '-'}</td>
+      <td class="px-6 py-4 whitespace-nowrap">${student.name || '-'}</td>
+      <td class="px-6 py-4 whitespace-nowrap">${student.grade || '-'}</td>
+      <td class="px-6 py-4 whitespace-nowrap">${student.class || '-'}</td>
+      <td class="px-6 py-4 whitespace-nowrap">${student.number || '-'}</td>
+      <td class="px-6 py-4 whitespace-nowrap">${student.totalAttendance || 0}</td>
+      <td class="px-6 py-4 whitespace-nowrap">${student.totalLateAttendance || 0}</td>
+      <td class="px-6 py-4 whitespace-nowrap">${student.totalLateMinutes || 0}분</td>
       <td class="px-6 py-4 whitespace-nowrap">${formatLastAttendance(student)}</td>
     `;
     studentStatsBody.appendChild(row);
@@ -214,7 +214,7 @@ function displayStudentDetails(students) {
 function formatLastAttendance(student) {
   if (student.lastAttendanceTime) {
     const date = new Date(student.lastAttendanceTime);
-    return `${date.toLocaleDateString()} ${date.toLocaleTimeString()} (${student.lastAttendanceStatus || 'N/A'})`;
+    return `${date.toLocaleDateString()} ${date.toLocaleTimeString()} (${student.lastAttendanceStatus || '-'})`;
   }
   return '미출석';
 }
