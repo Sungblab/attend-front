@@ -168,13 +168,13 @@ function displayOverallStats(stats) {
       <span class="font-bold">총 학생 수:</span> ${stats.totalStudents || 0}
     </div>
     <div class="stat-item">
-      <span class="font-bold">총 출석 횟수:</span> ${stats.totalAttendance || 0}
+      <span class="font-bold">총 출석 횟수:</span> ${stats.periodAttendance || 0}
     </div>
     <div class="stat-item">
-      <span class="font-bold">총 지각 횟수:</span> ${stats.totalLateAttendance || 0}
+      <span class="font-bold">총 지각 횟수:</span> ${stats.periodLateAttendance || 0}
     </div>
     <div class="stat-item">
-      <span class="font-bold">총 지각 시간:</span> ${stats.totalLateMinutes || 0}분
+      <span class="font-bold">총 지각 시간:</span> ${stats.periodLateMinutes || 0}분
     </div>
     <div class="stat-item">
       <span class="font-bold">평균 출석률:</span> ${stats.averageAttendanceRate || '0.00'}%
@@ -202,9 +202,9 @@ function displayStudentDetails(students) {
       <td class="px-6 py-4 whitespace-nowrap">${student.grade || '-'}</td>
       <td class="px-6 py-4 whitespace-nowrap">${student.class || '-'}</td>
       <td class="px-6 py-4 whitespace-nowrap">${student.number || '-'}</td>
-      <td class="px-6 py-4 whitespace-nowrap">${student.totalAttendance || 0}</td>
-      <td class="px-6 py-4 whitespace-nowrap">${student.totalLateAttendance || 0}</td>
-      <td class="px-6 py-4 whitespace-nowrap">${student.totalLateMinutes || 0}분</td>
+      <td class="px-6 py-4 whitespace-nowrap">${student.periodAttendance || 0}</td>
+      <td class="px-6 py-4 whitespace-nowrap">${student.periodLateAttendance || 0}</td>
+      <td class="px-6 py-4 whitespace-nowrap">${student.periodLateMinutes || 0}분</td>
       <td class="px-6 py-4 whitespace-nowrap">${formatLastAttendance(student)}</td>
     `;
     studentStatsBody.appendChild(row);
