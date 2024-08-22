@@ -204,8 +204,10 @@
       const studentStatsBody = document.getElementById("studentStatsBody");
       const gradeSelect = document.getElementById("gradeSelect");
       const classSelect = document.getElementById("classSelect");
+      const downloadExcelButton = document.getElementById("downloadExcel");
 
       fetchStatsButton.addEventListener("click", fetchAttendanceStats);
+      downloadExcelButton.addEventListener("click", downloadExcel);
 
       async function fetchAttendanceStats() {
         try {
@@ -354,10 +356,6 @@
           alert(`요청 설정 중 오류가 발생했습니다: ${error.message}`);
         }
       }
-
-      const downloadExcelButton = document.getElementById("downloadExcel");
-
-      downloadExcelButton.addEventListener("click", downloadExcel);
 
       async function downloadExcel() {
         try {
