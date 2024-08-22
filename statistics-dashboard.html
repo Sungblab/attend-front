@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>완도고 출결관리 시스템</title>
+    <title>출석 통계 대시보드 - 완도고 출결관리 시스템</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
   </head>
@@ -19,17 +19,68 @@
 
       <main class="flex-grow container mx-auto px-4 py-8">
         <div class="bg-white shadow-md rounded-lg p-6 mb-6">
-          <h2 class="text-xl font-semibold mb-4">날짜 선택</h2>
+          <h2 class="text-xl font-semibold mb-4">기간 및 학년/반 선택</h2>
           <div class="flex space-x-4 mb-4">
             <div>
-              <label for="date" class="block text-sm font-medium text-gray-700"
-                >날짜</label
+              <label
+                for="startDate"
+                class="block text-sm font-medium text-gray-700"
+                >시작 날짜</label
               >
               <input
                 type="date"
-                id="date"
+                id="startDate"
                 class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary"
               />
+            </div>
+            <div>
+              <label
+                for="endDate"
+                class="block text-sm font-medium text-gray-700"
+                >종료 날짜</label
+              >
+              <input
+                type="date"
+                id="endDate"
+                class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary"
+              />
+            </div>
+          </div>
+          <div class="flex space-x-4 mb-4">
+            <div>
+              <label
+                for="gradeSelect"
+                class="block text-sm font-medium text-gray-700"
+                >학년</label
+              >
+              <select
+                id="gradeSelect"
+                class="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary"
+              >
+                <option value="">전체</option>
+                <option value="1">1학년</option>
+                <option value="2">2학년</option>
+                <option value="3">3학년</option>
+              </select>
+            </div>
+            <div>
+              <label
+                for="classSelect"
+                class="block text-sm font-medium text-gray-700"
+                >반</label
+              >
+              <select
+                id="classSelect"
+                class="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary"
+              >
+                <option value="">전체</option>
+                <option value="1">1반</option>
+                <option value="2">2반</option>
+                <option value="3">3반</option>
+                <option value="4">4반</option>
+                <option value="5">5반</option>
+                <option value="6">6반</option>
+              </select>
             </div>
           </div>
           <div class="flex items-end">
@@ -83,17 +134,22 @@
                   <th
                     class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
                   >
-                    출석 상태
+                    출석 횟수
                   </th>
                   <th
                     class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
                   >
-                    지각 시간(분)
+                    지각 횟수
                   </th>
                   <th
                     class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
                   >
-                    출석 시간
+                    총 지각 시간
+                  </th>
+                  <th
+                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  >
+                    최근 출석 시간
                   </th>
                 </tr>
               </thead>
@@ -134,33 +190,44 @@
         throw new Error("Authentication required");
       }
 
-      const dateInput = document.getElementById("date");
+      const startDateInput = document.getElementById("startDate");
+      const endDateInput = document.getElementById("endDate");
       const fetchStatsButton = document.getElementById("fetchStats");
       const overallStatsDiv = document.getElementById("overallStats");
       const studentStatsBody = document.getElementById("studentStatsBody");
+      const gradeSelect = document.getElementById("gradeSelect");
+      const classSelect = document.getElementById("classSelect");
 
       fetchStatsButton.addEventListener("click", fetchAttendanceStats);
 
       async function fetchAttendanceStats() {
         try {
-          const date = dateInput.value;
+          const startDate = startDateInput.value;
+          const endDate = endDateInput.value;
+          const grade = gradeSelect.value;
+          const classNumber = classSelect.value;
 
-          if (!date) {
-            alert("날짜를 선택해주세요.");
+          if (!startDate || !endDate) {
+            alert("시작 날짜와 종료 날짜를 모두 선택해주세요.");
             return;
           }
 
-          console.log("Sending request with date:", date);
+          console.log("Sending request with params:", {
+            startDate,
+            endDate,
+            grade,
+            class: classNumber,
+          });
 
-          const response = await axios.get("/api/attendance", {
-            params: { date },
+          const response = await axios.get("/api/dashboard", {
+            params: { startDate, endDate, grade, class: classNumber },
           });
 
           console.log("Received response:", response.data);
 
-          if (response.data) {
-            displayOverallStats(response.data);
-            displayStudentDetails(response.data.studentDetails);
+          if (response.data.overallStats && response.data.attendanceData) {
+            displayOverallStats(response.data.overallStats);
+            displayStudentDetails(response.data.attendanceData);
           } else {
             console.error("Unexpected response structure:", response.data);
             alert("서버에서 예상치 못한 응답 구조를 받았습니다.");
@@ -171,69 +238,87 @@
         }
       }
 
-      function displayOverallStats(data) {
+      function displayOverallStats(stats) {
+        if (!stats) {
+          console.error("No overall stats provided");
+          return;
+        }
         overallStatsDiv.innerHTML = `
     <div class="stat-item">
-      <span class="font-bold">날짜:</span> ${new Date(
-        data.date
-      ).toLocaleDateString()}
+      <span class="font-bold">총 학생 수:</span> ${stats.totalStudents || 0}
     </div>
     <div class="stat-item">
-      <span class="font-bold">총 출석 수:</span> ${data.totalAttendance}
+      <span class="font-bold">총 출석 횟수:</span> ${
+        stats.periodAttendance || 0
+      }
     </div>
     <div class="stat-item">
-      <span class="font-bold">정상 출석 수:</span> ${data.onTimeAttendance}
+      <span class="font-bold">총 지각 횟수:</span> ${
+        stats.periodLateAttendance || 0
+      }
     </div>
     <div class="stat-item">
-      <span class="font-bold">지각 수:</span> ${data.lateAttendance}
+      <span class="font-bold">총 지각 시간:</span> ${
+        stats.periodLateMinutes || 0
+      }분
     </div>
     <div class="stat-item">
-      <span class="font-bold">결석 수:</span> ${data.absentCount}
+      <span class="font-bold">평균 출석률:</span> ${
+        stats.averageAttendanceRate || "0.00"
+      }%
+    </div>
+    <div class="stat-item">
+      <span class="font-bold">평균 지각률:</span> ${
+        stats.averageLateRate || "0.00"
+      }%
+    </div>
+    <div class="stat-item">
+      <span class="font-bold">평균 지각 시간:</span> ${
+        stats.averageLateMinutes || "0.00"
+      }분
     </div>
   `;
       }
 
       function displayStudentDetails(students) {
+        if (!Array.isArray(students)) {
+          console.error("Students data is not an array:", students);
+          return;
+        }
         studentStatsBody.innerHTML = "";
         students.forEach((student) => {
           const row = document.createElement("tr");
           row.innerHTML = `
-      <td class="px-6 py-4 whitespace-nowrap">${student.studentId}</td>
-      <td class="px-6 py-4 whitespace-nowrap">${student.name}</td>
-      <td class="px-6 py-4 whitespace-nowrap">${student.grade}</td>
-      <td class="px-6 py-4 whitespace-nowrap">${student.class}</td>
-      <td class="px-6 py-4 whitespace-nowrap">${student.number}</td>
-      <td class="px-6 py-4 whitespace-nowrap">${getStatusText(
-        student.status
-      )}</td>
-      <td class="px-6 py-4 whitespace-nowrap">${student.lateMinutes || "-"}</td>
-      <td class="px-6 py-4 whitespace-nowrap">${formatAttendanceTime(
-        student.timestamp
+      <td class="px-6 py-4 whitespace-nowrap">${student.studentId || "-"}</td>
+      <td class="px-6 py-4 whitespace-nowrap">${student.name || "-"}</td>
+      <td class="px-6 py-4 whitespace-nowrap">${student.grade || "-"}</td>
+      <td class="px-6 py-4 whitespace-nowrap">${student.class || "-"}</td>
+      <td class="px-6 py-4 whitespace-nowrap">${student.number || "-"}</td>
+      <td class="px-6 py-4 whitespace-nowrap">${
+        student.periodAttendance || 0
+      }</td>
+      <td class="px-6 py-4 whitespace-nowrap">${
+        student.periodLateAttendance || 0
+      }</td>
+      <td class="px-6 py-4 whitespace-nowrap">${
+        student.periodLateMinutes || 0
+      }분</td>
+      <td class="px-6 py-4 whitespace-nowrap">${formatLastAttendance(
+        student
       )}</td>
     `;
           studentStatsBody.appendChild(row);
         });
       }
 
-      function getStatusText(status) {
-        switch (status) {
-          case "present":
-            return "출석";
-          case "late":
-            return "지각";
-          case "absent":
-            return "결석";
-          default:
-            return "-";
+      function formatLastAttendance(student) {
+        if (student.lastAttendanceTime) {
+          const date = new Date(student.lastAttendanceTime);
+          return `${date.toLocaleDateString()} ${date.toLocaleTimeString()} (${
+            student.lastAttendanceStatus || "-"
+          })`;
         }
-      }
-
-      function formatAttendanceTime(timestamp) {
-        if (timestamp) {
-          const date = new Date(timestamp);
-          return date.toLocaleTimeString();
-        }
-        return "-";
+        return "미출석";
       }
 
       function handleError(error) {
