@@ -133,57 +133,55 @@
       }
 
       async function sendAttendance(encryptedData) {
-  try {
-    const token = localStorage.getItem("token");
-    const response = await fetch(
-      "https://port-0-attend-backend-lz9cd9taff85e9dc.sel4.cloudtype.app/api/attendance",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ encryptedData }),
+        try {
+          const token = localStorage.getItem("token");
+          const response = await fetch(
+            "https://port-0-attend-backend-lz9cd9taff85e9dc.sel4.cloudtype.app/api/attendance",
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
+              },
+              body: JSON.stringify({ encryptedData }),
+            }
+          );
+
+          const data = await response.json();
+
+          if (!response.ok) {
+            throw new Error(data.message || "출석 처리에 실패했습니다.");
+          }
+
+          console.log("출석 처리 성공:", data);
+          scanResult.innerText = data.message;
+          scanResult.classList.remove("text-red-600", "text-blue-600", "text-yellow-600", "text-green-600");
+
+          if (data.message.includes("결석 처리되었습니다")) {
+            scanResult.classList.add("text-red-600");
+          } else if (data.message.includes("지각")) {
+            scanResult.classList.add("text-yellow-600");
+          } else {
+            scanResult.classList.add("text-green-600");
+          }
+
+          const logEntry = document.createElement("div");
+          logEntry.textContent = `${new Date().toLocaleTimeString()} - ${data.message}`;
+          logEntry.classList.add(
+            data.message.includes("결석 처리되었습니다")
+              ? "text-red-600"
+              : data.message.includes("지각")
+              ? "text-yellow-600"
+              : "text-green-600"
+          );
+          attendanceLog.prepend(logEntry);
+        } catch (error) {
+          console.error("출석 처리 오류:", error);
+          scanResult.innerText = `오류: ${error.message}`;
+          scanResult.classList.remove("text-green-600", "text-blue-600", "text-yellow-600");
+          scanResult.classList.add("text-red-600");
+        }
       }
-    );
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      throw new Error(data.message || "출석 처리에 실패했습니다.");
-    }
-
-    console.log("출석 처리 성공:", data);
-    scanResult.innerText = data.message;
-    scanResult.classList.remove("text-red-600", "text-blue-600", "text-yellow-600", "text-green-600");
-
-    if (data.isAbsent) {
-      scanResult.classList.add("text-red-600");
-      scanResult.innerText = `${data.message} (결석 처리)`;
-    } else if (data.isLate) {
-      scanResult.classList.add("text-yellow-600");
-      scanResult.innerText = `${data.message} (${data.lateMinutes}분 지각)`;
-    } else {
-      scanResult.classList.add("text-green-600");
-    }
-
-    const logEntry = document.createElement("div");
-    logEntry.textContent = `${new Date().toLocaleTimeString()} - ${scanResult.innerText}`;
-    logEntry.classList.add(
-      data.isAbsent
-        ? "text-red-600"
-        : data.isLate
-        ? "text-yellow-600"
-        : "text-green-600"
-    );
-    attendanceLog.prepend(logEntry);
-  } catch (error) {
-    console.error("출석 처리 오류:", error);
-    scanResult.innerText = `오류: ${error.message}`;
-    scanResult.classList.remove("text-green-600", "text-blue-600", "text-yellow-600");
-    scanResult.classList.add("text-red-600");
-  }
-}
 
       // 초기 상태 설정
       stopButton.disabled = true;

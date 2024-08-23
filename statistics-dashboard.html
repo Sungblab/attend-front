@@ -3,11 +3,9 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>완도고 출결관리 시스템</title>
+    <title>출석 통계 대시보드 - 완도고 출결관리 시스템</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment-timezone/0.5.33/moment-timezone-with-data.min.js"></script>
   </head>
   <body class="bg-gray-100">
     <div class="min-h-screen flex flex-col">
@@ -231,14 +229,8 @@
           });
 
           const response = await axios.get("/api/dashboard", {
-      params: { 
-        startDate,
-        endDate,
-        grade, 
-        class: classNumber,
-        includeToday: moment().tz('Asia/Seoul').isSame(endDate, 'day') // 당일 데이터 포함 여부
-      },
-    });
+            params: { startDate, endDate, grade, class: classNumber },
+          });
 
           console.log("Received response:", response.data);
 
@@ -256,7 +248,6 @@
           handleError(error);
         }
       }
-
 
       function displayOverallStats(stats) {
         if (!stats) {
@@ -332,19 +323,14 @@
       }
 
       function formatLastAttendance(student) {
-  if (student.lastAttendanceTime) {
-    const date = moment(student.lastAttendanceTime).tz('Asia/Seoul');
-    let status = student.lastAttendanceStatus;
-    
-    // 8시 3분(ATTENDANCE_HOUR:ATTENDANCE_MINUTE) 이후의 출석을 지각으로 표시
-    if (date.hour() > ATTENDANCE_HOUR || (date.hour() === ATTENDANCE_HOUR && date.minute() > ATTENDANCE_MINUTE)) {
-      status = "지각";
-    }
-    
-    return `${date.format('YYYY-MM-DD HH:mm:ss')} (${status})`;
-  }
-  return "미출석";
-}
+        if (student.lastAttendanceTime) {
+          const date = new Date(student.lastAttendanceTime);
+          return `${date.toLocaleDateString()} ${date.toLocaleTimeString()} (${
+            student.lastAttendanceStatus || "-"
+          })`;
+        }
+        return "미출석";
+      }
 
       function handleError(error) {
         if (error.response) {
