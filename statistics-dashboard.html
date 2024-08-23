@@ -336,9 +336,9 @@
     const date = moment(student.lastAttendanceTime).tz('Asia/Seoul');
     let status = student.lastAttendanceStatus;
     
-    // 9시 이후의 출석도 표시하되, 상태를 명확히 함
-    if (date.hour() >= 9) {
-      status += " (9시 이후)";
+    // 8시 3분(ATTENDANCE_HOUR:ATTENDANCE_MINUTE) 이후의 출석을 지각으로 표시
+    if (date.hour() > ATTENDANCE_HOUR || (date.hour() === ATTENDANCE_HOUR && date.minute() > ATTENDANCE_MINUTE)) {
+      status = "지각";
     }
     
     return `${date.format('YYYY-MM-DD HH:mm:ss')} (${status})`;
