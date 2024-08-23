@@ -231,13 +231,14 @@
           });
 
           const response = await axios.get("/api/dashboard", {
-            params: { 
-              startDate: moment(startDate).format('YYYY-MM-DD'),
-              endDate: moment(endDate).format('YYYY-MM-DD'),
-              grade, 
-              class: classNumber 
-            },
-          });
+      params: { 
+        startDate,
+        endDate,
+        grade, 
+        class: classNumber,
+        includeToday: moment().tz('Asia/Seoul').isSame(endDate, 'day') // 당일 데이터 포함 여부
+      },
+    });
 
           console.log("Received response:", response.data);
 
@@ -331,14 +332,19 @@
       }
 
       function formatLastAttendance(student) {
-        if (student.lastAttendanceTime) {
-          const date = moment(student.lastAttendanceTime).tz('Asia/Seoul');
-          return `${date.format('YYYY-MM-DD HH:mm:ss')} (${
-            student.lastAttendanceStatus || "-"
-          })`;
-        }
-        return "미출석";
-      }
+  if (student.lastAttendanceTime) {
+    const date = moment(student.lastAttendanceTime).tz('Asia/Seoul');
+    let status = student.lastAttendanceStatus;
+    
+    // 9시 이후의 출석도 표시하되, 상태를 명확히 함
+    if (date.hour() >= 9) {
+      status += " (9시 이후)";
+    }
+    
+    return `${date.format('YYYY-MM-DD HH:mm:ss')} (${status})`;
+  }
+  return "미출석";
+}
 
       function handleError(error) {
         if (error.response) {
