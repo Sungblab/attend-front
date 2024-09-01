@@ -151,12 +151,22 @@
                   <th
                     class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
                   >
+                    결석 횟수
+                  </th>
+                  <th
+                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  >
                     총 지각 시간
                   </th>
                   <th
                     class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
                   >
-                    최근 출석 시간
+                    출석률
+                  </th>
+                  <th
+                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  >
+                    지각률
                   </th>
                 </tr>
               </thead>
@@ -236,9 +246,9 @@
 
           downloadExcelButton.disabled = false;
 
-          if (response.data.overallStats && response.data.attendanceData) {
+          if (response.data.overallStats && response.data.studentStats) {
             displayOverallStats(response.data.overallStats);
-            displayStudentDetails(response.data.attendanceData);
+            displayStudentDetails(response.data.studentStats);
           } else {
             console.error("Unexpected response structure:", response.data);
             alert("서버에서 예상치 못한 응답 구조를 받았습니다.");
@@ -259,18 +269,20 @@
       <span class="font-bold">총 학생 수:</span> ${stats.totalStudents || 0}
     </div>
     <div class="stat-item">
-      <span class="font-bold">총 출석 횟수:</span> ${
-        stats.periodAttendance || 0
-      }
+      <span class="font-bold">총 일수:</span> ${stats.totalDays || 0}
     </div>
     <div class="stat-item">
-      <span class="font-bold">총 지각 횟수:</span> ${
-        stats.periodLateAttendance || 0
-      }
+      <span class="font-bold">총 출석 횟수:</span> ${stats.totalPresent || 0}
+    </div>
+    <div class="stat-item">
+      <span class="font-bold">총 지각 횟수:</span> ${stats.totalLate || 0}
+    </div>
+    <div class="stat-item">
+      <span class="font-bold">총 결석 횟수:</span> ${stats.totalAbsent || 0}
     </div>
     <div class="stat-item">
       <span class="font-bold">총 지각 시간:</span> ${
-        stats.periodLateMinutes || 0
+        stats.totalLateMinutes || 0
       }분
     </div>
     <div class="stat-item">
@@ -282,11 +294,6 @@
       <span class="font-bold">평균 지각률:</span> ${
         stats.averageLateRate || "0.00"
       }%
-    </div>
-    <div class="stat-item">
-      <span class="font-bold">평균 지각 시간:</span> ${
-        stats.averageLateMinutes || "0.00"
-      }분
     </div>
   `;
       }
@@ -305,31 +312,21 @@
       <td class="px-6 py-4 whitespace-nowrap">${student.grade || "-"}</td>
       <td class="px-6 py-4 whitespace-nowrap">${student.class || "-"}</td>
       <td class="px-6 py-4 whitespace-nowrap">${student.number || "-"}</td>
+      <td class="px-6 py-4 whitespace-nowrap">${student.presentCount || 0}</td>
+      <td class="px-6 py-4 whitespace-nowrap">${student.lateCount || 0}</td>
+      <td class="px-6 py-4 whitespace-nowrap">${student.absentCount || 0}</td>
       <td class="px-6 py-4 whitespace-nowrap">${
-        student.periodAttendance || 0
-      }</td>
-      <td class="px-6 py-4 whitespace-nowrap">${
-        student.periodLateAttendance || 0
-      }</td>
-      <td class="px-6 py-4 whitespace-nowrap">${
-        student.periodLateMinutes || 0
+        student.totalLateMinutes || 0
       }분</td>
-      <td class="px-6 py-4 whitespace-nowrap">${formatLastAttendance(
-        student
-      )}</td>
+      <td class="px-6 py-4 whitespace-nowrap">${
+        student.attendanceRate || "0.00"
+      }%</td>
+      <td class="px-6 py-4 whitespace-nowrap">${
+        student.lateRate || "0.00"
+      }%</td>
     `;
           studentStatsBody.appendChild(row);
         });
-      }
-
-      function formatLastAttendance(student) {
-        if (student.lastAttendanceTime) {
-          const date = new Date(student.lastAttendanceTime);
-          return `${date.toLocaleDateString()} ${date.toLocaleTimeString()} (${
-            student.lastAttendanceStatus || "-"
-          })`;
-        }
-        return "미출석";
       }
 
       function handleError(error) {
