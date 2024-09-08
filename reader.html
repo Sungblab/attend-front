@@ -241,6 +241,8 @@
             scanResult.classList.add("text-red-600");
           } else if (data.message.includes("지각")) {
             scanResult.classList.add("text-yellow-600");
+          } else if (data.message.includes("이미 오늘 출석이 기록되었습니다")) {
+            scanResult.classList.add("text-blue-600");
           } else {
             scanResult.classList.add("text-green-600");
           }
@@ -254,6 +256,8 @@
               ? "text-red-600"
               : data.message.includes("지각")
               ? "text-yellow-600"
+              : data.message.includes("이미 오늘 출석이 기록되었습니다")
+              ? "text-blue-600"
               : "text-green-600"
           );
           attendanceLog.prepend(logEntry);
@@ -266,6 +270,13 @@
             "text-yellow-600"
           );
           scanResult.classList.add("text-red-600");
+
+          const logEntry = document.createElement("div");
+          logEntry.textContent = `${new Date().toLocaleTimeString()} - 오류: ${
+            error.message
+          }`;
+          logEntry.classList.add("text-red-600");
+          attendanceLog.prepend(logEntry);
         }
       }
 
