@@ -315,7 +315,7 @@
         if (navigator.userAgent.match(/Android/i)) {
           if (navigator.userAgent.match(/SamsungBrowser/i)) {
             instructions =
-              '삼성 인터넷 브라우저: 메뉴 버튼을 누른 후 "홈 화면에 추가" 옵션을 선택하세요.';
+              '삼성 인터넷 브라우저: 메뉴 버튼을 누른 후 현재 페이지에 추가에 들어가서 "홈 화면에 추가" 옵션을 선택하세요.';
           } else if (navigator.userAgent.match(/Chrome/i)) {
             instructions =
               '크롬 브라우저: 메뉴 버튼을 누른 후 "홈 화면에 추가" 옵션을 선택하세요.';
@@ -340,7 +340,7 @@
           if (!deferredPrompt) {
             showInstallInstructions();
           }
-        }, 30000); // 30초 후 표시
+        }, 5000); // 30초 후 표시
       });
     </script>
   </body>
