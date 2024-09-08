@@ -283,45 +283,65 @@
       window.addEventListener("beforeinstallprompt", (e) => {
         e.preventDefault();
         deferredPrompt = e;
-        installPrompt.classList.remove("hidden");
+        showInstallPrompt();
       });
 
-      installButton.addEventListener("click", (e) => {
+      function showInstallPrompt() {
+        installPrompt.classList.remove("hidden");
+        installButton.textContent = "앱 설치하기";
+        installButton.addEventListener("click", installPWA);
+      }
+
+      function installPWA() {
         installPrompt.classList.add("hidden");
-        deferredPrompt.prompt();
-        deferredPrompt.userChoice.then((choiceResult) => {
-          if (choiceResult.outcome === "accepted") {
-            console.log("User accepted the install prompt");
-          } else {
-            console.log("User dismissed the install prompt");
+        if (deferredPrompt) {
+          deferredPrompt.prompt();
+          deferredPrompt.userChoice.then((choiceResult) => {
+            if (choiceResult.outcome === "accepted") {
+              console.log("사용자가 앱 설치를 수락했습니다.");
+            } else {
+              console.log("사용자가 앱 설치를 거부했습니다.");
+              showInstallInstructions();
+            }
+            deferredPrompt = null;
+          });
+        } else {
+          showInstallInstructions();
+        }
+      }
+
+      function showInstallInstructions() {
+        let instructions = "";
+        if (navigator.userAgent.match(/Android/i)) {
+          if (navigator.userAgent.match(/SamsungBrowser/i)) {
+            instructions =
+              '삼성 인터넷 브라우저: 메뉴 버튼을 누른 후 "홈 화면에 추가" 옵션을 선택하세요.';
+          } else if (navigator.userAgent.match(/Chrome/i)) {
+            instructions =
+              '크롬 브라우저: 메뉴 버튼을 누른 후 "홈 화면에 추가" 옵션을 선택하세요.';
           }
-          deferredPrompt = null;
-        });
-      });
+        } else if (navigator.userAgent.match(/(iPhone|iPod|iPad)/i)) {
+          instructions =
+            'Safari 브라우저: 공유 버튼을 누른 후 "홈 화면에 추가"를 선택하세요.';
+        }
 
-      // iOS용 설치 안내
-      if (
-        navigator.standalone === false &&
-        navigator.userAgent.match(/(iPad|iPhone|iPod)/g) &&
-        navigator.userAgent.match(/Safari/g)
-      ) {
-        installPrompt.classList.remove("hidden");
-        installButton.textContent = "iOS 설치 방법";
-        installButton.addEventListener("click", () => {
+        if (instructions) {
+          alert(instructions);
+        } else {
           alert(
-            'Safari 브라우저의 공유 버튼을 누른 후 "홈 화면에 추가"를 선택하세요.'
+            '브라우저의 설정에서 "홈 화면에 추가" 또는 "앱 설치" 옵션을 찾아 설치해주세요.'
           );
-        });
+        }
       }
 
-      // 삼성 인터넷 브라우저 감지 및 설치 안내
-      if (navigator.userAgent.match(/SamsungBrowser/i)) {
-        installPrompt.classList.remove("hidden");
-        installButton.textContent = "삼성 브라우저 설치 방법";
-        installButton.addEventListener("click", () => {
-          alert('브라우저 메뉴에서 "홈 화면에 추가" 옵션을 선택하세요.');
-        });
-      }
+      // 페이지 로드 후 일정 시간이 지나면 설치 프롬프트 표시
+      window.addEventListener("load", () => {
+        setTimeout(() => {
+          if (!deferredPrompt) {
+            showInstallInstructions();
+          }
+        }, 30000); // 30초 후 표시
+      });
     </script>
   </body>
 </html>
