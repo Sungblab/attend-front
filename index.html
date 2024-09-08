@@ -29,6 +29,28 @@
       href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css"
       rel="stylesheet"
     />
+    <link
+      rel="apple-touch-icon"
+      sizes="180x180"
+      href="/favicon/apple-touch-icon.png"
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="32x32"
+      href="/favicon/favicon-32x32.png"
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="16x16"
+      href="/favicon/favicon-16x16.png"
+    />
+    <link rel="manifest" href="/favicon/site.webmanifest" />
+    <meta name="theme-color" content="#4F46E5" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+    <meta name="apple-mobile-web-app-title" content="디지털 출결관리" />
   </head>
   <body class="bg-gray-50 text-gray-900 font-sans flex flex-col min-h-screen">
     <header class="bg-white shadow-sm">
@@ -206,6 +228,48 @@
             showMessage("학번과 비밀번호를 입력해주세요.", true);
           }
         });
+
+      // 서비스 워커 등록
+      if ("serviceWorker" in navigator) {
+        window.addEventListener("load", () => {
+          navigator.serviceWorker
+            .register("/service-worker.js")
+            .then((registration) => {
+              console.log(
+                "Service Worker registered successfully:",
+                registration.scope
+              );
+            })
+            .catch((error) => {
+              console.log("Service Worker registration failed:", error);
+            });
+        });
+      }
+
+      // PWA 설치 프롬프트
+      let deferredPrompt;
+
+      window.addEventListener("beforeinstallprompt", (e) => {
+        e.preventDefault();
+        deferredPrompt = e;
+        // 여기에 설치 버튼을 표시하는 로직을 추가할 수 있습니다.
+      });
+
+      // iOS용 설치 안내
+      function isIOS() {
+        return /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+      }
+
+      if (isIOS()) {
+        const iosPrompt = document.createElement("div");
+        iosPrompt.innerHTML = `
+          <div class="bg-blue-100 border-l-4 border-blue-500 text-blue-700 p-4 mb-4" role="alert">
+            <p class="font-bold">iOS 사용자 안내</p>
+            <p>이 앱을 홈 화면에 추가하려면 Safari 브라우저의 공유 버튼을 탭한 후 "홈 화면에 추가"를 선택하세요.</p>
+          </div>
+        `;
+        document.body.insertBefore(iosPrompt, document.body.firstChild);
+      }
     </script>
   </body>
 </html>
