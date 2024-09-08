@@ -163,6 +163,24 @@
     </footer>
 
     <script>
+      // 서비스 워커 등록
+      if ("serviceWorker" in navigator) {
+        window.addEventListener("load", function () {
+          navigator.serviceWorker.register("/service-worker.js").then(
+            function (registration) {
+              console.log(
+                "ServiceWorker registration successful with scope: ",
+                registration.scope
+              );
+            },
+            function (err) {
+              console.log("ServiceWorker registration failed: ", err);
+            }
+          );
+        });
+      }
+
+      // 메시지 표시 함수
       function showMessage(message, isError = false) {
         const messageArea = document.getElementById("message-area");
         messageArea.textContent = message;
@@ -184,6 +202,19 @@
         );
       }
 
+      // 로그인 상태 확인
+      function checkLoginStatus() {
+        const token = localStorage.getItem("token");
+        if (token) {
+          // 토큰이 있으면 자동으로 hub.html로 리다이렉트
+          window.location.href = "hub.html";
+        }
+      }
+
+      // 페이지 로드 시 로그인 상태 확인
+      window.addEventListener("load", checkLoginStatus);
+
+      // 로그인 폼 제출 이벤트 리스너
       document
         .getElementById("loginForm")
         .addEventListener("submit", async function (e) {
@@ -229,47 +260,54 @@
           }
         });
 
-      // 서비스 워커 등록
-      if ("serviceWorker" in navigator) {
-        window.addEventListener("load", () => {
-          navigator.serviceWorker
-            .register("/service-worker.js")
-            .then((registration) => {
-              console.log(
-                "Service Worker registered successfully:",
-                registration.scope
-              );
-            })
-            .catch((error) => {
-              console.log("Service Worker registration failed:", error);
-            });
-        });
+      // Web Authentication API를 사용한 생체 인증
+      async function authenticateWithBiometrics() {
+        if (!window.PublicKeyCredential) {
+          console.log("Web Authentication API is not supported");
+          showMessage("이 브라우저는 생체 인증을 지원하지 않습니다.", true);
+          return;
+        }
+
+        try {
+          const credential = await navigator.credentials.create({
+            publicKey: {
+              challenge: new Uint8Array(32),
+              rp: {
+                name: "디지털 출결관리 시스템",
+              },
+              user: {
+                id: new Uint8Array(16),
+                name: document.getElementById("student-id").value,
+                displayName: "사용자",
+              },
+              pubKeyCredParams: [{ alg: -7, type: "public-key" }],
+              authenticatorSelection: {
+                authenticatorAttachment: "platform",
+                userVerification: "required",
+              },
+              timeout: 60000,
+            },
+          });
+
+          console.log("생체 인증 성공:", credential);
+          showMessage("생체 인증 성공! 서버 확인 중...");
+          // 여기서 서버로 인증 정보를 보내고 처리할 수 있습니다.
+          // 예: sendAuthenticationToServer(credential);
+        } catch (err) {
+          console.error("생체 인증 실패:", err);
+          showMessage("생체 인증에 실패했습니다. 다시 시도해주세요.", true);
+        }
       }
 
-      // PWA 설치 프롬프트
-      let deferredPrompt;
-
-      window.addEventListener("beforeinstallprompt", (e) => {
-        e.preventDefault();
-        deferredPrompt = e;
-        // 여기에 설치 버튼을 표시하는 로직을 추가할 수 있습니다.
-      });
-
-      // iOS용 설치 안내
-      function isIOS() {
-        return /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-      }
-
-      if (isIOS()) {
-        const iosPrompt = document.createElement("div");
-        iosPrompt.innerHTML = `
-          <div class="bg-blue-100 border-l-4 border-blue-500 text-blue-700 p-4 mb-4" role="alert">
-            <p class="font-bold">iOS 사용자 안내</p>
-            <p>이 앱을 홈 화면에 추가하려면 Safari 브라우저의 공유 버튼을 탭한 후 "홈 화면에 추가"를 선택하세요.</p>
-          </div>
-        `;
-        document.body.insertBefore(iosPrompt, document.body.firstChild);
-      }
+      // 생체 인증 버튼 추가
+      document.getElementById("loginForm").insertAdjacentHTML(
+        "beforeend",
+        `
+        <button type="button" onclick="authenticateWithBiometrics()" class="w-full bg-green-500 hover:bg-green-600 text-white font-semibold py-3 px-4 rounded-lg transition duration-300 mt-4">
+          생체 인증으로 로그인
+        </button>
+      `
+      );
     </script>
   </body>
 </html>
