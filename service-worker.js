@@ -35,7 +35,20 @@ self.addEventListener("fetch", (event) => {
       if (response) {
         return response;
       }
-      return fetch(event.request);
+      return fetch(event.request).then((response) => {
+        // 중요: 유효한 응답인지 확인
+        if (!response || response.status !== 200 || response.type !== "basic") {
+          return response;
+        }
+
+        // 응답을 복제하여 캐시에 저장
+        const responseToCache = response.clone();
+        caches.open(CACHE_NAME).then((cache) => {
+          cache.put(event.request, responseToCache);
+        });
+
+        return response;
+      });
     })
   );
 });
@@ -54,4 +67,19 @@ self.addEventListener("activate", (event) => {
       );
     })
   );
+});
+
+// 푸시 알림 이벤트 (옵션)
+self.addEventListener("push", function (event) {
+  if (event.data) {
+    const notificationData = event.data.json();
+    const options = {
+      body: notificationData.body,
+      icon: "/favicon/android-chrome-192x192.png",
+      badge: "/favicon/favicon-32x32.png",
+    };
+    event.waitUntil(
+      self.registration.showNotification(notificationData.title, options)
+    );
+  }
 });

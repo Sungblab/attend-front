@@ -276,17 +276,19 @@
           }
         });
 
-      // PWA 설치 관련 코드
+      // PWA 설치 관련 변수
       let deferredPrompt;
       const pwaInstallBanner = document.getElementById("pwa-install-banner");
       const pwaInstallButton = document.getElementById("pwa-install-button");
 
+      // PWA 설치 프롬프트 이벤트 처리
       window.addEventListener("beforeinstallprompt", (e) => {
         e.preventDefault();
         deferredPrompt = e;
-        pwaInstallBanner.classList.remove("hidden");
+        showInstallPrompt();
       });
 
+      // PWA 설치 버튼 클릭 이벤트
       pwaInstallButton.addEventListener("click", async () => {
         if (deferredPrompt) {
           deferredPrompt.prompt();
@@ -294,35 +296,68 @@
           console.log(`사용자 선택: ${outcome}`);
           deferredPrompt = null;
           pwaInstallBanner.classList.add("hidden");
+        } else {
+          showBrowserSpecificInstallInstructions();
         }
       });
 
-      // iOS용 설치 안내
-      if (navigator.standalone === false) {
-        // iOS에서 Safari 브라우저를 통해 접속한 경우
-        pwaInstallBanner.classList.remove("hidden");
-        pwaInstallButton.textContent = "iOS 설치 방법";
-        pwaInstallButton.addEventListener("click", () => {
+      // 브라우저별 설치 안내 함수
+      function showBrowserSpecificInstallInstructions() {
+        if (/SamsungBrowser/i.test(navigator.userAgent)) {
+          alert("브라우저 메뉴에서 '홈 화면에 추가' 옵션을 선택하세요.");
+        } else if (
+          /iPad|iPhone|iPod/.test(navigator.userAgent) &&
+          !window.MSStream
+        ) {
           alert(
-            'Safari 브라우저의 공유 버튼을 누른 후 "홈 화면에 추가"를 선택하세요.'
+            "Safari 브라우저의 공유 버튼을 누른 후 '홈 화면에 추가'를 선택하세요."
           );
-        });
+        } else {
+          alert(
+            "브라우저 설정에서 '홈 화면에 추가' 또는 '앱 설치' 옵션을 찾아 설치해주세요."
+          );
+        }
       }
 
-      // 앱이 이미 설치되었는지 확인
+      // 설치 프롬프트 표시 함수
+      function showInstallPrompt() {
+        pwaInstallBanner.classList.remove("hidden");
+        if (/SamsungBrowser/i.test(navigator.userAgent)) {
+          pwaInstallButton.textContent = "삼성 브라우저 설치 방법";
+        } else if (
+          /iPad|iPhone|iPod/.test(navigator.userAgent) &&
+          !window.MSStream
+        ) {
+          pwaInstallButton.textContent = "iOS 설치 방법";
+        } else {
+          pwaInstallButton.textContent = "앱 설치하기";
+        }
+      }
+
+      // 페이지 로드 시 설치 상태 확인
+      window.addEventListener("load", () => {
+        if (
+          !navigator.standalone &&
+          !window.matchMedia("(display-mode: standalone)").matches
+        ) {
+          showInstallPrompt();
+        }
+      });
+
+      // 앱 설치 완료 이벤트
       window.addEventListener("appinstalled", (evt) => {
         console.log("앱이 설치되었습니다.");
         pwaInstallBanner.classList.add("hidden");
       });
 
-      // 설치 가능 여부 확인 및 디버깅
+      // 설치 가능 여부 확인 및 디버깅 (선택적)
       if ("getInstalledRelatedApps" in navigator) {
         navigator.getInstalledRelatedApps().then((relatedApps) => {
           console.log("설치된 관련 앱:", relatedApps);
         });
       }
 
-      // PWA 상태 디버깅
+      // PWA 상태 디버깅 (선택적)
       if ("serviceWorker" in navigator) {
         navigator.serviceWorker.getRegistrations().then((registrations) => {
           console.log("등록된 서비스 워커:", registrations);
