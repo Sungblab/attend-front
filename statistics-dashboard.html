@@ -307,7 +307,7 @@
       <td class="px-6 py-4 whitespace-nowrap">${
         student.totalLateMinutes
       } 분</td>
-      <td class="px-6 py-4 whitespace-nowrap">${formatToKST(student.lastAttendance)}</td>
+      <td class="px-6 py-4 whitespace-nowrap">${student.lastAttendance}</td>
       <td class="px-6 py-4 whitespace-nowrap ${getStatusColor(
         student.todayStatus
       )}">${student.todayStatus}</td>
@@ -315,11 +315,6 @@
   `
           )
           .join("");
-      }
-
-      function formatToKST(dateString) {
-        if (dateString === "N/A") return dateString;
-        return moment(dateString).tz("Asia/Seoul").format("YYYY-MM-DD HH:mm:ss");
       }
 
       function getStatusColor(status) {
