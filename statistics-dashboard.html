@@ -3,59 +3,86 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>출석 통계 대시보드 - 완도고 출결관리 시스템</title>
+    <title>디지털 출결관리 시스템</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              primary: "#4F46E5",
+              secondary: "#3730A3",
+              accent: "#EEF2FF",
+            },
+            fontFamily: {
+              sans: ["Inter", "sans-serif"],
+            },
+          },
+        },
+      };
+    </script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css"
+      rel="stylesheet"
+    />
   </head>
-  <body class="bg-gray-100">
-    <div class="min-h-screen flex flex-col">
-      <header class="bg-white shadow-md py-4">
-        <div class="container mx-auto px-4">
-          <h1 class="text-2xl font-semibold text-primary">
-            출석 통계 대시보드
-          </h1>
-        </div>
-      </header>
+  <body class="bg-gray-50 text-gray-900 font-sans flex flex-col min-h-screen">
+    <header class="bg-white shadow-sm">
+      <nav
+        class="container mx-auto px-4 py-4 flex justify-between items-center"
+      >
+        <a href="#" class="text-2xl font-bold text-primary flex items-center">
+          <i class="ri-calendar-check-fill mr-2"></i>
+          디지털 출결관리
+        </a>
+      </nav>
+    </header>
 
-      <main class="flex-grow container mx-auto px-4 py-8">
-        <div class="bg-white shadow-md rounded-lg p-6 mb-6">
-          <h2 class="text-xl font-semibold mb-4">기간 및 학년/반 선택</h2>
-          <div class="flex space-x-4 mb-4">
+    <main class="flex-grow container mx-auto px-4 py-8">
+      <div class="bg-white shadow-xl rounded-lg overflow-hidden mb-8">
+        <div class="p-6">
+          <h2 class="text-2xl font-bold mb-6 text-gray-800">
+            기간 및 학년/반 선택
+          </h2>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
             <div>
               <label
                 for="startDate"
-                class="block text-sm font-medium text-gray-700"
+                class="block text-sm font-medium text-gray-700 mb-1"
                 >시작 날짜</label
               >
               <input
                 type="date"
                 id="startDate"
-                class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary"
+                class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition duration-200"
               />
             </div>
             <div>
               <label
                 for="endDate"
-                class="block text-sm font-medium text-gray-700"
+                class="block text-sm font-medium text-gray-700 mb-1"
                 >종료 날짜</label
               >
               <input
                 type="date"
                 id="endDate"
-                class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary"
+                class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition duration-200"
               />
             </div>
-          </div>
-          <div class="flex space-x-4 mb-4">
             <div>
               <label
                 for="gradeSelect"
-                class="block text-sm font-medium text-gray-700"
+                class="block text-sm font-medium text-gray-700 mb-1"
                 >학년</label
               >
               <select
                 id="gradeSelect"
-                class="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary"
+                class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition duration-200"
               >
                 <option value="">전체</option>
                 <option value="1">1학년</option>
@@ -66,12 +93,12 @@
             <div>
               <label
                 for="classSelect"
-                class="block text-sm font-medium text-gray-700"
+                class="block text-sm font-medium text-gray-700 mb-1"
                 >반</label
               >
               <select
                 id="classSelect"
-                class="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary"
+                class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition duration-200"
               >
                 <option value="">전체</option>
                 <option value="1">1반</option>
@@ -83,32 +110,32 @@
               </select>
             </div>
           </div>
-          <div class="flex items-end space-x-4">
+          <div class="flex justify-between items-center">
             <button
               id="fetchStats"
-              class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+              class="bg-primary hover:bg-secondary text-white font-semibold py-3 px-6 rounded-lg transition duration-300 flex items-center justify-center"
             >
+              <i class="ri-search-line mr-2"></i>
               통계 조회
-            </button>
-            <button
-              id="downloadExcel"
-              class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
-              disabled
-            >
-              엑셀 다운로드
             </button>
           </div>
         </div>
+      </div>
 
-        <div class="bg-white shadow-md rounded-lg p-6 mb-6">
-          <h2 class="text-xl font-semibold mb-4">전체 통계 요약</h2>
-          <div id="overallStats" class="grid grid-cols-2 gap-4">
+      <div class="bg-white shadow-xl rounded-lg overflow-hidden mb-8">
+        <div class="p-6">
+          <h2 class="text-2xl font-bold mb-6 text-gray-800">전체 통계 요약</h2>
+          <div id="overallStats" class="grid grid-cols-2 md:grid-cols-4 gap-4">
             <!-- 전체 통계가 여기에 동적으로 추가됩니다 -->
           </div>
         </div>
+      </div>
 
-        <div class="bg-white shadow-md rounded-lg p-6">
-          <h2 class="text-xl font-semibold mb-4">학생별 출석 정보</h2>
+      <div class="bg-white shadow-xl rounded-lg overflow-hidden">
+        <div class="p-6">
+          <h2 class="text-2xl font-bold mb-6 text-gray-800">
+            학생별 출석 정보
+          </h2>
           <div class="overflow-x-auto">
             <table class="min-w-full divide-y divide-gray-200">
               <thead class="bg-gray-50">
@@ -161,12 +188,12 @@
                   <th
                     class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
                   >
-                    출석률
+                    최근 출석 시간
                   </th>
                   <th
                     class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
                   >
-                    지각률
+                    오늘의 출석
                   </th>
                 </tr>
               </thead>
@@ -179,209 +206,122 @@
             </table>
           </div>
         </div>
-      </main>
+      </div>
+    </main>
 
-      <footer class="bg-white shadow-md py-4 mt-8">
-        <div class="container mx-auto px-4 text-center text-gray-600">
-          <p>&copy; 2024 완도고 출결관리 시스템. All rights reserved.</p>
+    <footer class="bg-gray-800 text-white py-8 mt-auto">
+      <div class="container mx-auto px-4">
+        <div class="flex flex-wrap justify-between">
+          <div class="w-full md:w-1/3 mb-6 md:mb-0">
+            <h3 class="text-xl font-semibold mb-4">디지털 출결관리 시스템</h3>
+            <p class="text-gray-400">
+              편리하고 정확한 출결 관리를 위한 최선의 선택
+            </p>
+          </div>
+          <div class="w-full md:w-1/3">
+            <h4 class="text-lg font-semibold mb-4">연락처</h4>
+            <p class="text-gray-400 mb-2">이메일: ksb19558@naver.com</p>
+          </div>
         </div>
-      </footer>
-    </div>
+        <div
+          class="border-t border-gray-700 mt-8 pt-6 text-center text-gray-400"
+        >
+          <p>&copy; 2024 디지털 출결관리 시스템. All rights reserved.</p>
+        </div>
+      </div>
+    </footer>
 
     <script>
       axios.defaults.baseURL =
-        "https://port-0-attend-backend-lz9cd9taff85e9dc.sel4.cloudtype.app";
+        "https://port-0-attend-backend-m0tl39wtc3a73922.sel4.cloudtype.app";
 
-      function checkAuthAndRedirect() {
-        const token = localStorage.getItem("token");
-        if (!token) {
-          window.location.href =
-            "index.html?error=" + encodeURIComponent("로그인이 필요합니다.");
-          return false;
-        }
-        axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
-        return true;
-      }
-
-      if (!checkAuthAndRedirect()) {
-        throw new Error("Authentication required");
-      }
-
-      const startDateInput = document.getElementById("startDate");
-      const endDateInput = document.getElementById("endDate");
-      const fetchStatsButton = document.getElementById("fetchStats");
-      const overallStatsDiv = document.getElementById("overallStats");
-      const studentStatsBody = document.getElementById("studentStatsBody");
-      const gradeSelect = document.getElementById("gradeSelect");
-      const classSelect = document.getElementById("classSelect");
-      const downloadExcelButton = document.getElementById("downloadExcel");
-
-      fetchStatsButton.addEventListener("click", fetchAttendanceStats);
-      downloadExcelButton.addEventListener("click", downloadExcel);
+      document.addEventListener("DOMContentLoaded", function () {
+        const fetchStatsButton = document.getElementById("fetchStats");
+        fetchStatsButton.addEventListener("click", fetchAttendanceStats);
+      });
 
       async function fetchAttendanceStats() {
         try {
-          const startDate = startDateInput.value;
-          const endDate = endDateInput.value;
-          const grade = gradeSelect.value;
-          const classNumber = classSelect.value;
+          const startDate = document.getElementById("startDate").value;
+          const endDate = document.getElementById("endDate").value;
+          const grade = document.getElementById("gradeSelect").value;
+          const classNum = document.getElementById("classSelect").value;
 
-          if (!startDate || !endDate) {
-            alert("시작 날짜와 종료 날짜를 모두 선택해주세요.");
-            return;
-          }
-
-          console.log("Sending request with params:", {
-            startDate,
-            endDate,
-            grade,
-            class: classNumber,
+          const response = await axios.get("/api/attendance/stats", {
+            params: { startDate, endDate, grade, classNum },
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
           });
 
-          const response = await axios.get("/api/dashboard", {
-            params: { startDate, endDate, grade, class: classNumber },
-          });
-
-          console.log("Received response:", response.data);
-
-          downloadExcelButton.disabled = false;
-
-          if (response.data.overallStats && response.data.studentStats) {
-            displayOverallStats(response.data.overallStats);
-            displayStudentDetails(response.data.studentStats);
-          } else {
-            console.error("Unexpected response structure:", response.data);
-            alert("서버에서 예상치 못한 응답 구조를 받았습니다.");
-          }
+          const { studentStats, overallStats } = response.data;
+          updateOverallStats(overallStats);
+          updateStudentStats(studentStats);
         } catch (error) {
-          console.error("Error fetching attendance stats:", error);
-          handleError(error);
+          console.error("통계 조회 중 오류 발생:", error);
+          alert("통계 조회 중 오류가 발생했습니다.");
         }
       }
 
-      function displayOverallStats(stats) {
-        if (!stats) {
-          console.error("No overall stats provided");
-          return;
-        }
+      function updateOverallStats(stats) {
+        const overallStatsDiv = document.getElementById("overallStats");
         overallStatsDiv.innerHTML = `
-    <div class="stat-item">
-      <span class="font-bold">총 학생 수:</span> ${stats.totalStudents || 0}
-    </div>
-    <div class="stat-item">
-      <span class="font-bold">총 일수:</span> ${stats.totalDays || 0}
-    </div>
-    <div class="stat-item">
-      <span class="font-bold">총 출석 횟수:</span> ${stats.totalPresent || 0}
-    </div>
-    <div class="stat-item">
-      <span class="font-bold">총 지각 횟수:</span> ${stats.totalLate || 0}
-    </div>
-    <div class="stat-item">
-      <span class="font-bold">총 결석 횟수:</span> ${stats.totalAbsent || 0}
-    </div>
-    <div class="stat-item">
-      <span class="font-bold">총 지각 시간:</span> ${
-        stats.totalLateMinutes || 0
-      }분
-    </div>
-    <div class="stat-item">
-      <span class="font-bold">평균 출석률:</span> ${
-        stats.averageAttendanceRate || "0.00"
-      }%
-    </div>
-    <div class="stat-item">
-      <span class="font-bold">평균 지각률:</span> ${
-        stats.averageLateRate || "0.00"
-      }%
-    </div>
-  `;
+          <div class="bg-blue-100 p-4 rounded-lg">
+            <h3 class="font-semibold text-lg mb-2">전체 학생 수</h3>
+            <p class="text-2xl font-bold">${stats.totalStudents}</p>
+          </div>
+          <div class="bg-green-100 p-4 rounded-lg">
+            <h3 class="font-semibold text-lg mb-2">총 출석</h3>
+            <p class="text-2xl font-bold">${stats.totalPresent}</p>
+          </div>
+          <div class="bg-yellow-100 p-4 rounded-lg">
+            <h3 class="font-semibold text-lg mb-2">총 지각</h3>
+            <p class="text-2xl font-bold">${stats.totalLate}</p>
+          </div>
+          <div class="bg-red-100 p-4 rounded-lg">
+            <h3 class="font-semibold text-lg mb-2">총 결석</h3>
+            <p class="text-2xl font-bold">${stats.totalAbsent}</p>
+          </div>
+        `;
       }
 
-      function displayStudentDetails(students) {
-        if (!Array.isArray(students)) {
-          console.error("Students data is not an array:", students);
-          return;
-        }
-        studentStatsBody.innerHTML = "";
-        students.forEach((student) => {
-          const row = document.createElement("tr");
-          row.innerHTML = `
-      <td class="px-6 py-4 whitespace-nowrap">${student.studentId || "-"}</td>
-      <td class="px-6 py-4 whitespace-nowrap">${student.name || "-"}</td>
-      <td class="px-6 py-4 whitespace-nowrap">${student.grade || "-"}</td>
-      <td class="px-6 py-4 whitespace-nowrap">${student.class || "-"}</td>
-      <td class="px-6 py-4 whitespace-nowrap">${student.number || "-"}</td>
-      <td class="px-6 py-4 whitespace-nowrap">${student.presentCount || 0}</td>
-      <td class="px-6 py-4 whitespace-nowrap">${student.lateCount || 0}</td>
-      <td class="px-6 py-4 whitespace-nowrap">${student.absentCount || 0}</td>
+      function updateStudentStats(stats) {
+        const tbody = document.getElementById("studentStatsBody");
+        tbody.innerHTML = stats
+          .map(
+            (student) => `
+    <tr>
+      <td class="px-6 py-4 whitespace-nowrap">${student.studentId}</td>
+      <td class="px-6 py-4 whitespace-nowrap">${student.name}</td>
+      <td class="px-6 py-4 whitespace-nowrap">${student.grade}</td>
+      <td class="px-6 py-4 whitespace-nowrap">${student.class}</td>
+      <td class="px-6 py-4 whitespace-nowrap">${student.number}</td>
+      <td class="px-6 py-4 whitespace-nowrap">${student.presentCount}</td>
+      <td class="px-6 py-4 whitespace-nowrap">${student.lateCount}</td>
+      <td class="px-6 py-4 whitespace-nowrap">${student.absentCount}</td>
       <td class="px-6 py-4 whitespace-nowrap">${
-        student.totalLateMinutes || 0
-      }분</td>
-      <td class="px-6 py-4 whitespace-nowrap">${
-        student.attendanceRate || "0.00"
-      }%</td>
-      <td class="px-6 py-4 whitespace-nowrap">${
-        student.lateRate || "0.00"
-      }%</td>
-    `;
-          studentStatsBody.appendChild(row);
-        });
+        student.totalLateMinutes
+      } 분</td>
+      <td class="px-6 py-4 whitespace-nowrap">${student.lastAttendance}</td>
+      <td class="px-6 py-4 whitespace-nowrap ${getStatusColor(
+        student.todayStatus
+      )}">${student.todayStatus}</td>
+    </tr>
+  `
+          )
+          .join("");
       }
 
-      function handleError(error) {
-        if (error.response) {
-          console.error("Server responded with error:", error.response.data);
-          if (error.response.status === 401) {
-            window.location.href =
-              "index.html?error=" +
-              encodeURIComponent("인증이 만료되었습니다. 다시 로그인해주세요.");
-          } else {
-            alert(
-              `오류: ${
-                error.response.data.message || "알 수 없는 오류"
-              } (Status: ${error.response.status})`
-            );
-          }
-        } else if (error.request) {
-          console.error("No response received:", error.request);
-          alert(
-            "서버로부터 응답을 받지 못했습니다. 네트워크 연결을 확인해주세요."
-          );
-        } else {
-          console.error("Error setting up request:", error.message);
-          alert(`요청 설정 중 오류가 발생했습니다: ${error.message}`);
-        }
-      }
-
-      async function downloadExcel() {
-        try {
-          const startDate = startDateInput.value;
-          const endDate = endDateInput.value;
-          const grade = gradeSelect.value;
-          const classNumber = classSelect.value;
-
-          if (!startDate || !endDate) {
-            alert("시작 날짜와 종료 날짜를 모두 선택해주세요.");
-            return;
-          }
-
-          const response = await axios.get("/api/download-excel", {
-            params: { startDate, endDate, grade, class: classNumber },
-            responseType: "blob", // 중요: 응답을 Blob으로 받습니다.
-          });
-
-          // Blob을 파일로 다운로드
-          const url = window.URL.createObjectURL(new Blob([response.data]));
-          const link = document.createElement("a");
-          link.href = url;
-          link.setAttribute("download", "attendance_data.xlsx");
-          document.body.appendChild(link);
-          link.click();
-          document.body.removeChild(link);
-        } catch (error) {
-          console.error("Error downloading Excel file:", error);
-          handleError(error);
+      function getStatusColor(status) {
+        switch (status) {
+          case "present":
+            return "text-green-600";
+          case "late":
+            return "text-yellow-600";
+          case "absent":
+            return "text-red-600";
+          default:
+            return "text-gray-600";
         }
       }
     </script>
