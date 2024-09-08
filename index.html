@@ -46,7 +46,7 @@
       sizes="16x16"
       href="/favicon/favicon-16x16.png"
     />
-    <link rel="manifest" href="/favicon/site.webmanifest" />
+    <link rel="manifest" href="/manifest.json" />
     <meta name="theme-color" content="#4F46E5" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black" />
@@ -136,6 +136,21 @@
               </a>
             </div>
           </div>
+        </div>
+        <div
+          id="installPrompt"
+          class="mt-6 p-4 bg-accent rounded-lg shadow-md hidden"
+        >
+          <p class="text-primary font-semibold mb-2">앱으로 설치하세요!</p>
+          <p class="text-sm text-gray-600 mb-4">
+            더 빠르고 편리한 사용을 위해 홈 화면에 추가하세요.
+          </p>
+          <button
+            id="installButton"
+            class="bg-primary text-white px-4 py-2 rounded-lg hover:bg-secondary transition duration-300"
+          >
+            설치하기
+          </button>
         </div>
       </div>
     </main>
@@ -260,54 +275,53 @@
           }
         });
 
-      // Web Authentication API를 사용한 생체 인증
-      async function authenticateWithBiometrics() {
-        if (!window.PublicKeyCredential) {
-          console.log("Web Authentication API is not supported");
-          showMessage("이 브라우저는 생체 인증을 지원하지 않습니다.", true);
-          return;
-        }
+      // PWA 설치 관련 코드
+      let deferredPrompt;
+      const installPrompt = document.getElementById("installPrompt");
+      const installButton = document.getElementById("installButton");
 
-        try {
-          const credential = await navigator.credentials.create({
-            publicKey: {
-              challenge: new Uint8Array(32),
-              rp: {
-                name: "디지털 출결관리 시스템",
-              },
-              user: {
-                id: new Uint8Array(16),
-                name: document.getElementById("student-id").value,
-                displayName: "사용자",
-              },
-              pubKeyCredParams: [{ alg: -7, type: "public-key" }],
-              authenticatorSelection: {
-                authenticatorAttachment: "platform",
-                userVerification: "required",
-              },
-              timeout: 60000,
-            },
-          });
+      window.addEventListener("beforeinstallprompt", (e) => {
+        e.preventDefault();
+        deferredPrompt = e;
+        installPrompt.classList.remove("hidden");
+      });
 
-          console.log("생체 인증 성공:", credential);
-          showMessage("생체 인증 성공! 서버 확인 중...");
-          // 여기서 서버로 인증 정보를 보내고 처리할 수 있습니다.
-          // 예: sendAuthenticationToServer(credential);
-        } catch (err) {
-          console.error("생체 인증 실패:", err);
-          showMessage("생체 인증에 실패했습니다. 다시 시도해주세요.", true);
-        }
+      installButton.addEventListener("click", (e) => {
+        installPrompt.classList.add("hidden");
+        deferredPrompt.prompt();
+        deferredPrompt.userChoice.then((choiceResult) => {
+          if (choiceResult.outcome === "accepted") {
+            console.log("User accepted the install prompt");
+          } else {
+            console.log("User dismissed the install prompt");
+          }
+          deferredPrompt = null;
+        });
+      });
+
+      // iOS용 설치 안내
+      if (
+        navigator.standalone === false &&
+        navigator.userAgent.match(/(iPad|iPhone|iPod)/g) &&
+        navigator.userAgent.match(/Safari/g)
+      ) {
+        installPrompt.classList.remove("hidden");
+        installButton.textContent = "iOS 설치 방법";
+        installButton.addEventListener("click", () => {
+          alert(
+            'Safari 브라우저의 공유 버튼을 누른 후 "홈 화면에 추가"를 선택하세요.'
+          );
+        });
       }
 
-      // 생체 인증 버튼 추가
-      document.getElementById("loginForm").insertAdjacentHTML(
-        "beforeend",
-        `
-        <button type="button" onclick="authenticateWithBiometrics()" class="w-full bg-green-500 hover:bg-green-600 text-white font-semibold py-3 px-4 rounded-lg transition duration-300 mt-4">
-          생체 인증으로 로그인
-        </button>
-      `
-      );
+      // 삼성 인터넷 브라우저 감지 및 설치 안내
+      if (navigator.userAgent.match(/SamsungBrowser/i)) {
+        installPrompt.classList.remove("hidden");
+        installButton.textContent = "삼성 브라우저 설치 방법";
+        installButton.addEventListener("click", () => {
+          alert('브라우저 메뉴에서 "홈 화면에 추가" 옵션을 선택하세요.');
+        });
+      }
     </script>
   </body>
 </html>
