@@ -137,21 +137,6 @@
             </div>
           </div>
         </div>
-        <div
-          id="installPrompt"
-          class="mt-6 p-4 bg-accent rounded-lg shadow-md hidden"
-        >
-          <p class="text-primary font-semibold mb-2">앱으로 설치하세요!</p>
-          <p class="text-sm text-gray-600 mb-4">
-            더 빠르고 편리한 사용을 위해 홈 화면에 추가하세요.
-          </p>
-          <button
-            id="installButton"
-            class="bg-primary text-white px-4 py-2 rounded-lg hover:bg-secondary transition duration-300"
-          >
-            설치하기
-          </button>
-        </div>
       </div>
     </main>
 
@@ -277,23 +262,16 @@
 
       // PWA 설치 관련 코드
       let deferredPrompt;
-      const installPrompt = document.getElementById("installPrompt");
-      const installButton = document.getElementById("installButton");
 
       window.addEventListener("beforeinstallprompt", (e) => {
         e.preventDefault();
         deferredPrompt = e;
-        showInstallPrompt();
+        // 설치 버튼을 표시하거나 활성화하는 로직을 여기에 추가할 수 있습니다.
+        // 예: showInstallButton();
       });
 
-      function showInstallPrompt() {
-        installPrompt.classList.remove("hidden");
-        installButton.textContent = "앱 설치하기";
-        installButton.addEventListener("click", installPWA);
-      }
-
+      // 설치 버튼 클릭 시 호출될 함수
       function installPWA() {
-        installPrompt.classList.add("hidden");
         if (deferredPrompt) {
           deferredPrompt.prompt();
           deferredPrompt.userChoice.then((choiceResult) => {
@@ -301,46 +279,16 @@
               console.log("사용자가 앱 설치를 수락했습니다.");
             } else {
               console.log("사용자가 앱 설치를 거부했습니다.");
-              showInstallInstructions();
             }
             deferredPrompt = null;
           });
-        } else {
-          showInstallInstructions();
         }
       }
 
-      function showInstallInstructions() {
-        let instructions = "";
-        if (navigator.userAgent.match(/Android/i)) {
-          if (navigator.userAgent.match(/SamsungBrowser/i)) {
-            instructions =
-              '삼성 인터넷 브라우저: 메뉴 버튼을 누른 후 현재 페이지에 추가에 들어가서 "홈 화면에 추가" 옵션을 선택하세요.';
-          } else if (navigator.userAgent.match(/Chrome/i)) {
-            instructions =
-              '크롬 브라우저: 메뉴 버튼을 누른 후 "홈 화면에 추가" 옵션을 선택하세요.';
-          }
-        } else if (navigator.userAgent.match(/(iPhone|iPod|iPad)/i)) {
-          instructions =
-            'Safari 브라우저: 공유 버튼을 누른 후 "홈 화면에 추가"를 선택하세요.';
-        }
-
-        if (instructions) {
-          alert(instructions);
-        } else {
-          alert(
-            '브라우저의 설정에서 "홈 화면에 추가" 또는 "앱 설치" 옵션을 찾아 설치해주세요.'
-          );
-        }
-      }
-
-      // 페이지 로드 후 일정 시간이 지나면 설치 프롬프트 표시
-      window.addEventListener("load", () => {
-        setTimeout(() => {
-          if (!deferredPrompt) {
-            showInstallInstructions();
-          }
-        }, 5000); // 30초 후 표시
+      // 앱이 이미 설치되었는지 확인
+      window.addEventListener("appinstalled", (evt) => {
+        console.log("앱이 설치되었습니다.");
+        // 여기에 앱 설치 후 로직을 추가할 수 있습니다.
       });
     </script>
   </body>
