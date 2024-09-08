@@ -6,8 +6,6 @@
     <title>디지털 출결관리 시스템</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment-timezone/0.5.33/moment-timezone-with-data.min.js"></script>
     <script>
       tailwind.config = {
         theme: {
@@ -287,13 +285,6 @@
         `;
       }
 
-      // 한국 시간으로 변환하는 함수
-      function toKoreanTime(dateString) {
-        return moment(dateString)
-          .tz("Asia/Seoul")
-          .format("YYYY-MM-DD HH:mm:ss");
-      }
-
       function updateStudentStats(stats) {
         const tbody = document.getElementById("studentStatsBody");
         tbody.innerHTML = stats
@@ -311,9 +302,7 @@
       <td class="px-6 py-4 whitespace-nowrap">${
         student.totalLateMinutes
       } 분</td>
-      <td class="px-6 py-4 whitespace-nowrap">${toKoreanTime(
-        student.lastAttendance
-      )}</td>
+      <td class="px-6 py-4 whitespace-nowrap">${student.lastAttendance}</td>
       <td class="px-6 py-4 whitespace-nowrap ${getStatusColor(
         student.todayStatus
       )}">${student.todayStatus}</td>
