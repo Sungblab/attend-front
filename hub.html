@@ -104,135 +104,156 @@
       const API_BASE_URL =
         "https://port-0-attend-backend-m0tl39wtc3a73922.sel4.cloudtype.app";
 
-      // 사용자 권한 확인
-      const userInfo = JSON.parse(localStorage.getItem("userInfo"));
-      const isAdmin = userInfo?.isAdmin || false;
-      const isReader = userInfo?.isReader || false;
-
-      const menuButtons = document.getElementById("menu-buttons");
-      const messageBanner = document.getElementById("message-banner");
-
-      // 메시지 표시 함수
-      function showMessage(message, type = "error") {
-        messageBanner.textContent = message;
-        messageBanner.classList.remove(
-          "hidden",
-          "bg-red-500",
-          "bg-yellow-500",
-          "bg-green-500"
-        );
-
-        switch (type) {
-          case "error":
-            messageBanner.classList.add("bg-red-500");
-            break;
-          case "warning":
-            messageBanner.classList.add("bg-yellow-500");
-            break;
-          case "success":
-            messageBanner.classList.add("bg-green-500");
-            break;
-        }
-
-        messageBanner.classList.remove("hidden");
-
-        // 5초 후 메시지 숨기기
-        setTimeout(() => {
-          messageBanner.classList.add("hidden");
-        }, 5000);
-      }
-
-      // QR 인증 버튼 (모든 사용자에게 표시)
-      addButton(
-        "QR 인증",
-        "bg-green-500 hover:bg-green-600",
-        "qr.html",
-        "ri-qr-code-line"
-      );
-
-      // 관리자 대시보드 버튼 (관리자에게만 표시)
-      if (isAdmin) {
-        addButton(
-          "관리자 대시보드",
-          "bg-primary hover:bg-secondary",
-          "dashboard.html",
-          "ri-dashboard-line"
-        );
-        // 출석 통계 대시보드 버튼 (관리자에게만 표시)
-        addButton(
-          "출석 통계 대시보드",
-          "bg-indigo-500 hover:bg-indigo-600",
-          "statistics-dashboard.html",
-          "ri-bar-chart-box-line"
-        );
-      }
-
-      // 출석 리더기 버튼 (리더 권한이 있는 사용자에게만 표시)
-      if (isReader) {
-        addButton(
-          "출석 리더기",
-          "bg-yellow-500 hover:bg-yellow-600",
-          "reader.html",
-          "ri-camera-line"
-        );
-      }
-
-      // 로그아웃 버튼 (모든 사용자에게 표시)
-      addButton(
-        "로그아웃",
-        "bg-red-500 hover:bg-red-600",
-        "logout",
-        "ri-logout-box-r-line"
-      );
-
-      function addButton(text, classes, destination, icon) {
-        const button = document.createElement("button");
-        button.className = `w-full ${classes} text-white font-semibold py-3 px-4 rounded-lg transition duration-300 flex items-center justify-center`;
-        button.innerHTML = `<i class="${icon} mr-2"></i>${text}`;
-        button.addEventListener("click", () => {
-          if (destination === "logout") {
-            // 로그아웃 처리
-            localStorage.removeItem("userInfo");
-            localStorage.removeItem("token");
-            showMessage("로그아웃되었습니다.", "success");
-            setTimeout(() => {
-              window.location.href = "index.html";
-            }, 500);
-          } else {
-            if (checkAccess(destination)) {
-              window.location.href = destination;
-            }
-          }
-        });
-        menuButtons.appendChild(button);
-      }
-
-      // 페이지 접근 제어
-      function checkAccess(page) {
-        switch (page) {
-          case "dashboard.html":
-          case "statistics-dashboard.html":
-            if (!isAdmin) {
-              showMessage("관리자 권한이 필요합니다.");
-              return false;
-            }
-            break;
-          case "reader.html":
-            if (!isReader) {
-              showMessage("리더 권한이 필요합니다.");
-              return false;
-            }
-            break;
+      // 로그인 상태 확인
+      function checkLoginStatus() {
+        const token = localStorage.getItem("token");
+        if (!token) {
+          // 토큰이 없으면 로컬 스토리지 정리 후 index.html로 리다이렉트
+          localStorage.removeItem("userInfo");
+          localStorage.removeItem("token");
+          window.location.href =
+            "index.html?error=" + encodeURIComponent("로그인이 필요합니다.");
+          return false;
         }
         return true;
       }
 
-      // URL 파라미터 확인
-      const urlParams = new URLSearchParams(window.location.search);
-      const errorMessage = urlParams.get("error");
-      if (errorMessage) {
-        showMessage(decodeURIComponent(errorMessage));
-      }
+      // 페이지 로드 시 로그인 상태 확인
+      window.addEventListener("load", () => {
+        if (!checkLoginStatus()) {
+          return; // 리다이렉트 되었으므로 추가 실행 중지
+        }
+
+        // 사용자 권한 확인
+        const userInfo = JSON.parse(localStorage.getItem("userInfo"));
+        const isAdmin = userInfo?.isAdmin || false;
+        const isReader = userInfo?.isReader || false;
+
+        const menuButtons = document.getElementById("menu-buttons");
+        const messageBanner = document.getElementById("message-banner");
+
+        // 메시지 표시 함수
+        function showMessage(message, type = "error") {
+          messageBanner.textContent = message;
+          messageBanner.classList.remove(
+            "hidden",
+            "bg-red-500",
+            "bg-yellow-500",
+            "bg-green-500"
+          );
+
+          switch (type) {
+            case "error":
+              messageBanner.classList.add("bg-red-500");
+              break;
+            case "warning":
+              messageBanner.classList.add("bg-yellow-500");
+              break;
+            case "success":
+              messageBanner.classList.add("bg-green-500");
+              break;
+          }
+
+          messageBanner.classList.remove("hidden");
+
+          // 5초 후 메시지 숨기기
+          setTimeout(() => {
+            messageBanner.classList.add("hidden");
+          }, 5000);
+        }
+
+        // QR 인증 버튼 (모든 사용자에게 표시)
+        addButton(
+          "QR 인증",
+          "bg-green-500 hover:bg-green-600",
+          "qr.html",
+          "ri-qr-code-line"
+        );
+
+        // 관리자 대시보드 버튼 (관리자에게만 표시)
+        if (isAdmin) {
+          addButton(
+            "관리자 대시보드",
+            "bg-primary hover:bg-secondary",
+            "dashboard.html",
+            "ri-dashboard-line"
+          );
+          // 출석 통계 대시보드 버튼 (관리자에게만 표시)
+          addButton(
+            "출석 통계 대시보드",
+            "bg-indigo-500 hover:bg-indigo-600",
+            "statistics-dashboard.html",
+            "ri-bar-chart-box-line"
+          );
+        }
+
+        // 출석 리더기 버튼 (리더 권한이 있는 사용자에게만 표시)
+        if (isReader) {
+          addButton(
+            "출석 리더기",
+            "bg-yellow-500 hover:bg-yellow-600",
+            "reader.html",
+            "ri-camera-line"
+          );
+        }
+
+        // 로그아웃 버튼 (모든 사용자에게 표시)
+        addButton(
+          "로그아웃",
+          "bg-red-500 hover:bg-red-600",
+          "logout",
+          "ri-logout-box-r-line"
+        );
+
+        function addButton(text, classes, destination, icon) {
+          const button = document.createElement("button");
+          button.className = `w-full ${classes} text-white font-semibold py-3 px-4 rounded-lg transition duration-300 flex items-center justify-center`;
+          button.innerHTML = `<i class="${icon} mr-2"></i>${text}`;
+          button.addEventListener("click", () => {
+            if (destination === "logout") {
+              // 로그아웃 처리
+              localStorage.removeItem("userInfo");
+              localStorage.removeItem("token");
+              showMessage("로그아웃되었습니다.", "success");
+              setTimeout(() => {
+                window.location.href = "index.html";
+              }, 500);
+            } else {
+              if (checkAccess(destination)) {
+                window.location.href = destination;
+              }
+            }
+          });
+          menuButtons.appendChild(button);
+        }
+
+        // 페이지 접근 제어
+        function checkAccess(page) {
+          switch (page) {
+            case "dashboard.html":
+            case "statistics-dashboard.html":
+              if (!isAdmin) {
+                showMessage("관리자 권한이 필요합니다.");
+                return false;
+              }
+              break;
+            case "reader.html":
+              if (!isReader) {
+                showMessage("리더 권한이 필요합니다.");
+                return false;
+              }
+              break;
+          }
+          return true;
+        }
+
+        // URL 파라미터 확인
+        const urlParams = new URLSearchParams(window.location.search);
+        const errorMessage = urlParams.get("error");
+        if (errorMessage) {
+          showMessage(decodeURIComponent(errorMessage));
+        }
+      });
     </script>
   </body>
 </html>

@@ -225,7 +225,7 @@
               throw new Error(data.message || "Logout failed");
             }
             localStorage.removeItem("token");
-            window.location.href = "hub.html"; // hub.html로 리다이렉트
+            window.location.href = "index.html"; // hub.html로 리다이렉트
           } catch (error) {
             console.error("Error during logout:", error);
             showError(`로그아웃 중 오류가 발생했습니다: ${error.message}`);
