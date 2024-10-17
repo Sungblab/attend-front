@@ -90,66 +90,64 @@
             </div>
           </div>
 
-          <div class="mt-6 overflow-x-auto" style="max-width: 1000px">
-            <div class="inline-block min-w-full">
-              <table class="min-w-full divide-y divide-gray-200">
-                <thead class="bg-gray-50">
-                  <tr>
-                    <th
-                      class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                    >
-                      학번
-                    </th>
-                    <th
-                      class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                    >
-                      이름
-                    </th>
-                    <th
-                      class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                    >
-                      학년
-                    </th>
-                    <th
-                      class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                    >
-                      반
-                    </th>
-                    <th
-                      class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                    >
-                      번호
-                    </th>
-                    <th
-                      class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                    >
-                      승인 상태
-                    </th>
-                    <th
-                      class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                    >
-                      관리자
-                    </th>
-                    <th
-                      class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                    >
-                      리더
-                    </th>
-                    <th
-                      class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                    >
-                      작업
-                    </th>
-                  </tr>
-                </thead>
-                <tbody
-                  id="userTableBody"
-                  class="bg-white divide-y divide-gray-200"
-                >
-                  <!-- 사용자 데이터가 여기에 동적으로 추가됩니다 -->
-                </tbody>
-              </table>
-            </div>
+          <div class="mt-6 overflow-x-auto max-w-[1000px]">
+            <table class="min-w-full w-full divide-y divide-gray-200">
+              <thead class="bg-gray-50">
+                <tr>
+                  <th
+                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  >
+                    학번
+                  </th>
+                  <th
+                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  >
+                    이름
+                  </th>
+                  <th
+                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  >
+                    학년
+                  </th>
+                  <th
+                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  >
+                    반
+                  </th>
+                  <th
+                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  >
+                    번호
+                  </th>
+                  <th
+                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  >
+                    승인 상태
+                  </th>
+                  <th
+                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  >
+                    관리자
+                  </th>
+                  <th
+                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  >
+                    리더
+                  </th>
+                  <th
+                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  >
+                    작업
+                  </th>
+                </tr>
+              </thead>
+              <tbody
+                id="userTableBody"
+                class="bg-white divide-y divide-gray-200"
+              >
+                <!-- 사용자 데이터가 여기에 동적으로 추가됩니다 -->
+              </tbody>
+            </table>
           </div>
         </div>
       </div>
@@ -178,19 +176,19 @@
       axios.defaults.baseURL =
         "https://port-0-attend-backend-m0tl39wtc3a73922.sel4.cloudtype.app";
 
-      function checkAuthAndRedirect() {
-        const token = localStorage.getItem("token");
-        console.log("Checking auth, token:", token); // 디버깅 로그
-        if (!token) {
-          console.log("No token found, redirecting to login page"); // 디버깅 로그
-          window.location.href =
-            "index.html?error=" + encodeURIComponent("로그인이 필요합니다.");
-          return false;
-        }
-        console.log("Token found, setting axios headers"); // 디버깅 로그
-        axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
-        return true;
-      }
+      // function checkAuthAndRedirect() {
+      //   const token = localStorage.getItem("token");
+      //   console.log("Checking auth, token:", token); // 디버깅 로그
+      //   if (!token) {
+      //     console.log("No token found, redirecting to login page"); // 디버깅 로그
+      //     window.location.href =
+      //       "index.html?error=" + encodeURIComponent("로그인이 필요합니다.");
+      //     return false;
+      //   }
+      //   console.log("Token found, setting axios headers"); // 디버깅 로그
+      //   axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+      //   return true;
+      // }
 
       // 페이지 로드 즉시 인증 확인
       if (!checkAuthAndRedirect()) {
