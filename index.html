@@ -28,6 +28,7 @@
       href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css"
       rel="stylesheet"
     />
+    <!-- 아이콘 경로 수정 또는 파일 추가 필요 -->
     <link
       rel="apple-touch-icon"
       sizes="180x180"
@@ -45,9 +46,17 @@
       sizes="16x16"
       href="/favicon/favicon-16x16.png"
     />
+    <!-- 올바른 아이콘 경로로 수정 -->
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="192x192"
+      href="/favicon/android-chrome-192x192.png"
+    />
     <link rel="manifest" href="/manifest.json" />
     <meta name="theme-color" content="#4F46E5" />
-    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <!-- 메타 태그 업데이트 -->
+    <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black" />
     <meta name="apple-mobile-web-app-title" content="디지털 출결관리" />
   </head>
@@ -163,6 +172,17 @@
       </div>
     </footer>
 
+    <!-- PWA 설치 배너 추가 -->
+    <div
+      id="pwa-install-banner"
+      class="hidden fixed bottom-0 left-0 right-0 bg-gray-800 text-white p-4 flex justify-between items-center"
+    >
+      <span>웹앱를 설치하시겠습니까?</span>
+      <button id="pwa-install-button" class="bg-primary px-4 py-2 rounded">
+        앱 설치하기
+      </button>
+    </div>
+
     <script>
       // 서비스 워커 등록
       if ("serviceWorker" in navigator) {
@@ -184,6 +204,7 @@
       // 메시지 표시 함수
       function showMessage(message, isError = false) {
         const messageArea = document.getElementById("message-area");
+        if (!messageArea) return; // 요소가 없을 경우 종료
         messageArea.textContent = message;
         messageArea.classList.remove(
           "hidden",
@@ -266,25 +287,28 @@
       const pwaInstallBanner = document.getElementById("pwa-install-banner");
       const pwaInstallButton = document.getElementById("pwa-install-button");
 
-      // PWA 설치 프롬프트 이벤트 처리
-      window.addEventListener("beforeinstallprompt", (e) => {
-        e.preventDefault();
-        deferredPrompt = e;
-        showInstallPrompt();
-      });
+      // 요소 존재 여부 확인
+      if (pwaInstallButton) {
+        // PWA 설치 프롬프트 이벤트 처리
+        window.addEventListener("beforeinstallprompt", (e) => {
+          e.preventDefault();
+          deferredPrompt = e;
+          showInstallPrompt();
+        });
 
-      // PWA 설치 버튼 클릭 이벤트
-      pwaInstallButton.addEventListener("click", async () => {
-        if (deferredPrompt) {
-          deferredPrompt.prompt();
-          const { outcome } = await deferredPrompt.userChoice;
-          console.log(`사용자 선택: ${outcome}`);
-          deferredPrompt = null;
-          pwaInstallBanner.classList.add("hidden");
-        } else {
-          showBrowserSpecificInstallInstructions();
-        }
-      });
+        // PWA 설치 버튼 클릭 이벤트
+        pwaInstallButton.addEventListener("click", async () => {
+          if (deferredPrompt) {
+            deferredPrompt.prompt();
+            const { outcome } = await deferredPrompt.userChoice;
+            console.log(`사용자 선택: ${outcome}`);
+            deferredPrompt = null;
+            pwaInstallBanner.classList.add("hidden");
+          } else {
+            showBrowserSpecificInstallInstructions();
+          }
+        });
+      }
 
       // 브라우저별 설치 안내 함수
       function showBrowserSpecificInstallInstructions() {
@@ -301,23 +325,25 @@
           );
         } else {
           alert(
-            "크롬 브라우저 설정에서 우측 상단 점3개 메뉴 클릭후' 아래 '전송,저장,공유'에 들어가 '페이지를 앱으로 설치' 를 눌러주세요"
+            "크롬 브라우저 설정에서 우측 상단 점 3개 메뉴를 클릭한 후 '페이지를 앱으로 설치'를 눌러주세요."
           );
         }
       }
 
       // 설치 프롬프트 표시 함수
       function showInstallPrompt() {
-        pwaInstallBanner.classList.remove("hidden");
-        if (/SamsungBrowser/i.test(navigator.userAgent)) {
-          pwaInstallButton.textContent = "삼성 브라우저 설치 방법";
-        } else if (
-          /iPad|iPhone|iPod/.test(navigator.userAgent) &&
-          !window.MSStream
-        ) {
-          pwaInstallButton.textContent = "iOS 설치 방법";
-        } else {
-          pwaInstallButton.textContent = "앱 설치하기";
+        if (pwaInstallBanner) {
+          pwaInstallBanner.classList.remove("hidden");
+          if (/SamsungBrowser/i.test(navigator.userAgent)) {
+            pwaInstallButton.textContent = "삼성 브라우저 설치 방법";
+          } else if (
+            /iPad|iPhone|iPod/.test(navigator.userAgent) &&
+            !window.MSStream
+          ) {
+            pwaInstallButton.textContent = "iOS 설치 방법";
+          } else {
+            pwaInstallButton.textContent = "앱 설치하기";
+          }
         }
       }
 
@@ -334,7 +360,9 @@
       // 앱 설치 완료 이벤트
       window.addEventListener("appinstalled", (evt) => {
         console.log("앱이 설치되었습니다.");
-        pwaInstallBanner.classList.add("hidden");
+        if (pwaInstallBanner) {
+          pwaInstallBanner.classList.add("hidden");
+        }
       });
 
       // 설치 가능 여부 확인 및 디버깅 (선택적)
