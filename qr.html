@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>디지털 출결관리</title>
+    <title>디지털 출결관리 - QR 코드 출석 확인</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
     <script>
@@ -46,42 +46,42 @@
       </nav>
     </header>
 
-    <main
-      class="flex-grow flex items-center justify-center px-4 sm:px-6 lg:px-8 py-4 sm:py-8"
-    >
+    <main class="flex-grow flex items-center justify-center px-4 py-12">
       <div class="w-full max-w-md my-4 sm:my-8">
-        <div class="bg-white overflow-hidden">
-          <div class="sm:p-8">
-            <h2 class="text-3xl font-bold mb-6 text-center text-gray-800">
-              출석 QR코드
-            </h2>
-            <div id="qrcode" class="flex justify-center mb-4"></div>
-            <p
-              id="student-info"
-              class="text-center text-gray-600 mb-4 font-medium"
-            ></p>
-            <p class="text-center text-sm text-gray-500 mb-6">
-              이 QR 코드는 30초마다 갱신됩니다.
-            </p>
-            <button
-              id="refresh-btn"
-              class="w-full bg-primary hover:bg-secondary text-white font-semibold py-3 px-4 rounded-lg transition duration-300 mb-4 flex items-center justify-center"
-            >
-              <i class="ri-refresh-line mr-2"></i>
-              QR 코드 새로고침
-            </button>
-            <button
-              id="logout-btn"
-              class="w-full bg-red-500 hover:bg-red-600 text-white font-semibold py-3 px-4 rounded-lg transition duration-300 flex items-center justify-center"
-            >
-              <i class="ri-logout-box-r-line mr-2"></i>
-              로그아웃
-            </button>
-            <div
-              id="error-message"
-              class="mt-4 p-4 bg-red-100 text-red-700 rounded-lg text-center hidden"
-            ></div>
-          </div>
+        <div
+          id="message-banner"
+          class="hidden mb-4 p-4 text-white text-center text-sm font-medium rounded-md"
+        ></div>
+        <div class="bg-white overflow-hidden shadow-md rounded-lg p-6">
+          <h2 class="text-3xl font-bold mb-6 text-center text-gray-800">
+            출석 QR코드
+          </h2>
+          <div id="qrcode" class="flex justify-center mb-4"></div>
+          <p
+            id="student-info"
+            class="text-center text-gray-600 mb-4 font-medium"
+          ></p>
+          <p class="text-center text-sm text-gray-500 mb-6">
+            이 QR 코드는 30초마다 갱신됩니다.
+          </p>
+          <button
+            id="refresh-btn"
+            class="w-full bg-primary hover:bg-secondary text-white font-semibold py-3 px-4 rounded-lg transition duration-300 mb-4 flex items-center justify-center"
+          >
+            <i class="ri-refresh-line mr-2"></i>
+            QR 코드 새로고침
+          </button>
+          <button
+            id="logout-btn"
+            class="w-full bg-red-500 hover:bg-red-600 text-white font-semibold py-3 px-4 rounded-lg transition duration-300 flex items-center justify-center"
+          >
+            <i class="ri-logout-box-r-line mr-2"></i>
+            로그아웃
+          </button>
+          <div
+            id="error-message"
+            class="mt-4 p-4 bg-red-100 text-red-700 rounded-lg text-center hidden"
+          ></div>
         </div>
       </div>
     </main>
@@ -106,32 +106,175 @@
     </footer>
 
     <script>
-      let studentId, studentName;
       const API_BASE_URL =
         "https://port-0-attend-backend-m0tl39wtc3a73922.sel4.cloudtype.app/api";
 
-      function showError(message) {
-        const errorElement = document.getElementById("error-message");
-        errorElement.textContent = message;
-        errorElement.classList.remove("hidden");
+      let studentId, studentName;
+      let accessToken, refreshToken;
+
+      // 메시지 표시 함수
+      function showMessage(message, type = "error") {
+        const messageBanner = document.getElementById("message-banner");
+        messageBanner.textContent = message;
+        messageBanner.classList.remove(
+          "hidden",
+          "bg-red-500",
+          "bg-yellow-500",
+          "bg-green-500"
+        );
+
+        switch (type) {
+          case "error":
+            messageBanner.classList.add("bg-red-500");
+            break;
+          case "warning":
+            messageBanner.classList.add("bg-yellow-500");
+            break;
+          case "success":
+            messageBanner.classList.add("bg-green-500");
+            break;
+        }
+
+        messageBanner.classList.remove("hidden");
+
+        // 5초 후 메시지 숨기기
+        setTimeout(() => {
+          messageBanner.classList.add("hidden");
+        }, 5000);
       }
 
-      function hideError() {
-        document.getElementById("error-message").classList.add("hidden");
+      function hideMessage() {
+        const messageBanner = document.getElementById("message-banner");
+        messageBanner.classList.add("hidden");
       }
 
+      // 로그인 상태 확인 및 토큰 갱신
+      async function checkLoginStatus() {
+        accessToken = localStorage.getItem("accessToken");
+        refreshToken = localStorage.getItem("refreshToken");
+
+        if (!accessToken || !refreshToken) {
+          // 토큰이 없으면 로컬 스토리지 정리 후 로그인 페이지로 리다이렉트
+          localStorage.removeItem("userInfo");
+          localStorage.removeItem("accessToken");
+          localStorage.removeItem("refreshToken");
+          window.location.href =
+            "login.html?error=" + encodeURIComponent("로그인이 필요합니다.");
+          return null;
+        }
+
+        // 엑세스 토큰 유효성 검사
+        try {
+          const response = await fetch(`${API_BASE_URL}/verify-token`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${accessToken}`,
+            },
+          });
+
+          if (response.ok) {
+            const data = await response.json();
+            return accessToken;
+          } else {
+            // 엑세스 토큰이 만료되었으므로 리프레시 토큰으로 갱신 시도
+            const newTokens = await refreshAccessToken(refreshToken);
+            return newTokens ? newTokens.accessToken : null;
+          }
+        } catch (error) {
+          console.error("로그인 상태 확인 중 오류 발생:", error);
+          showMessage(
+            "로그인 상태를 확인하는 중 오류가 발생했습니다.",
+            "error"
+          );
+          return null;
+        }
+      }
+
+      // 토큰 갱신 함수
+      async function refreshAccessToken(refreshToken) {
+        try {
+          const response = await fetch(`${API_BASE_URL}/token`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ refreshToken }),
+          });
+
+          const data = await response.json();
+
+          if (response.ok) {
+            accessToken = data.accessToken;
+            refreshToken = data.refreshToken;
+            localStorage.setItem("accessToken", accessToken);
+            localStorage.setItem("refreshToken", refreshToken);
+            if (data.user) {
+              localStorage.setItem("userInfo", JSON.stringify(data.user));
+            }
+            return {
+              accessToken: data.accessToken,
+              refreshToken: data.refreshToken,
+            };
+          } else {
+            // 리프레시 토큰이 유효하지 않으면 로그아웃
+            showMessage(data.message || "토큰 갱신에 실패했습니다.", "error");
+            logoutUser();
+            return null;
+          }
+        } catch (error) {
+          console.error("토큰 갱신 중 오류 발생:", error);
+          showMessage("토큰 갱신 중 오류가 발생했습니다.", "error");
+          logoutUser();
+          return null;
+        }
+      }
+
+      // 로그아웃 함수
+      async function logoutUser() {
+        try {
+          const response = await fetch(`${API_BASE_URL}/logout`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${accessToken}`,
+            },
+            body: JSON.stringify({ refreshToken }),
+          });
+
+          const data = await response.json();
+
+          if (response.ok) {
+            showMessage("로그아웃되었습니다.", "success");
+          } else {
+            showMessage(data.message || "로그아웃에 실패했습니다.", "error");
+          }
+        } catch (error) {
+          console.error("로그아웃 중 오류 발생:", error);
+          showMessage("로그아웃 중 오류가 발생했습니다.", "error");
+        } finally {
+          // 로컬 스토리지 정리 및 로그인 페이지로 리다이렉트
+          localStorage.removeItem("userInfo");
+          localStorage.removeItem("accessToken");
+          localStorage.removeItem("refreshToken");
+          setTimeout(() => {
+            window.location.href = "login.html";
+          }, 1500);
+        }
+      }
+
+      // 학생 정보 가져오기
       async function fetchStudentInfo() {
         try {
-          const token = localStorage.getItem("token");
           const response = await fetch(`${API_BASE_URL}/student-info`, {
             headers: {
-              Authorization: `Bearer ${token}`,
+              Authorization: `Bearer ${accessToken}`,
             },
           });
           if (!response.ok) {
             const errorData = await response.json();
             throw new Error(
-              errorData.message || "Failed to fetch student info"
+              errorData.message || "학생 정보를 가져오는데 실패했습니다."
             );
           }
           const data = await response.json();
@@ -140,16 +283,20 @@
           document.getElementById(
             "student-info"
           ).textContent = `학번: ${studentId} | 이름: ${studentName}`;
-          hideError();
+          hideMessage();
         } catch (error) {
           console.error("Error fetching student info:", error);
-          showError(`학생 정보를 가져오는데 실패했습니다: ${error.message}`);
+          showMessage(
+            `학생 정보를 가져오는데 실패했습니다: ${error.message}`,
+            "error"
+          );
           setTimeout(() => {
             window.location.href = "hub.html";
           }, 3000);
         }
       }
 
+      // QR 코드 생성 함수
       async function generateQRCode() {
         if (!studentId || !studentName) {
           await fetchStudentInfo();
@@ -158,12 +305,11 @@
         const timestamp = Math.floor(Date.now() / 30000); // 30초마다 변경
 
         try {
-          const token = localStorage.getItem("token");
           const response = await fetch(`${API_BASE_URL}/generate-qr`, {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
-              Authorization: `Bearer ${token}`,
+              Authorization: `Bearer ${accessToken}`,
             },
             body: JSON.stringify({ studentId, timestamp }),
           });
@@ -180,54 +326,70 @@
             throw new Error(data.message || "QR 코드 생성에 실패했습니다.");
           }
 
+          // QR 코드 생성 및 표시
           const qr = qrcode(0, "M");
           qr.addData(data.encryptedData);
           qr.make();
 
           document.getElementById("qrcode").innerHTML = qr.createImgTag(5);
-          hideError();
+          hideMessage();
         } catch (error) {
           console.error("Error generating QR code:", error);
-          showError(`QR 코드 생성에 실패했습니다: ${error.message}`);
+          showMessage(`QR 코드 생성에 실패했습니다: ${error.message}`, "error");
         }
       }
 
-      generateQRCode();
-      setInterval(generateQRCode, 30000); // 30초마다 QR 코드 갱신
+      // QR 코드 자동 갱신
+      async function setupQRCode() {
+        await generateQRCode();
+        setInterval(generateQRCode, 30000); // 30초마다 QR 코드 갱신
+      }
 
+      // QR 코드 새로고침 버튼 이벤트
       document
         .getElementById("refresh-btn")
         .addEventListener("click", generateQRCode);
 
+      // 로그아웃 버튼 이벤트
       document
         .getElementById("logout-btn")
-        .addEventListener("click", async function () {
-          try {
-            const token = localStorage.getItem("token");
-            const response = await fetch(`${API_BASE_URL}/logout`, {
-              method: "POST",
-              headers: {
-                Authorization: `Bearer ${token}`,
-              },
-            });
-            if (!response.ok) {
-              const errorData = await response.json();
-              throw new Error(errorData.message || "Logout failed");
-            }
-            const data = await response.json();
-            if (!data.success) {
-              throw new Error(data.message || "Logout failed");
-            }
-            localStorage.removeItem("token");
-            window.location.href = "index.html"; // hub.html로 리다이렉트
-          } catch (error) {
-            console.error("Error during logout:", error);
-            showError(`로그아웃 중 오류가 발생했습니다: ${error.message}`);
-          }
-        });
+        .addEventListener("click", logoutUser);
 
-      // 페이지 로드 시 학생 정보 가져오기
-      fetchStudentInfo();
+      // 페이지 로드 시 실행되는 함수
+      window.addEventListener("load", async () => {
+        accessToken = localStorage.getItem("accessToken");
+        refreshToken = localStorage.getItem("refreshToken");
+
+        if (!accessToken || !refreshToken) {
+          // 토큰이 없으면 로컬 스토리지 정리 후 로그인 페이지로 리다이렉트
+          localStorage.removeItem("userInfo");
+          localStorage.removeItem("accessToken");
+          localStorage.removeItem("refreshToken");
+          window.location.href =
+            "login.html?error=" + encodeURIComponent("로그인이 필요합니다.");
+          return;
+        }
+
+        // 로그인 상태 확인 및 토큰 갱신
+        const validToken = await checkLoginStatus();
+        if (!validToken) {
+          return; // 로그인 페이지로 리다이렉트 되었으므로 추가 실행 중지
+        }
+
+        // 사용자 정보 가져오기
+        const userInfo = JSON.parse(localStorage.getItem("userInfo"));
+        if (!userInfo || !userInfo.isReader) {
+          showMessage("리더 권한이 필요합니다.", "error");
+          logoutUser();
+          return;
+        }
+
+        // 학생 정보 가져오기
+        await fetchStudentInfo();
+
+        // QR 코드 설정
+        setupQRCode();
+      });
     </script>
   </body>
 </html>

@@ -205,8 +205,8 @@
 
       // 로그인 상태 확인
       function checkLoginStatus() {
-        const token = localStorage.getItem("token");
-        if (token) {
+        const accessToken = localStorage.getItem("accessToken");
+        if (accessToken) {
           // 토큰이 있으면 자동으로 hub.html로 리다이렉트
           window.location.href = "hub.html";
         }
@@ -214,6 +214,84 @@
 
       // 페이지 로드 시 로그인 상태 확인
       window.addEventListener("load", checkLoginStatus);
+
+      // 공통 API 요청 함수
+      async function apiRequest(url, options = {}) {
+        const accessToken = localStorage.getItem("accessToken");
+        const refreshToken = localStorage.getItem("refreshToken");
+
+        // 기본 헤더 설정
+        options.headers = options.headers || {};
+        if (accessToken) {
+          options.headers["Authorization"] = `Bearer ${accessToken}`;
+        }
+        if (
+          options.body &&
+          options.headers["Content-Type"] === "application/json"
+        ) {
+          options.body = JSON.stringify(options.body);
+        }
+
+        let response = await fetch(url, options);
+
+        // 액세스 토큰 만료 시 리프레시 토큰으로 새로운 액세스 토큰 요청
+        if (response.status === 401 && refreshToken) {
+          const tokenResponse = await fetch(
+            "https://port-0-attend-backend-m0tl39wtc3a73922.sel4.cloudtype.app/api/token",
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({ refreshToken }),
+            }
+          );
+
+          if (tokenResponse.ok) {
+            const tokenData = await tokenResponse.json();
+            localStorage.setItem("accessToken", tokenData.accessToken);
+            // 기존 요청을 다시 시도
+            options.headers[
+              "Authorization"
+            ] = `Bearer ${tokenData.accessToken}`;
+            response = await fetch(url, options);
+          } else {
+            // 리프레시 토큰도 만료된 경우 로그아웃 처리
+            logout();
+          }
+        }
+
+        return response;
+      }
+
+      // 로그아웃 함수
+      function logout() {
+        const refreshToken = localStorage.getItem("refreshToken");
+        if (refreshToken) {
+          fetch(
+            "https://port-0-attend-backend-m0tl39wtc3a73922.sel4.cloudtype.app/api/logout",
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+              },
+              body: JSON.stringify({ refreshToken }),
+            }
+          )
+            .then((response) => response.json())
+            .then((data) => {
+              console.log(data.message);
+            })
+            .catch((error) => {
+              console.error("로그아웃 중 오류 발생:", error);
+            });
+        }
+        localStorage.removeItem("accessToken");
+        localStorage.removeItem("refreshToken");
+        localStorage.removeItem("userInfo");
+        window.location.href = "login.html";
+      }
 
       // 로그인 폼 제출 이벤트 리스너
       document
@@ -240,7 +318,9 @@
               const data = await response.json();
 
               if (response.ok) {
-                localStorage.setItem("token", data.token);
+                // 액세스 토큰과 리프레시 토큰 저장
+                localStorage.setItem("accessToken", data.accessToken);
+                localStorage.setItem("refreshToken", data.refreshToken);
                 localStorage.setItem("userInfo", JSON.stringify(data.user));
                 showMessage("로그인 성공! 잠시 후 메인 페이지로 이동합니다.");
                 setTimeout(() => {
@@ -274,17 +354,22 @@
       });
 
       // PWA 설치 버튼 클릭 이벤트
-      pwaInstallButton.addEventListener("click", async () => {
-        if (deferredPrompt) {
-          deferredPrompt.prompt();
-          const { outcome } = await deferredPrompt.userChoice;
-          console.log(`사용자 선택: ${outcome}`);
-          deferredPrompt = null;
-          pwaInstallBanner.classList.add("hidden");
-        } else {
-          showBrowserSpecificInstallInstructions();
-        }
-      });
+      if (pwaInstallButton) {
+        // pwaInstallButton이 존재할 때만 이벤트 리스너 추가
+        pwaInstallButton.addEventListener("click", async () => {
+          if (deferredPrompt) {
+            deferredPrompt.prompt();
+            const { outcome } = await deferredPrompt.userChoice;
+            console.log(`사용자 선택: ${outcome}`);
+            deferredPrompt = null;
+            if (pwaInstallBanner) {
+              pwaInstallBanner.classList.add("hidden");
+            }
+          } else {
+            showBrowserSpecificInstallInstructions();
+          }
+        });
+      }
 
       // 브라우저별 설치 안내 함수
       function showBrowserSpecificInstallInstructions() {
@@ -301,23 +386,25 @@
           );
         } else {
           alert(
-            "크롬 브라우저 설정에서 우측 상단 점3개 메뉴 클릭후' 아래 '전송,저장,공유'에 들어가 '페이지를 앱으로 설치' 를 눌러주세요"
+            "크롬 브라우저 설정에서 우측 상단 점3개 메뉴 클릭 후 '전송, 저장, 공유'에 들어가 '페이지를 앱으로 설치'를 눌러주세요."
           );
         }
       }
 
       // 설치 프롬프트 표시 함수
       function showInstallPrompt() {
-        pwaInstallBanner.classList.remove("hidden");
-        if (/SamsungBrowser/i.test(navigator.userAgent)) {
-          pwaInstallButton.textContent = "삼성 브라우저 설치 방법";
-        } else if (
-          /iPad|iPhone|iPod/.test(navigator.userAgent) &&
-          !window.MSStream
-        ) {
-          pwaInstallButton.textContent = "iOS 설치 방법";
-        } else {
-          pwaInstallButton.textContent = "앱 설치하기";
+        if (pwaInstallBanner) {
+          pwaInstallBanner.classList.remove("hidden");
+          if (/SamsungBrowser/i.test(navigator.userAgent)) {
+            pwaInstallButton.textContent = "삼성 브라우저 설치 방법";
+          } else if (
+            /iPad|iPhone|iPod/.test(navigator.userAgent) &&
+            !window.MSStream
+          ) {
+            pwaInstallButton.textContent = "iOS 설치 방법";
+          } else {
+            pwaInstallButton.textContent = "앱 설치하기";
+          }
         }
       }
 
@@ -334,7 +421,9 @@
       // 앱 설치 완료 이벤트
       window.addEventListener("appinstalled", (evt) => {
         console.log("앱이 설치되었습니다.");
-        pwaInstallBanner.classList.add("hidden");
+        if (pwaInstallBanner) {
+          pwaInstallBanner.classList.add("hidden");
+        }
       });
 
       // 설치 가능 여부 확인 및 디버깅 (선택적)
