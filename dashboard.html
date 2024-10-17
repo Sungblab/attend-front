@@ -176,19 +176,19 @@
       axios.defaults.baseURL =
         "https://port-0-attend-backend-m0tl39wtc3a73922.sel4.cloudtype.app";
 
-      // function checkAuthAndRedirect() {
-      //   const token = localStorage.getItem("token");
-      //   console.log("Checking auth, token:", token); // 디버깅 로그
-      //   if (!token) {
-      //     console.log("No token found, redirecting to login page"); // 디버깅 로그
-      //     window.location.href =
-      //       "index.html?error=" + encodeURIComponent("로그인이 필요합니다.");
-      //     return false;
-      //   }
-      //   console.log("Token found, setting axios headers"); // 디버깅 로그
-      //   axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
-      //   return true;
-      // }
+      function checkAuthAndRedirect() {
+        const token = localStorage.getItem("token");
+        console.log("Checking auth, token:", token); // 디버깅 로그
+        if (!token) {
+          console.log("No token found, redirecting to login page"); // 디버깅 로그
+          window.location.href =
+            "index.html?error=" + encodeURIComponent("로그인이 필요합니다.");
+          return false;
+        }
+        console.log("Token found, setting axios headers"); // 디버깅 로그
+        axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+        return true;
+      }
 
       // 페이지 로드 즉시 인증 확인
       if (!checkAuthAndRedirect()) {
