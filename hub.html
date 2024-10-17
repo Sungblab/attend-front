@@ -95,100 +95,23 @@
       const API_BASE_URL =
         "https://port-0-attend-backend-m0tl39wtc3a73922.sel4.cloudtype.app";
 
-      // 토큰 갱신 함수
-      async function refreshAccessToken() {
-        const refreshToken = localStorage.getItem("refreshToken");
-        if (!refreshToken) {
-          throw new Error("리프레시 토큰이 없습니다.");
-        }
-
-        try {
-          const response = await fetch(`${API_BASE_URL}/api/token`, {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ refreshToken }),
-          });
-
-          if (!response.ok) {
-            throw new Error("토큰 갱신에 실패했습니다.");
-          }
-
-          const data = await response.json();
-          localStorage.setItem("token", data.accessToken);
-          return data.accessToken;
-        } catch (error) {
-          console.error("토큰 갱신 오류:", error);
-          logout();
-          throw error;
-        }
-      }
-
-      // API 요청 함수
-      async function apiRequest(url, options = {}) {
+      // 로그인 상태 확인
+      function checkLoginStatus() {
         const token = localStorage.getItem("token");
         if (!token) {
-          throw new Error("액세스 토큰이 없습니다.");
-        }
-
-        options.headers = {
-          ...options.headers,
-          Authorization: `Bearer ${token}`,
-        };
-
-        try {
-          const response = await fetch(url, options);
-          if (response.status === 401) {
-            // 토큰이 만료된 경우
-            const newToken = await refreshAccessToken();
-            options.headers.Authorization = `Bearer ${newToken}`;
-            return fetch(url, options);
-          }
-          return response;
-        } catch (error) {
-          console.error("API 요청 오류:", error);
-          throw error;
-        }
-      }
-
-      // 로그인 상태 확인
-      async function checkLoginStatus() {
-        const token = localStorage.getItem("token");
-        const refreshToken = localStorage.getItem("refreshToken");
-        if (!token || !refreshToken) {
-          logout();
+          // 토큰이 없으면 로컬 스토리지 정리 후 index.html로 리다이렉트
+          localStorage.removeItem("userInfo");
+          localStorage.removeItem("token");
+          window.location.href =
+            "index.html?error=" + encodeURIComponent("로그인이 필요합니다.");
           return false;
         }
-
-        try {
-          // 토큰 유효성 검사를 위한 API 엔드포인트 호출
-          const response = await apiRequest(
-            `${API_BASE_URL}/api/validate-token`
-          );
-          if (!response.ok) {
-            throw new Error("토큰이 유효하지 않습니다.");
-          }
-          return true;
-        } catch (error) {
-          console.error("로그인 상태 확인 오류:", error);
-          logout();
-          return false;
-        }
-      }
-
-      // 로그아웃 함수
-      function logout() {
-        localStorage.removeItem("userInfo");
-        localStorage.removeItem("token");
-        localStorage.removeItem("refreshToken");
-        window.location.href =
-          "index.html?error=" + encodeURIComponent("로그인이 필요합니다.");
+        return true;
       }
 
       // 페이지 로드 시 로그인 상태 확인
-      window.addEventListener("load", async () => {
-        if (!(await checkLoginStatus())) {
+      window.addEventListener("load", () => {
+        if (!checkLoginStatus()) {
           return; // 리다이렉트 되었으므로 추가 실행 중지
         }
 
@@ -279,7 +202,13 @@
           button.innerHTML = `<i class="${icon} mr-2"></i>${text}`;
           button.addEventListener("click", () => {
             if (destination === "logout") {
-              logout();
+              // 로그아웃 처리
+              localStorage.removeItem("userInfo");
+              localStorage.removeItem("token");
+              showMessage("로그아웃되었습니다.", "success");
+              setTimeout(() => {
+                window.location.href = "index.html";
+              }, 500);
             } else {
               if (checkAccess(destination)) {
                 window.location.href = destination;
