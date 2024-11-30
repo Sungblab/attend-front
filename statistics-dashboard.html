@@ -120,33 +120,120 @@
       </section>
 
       <section class="bg-white rounded-lg shadow mb-6 p-6">
-        <h2 class="text-2xl font-bold mb-4">전체 통계</h2>
-        <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4">
-          <div class="bg-blue-50 p-4 rounded-lg">
-            <h3 class="text-sm font-medium text-blue-700">전체 학생</h3>
-            <p class="text-2xl font-bold text-blue-900" id="totalStudents">-</p>
+        <h2 class="text-2xl font-bold mb-6 flex items-center">
+          <i class="ri-bar-chart-box-line mr-2"></i>
+          전체 통계
+        </h2>
+        <div
+          class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-6"
+        >
+          <!-- 전체 학생 카드 -->
+          <div
+            class="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-4 border border-blue-100"
+          >
+            <div class="flex items-center justify-between mb-3">
+              <span class="text-blue-600 bg-blue-100 p-2 rounded-lg">
+                <i class="ri-user-line text-xl"></i>
+              </span>
+              <span
+                class="text-xs font-medium text-blue-600 bg-blue-100 px-2 py-1 rounded-full"
+                >전체</span
+              >
+            </div>
+            <h3 class="text-sm font-medium text-gray-600 mb-1">전체 학생</h3>
+            <p class="text-2xl font-bold text-gray-900" id="totalStudents">-</p>
           </div>
-          <div class="bg-green-50 p-4 rounded-lg">
-            <h3 class="text-sm font-medium text-green-700">출석률</h3>
-            <p class="text-2xl font-bold text-green-900" id="attendanceRate">
+
+          <!-- 출석률 카드 -->
+          <div
+            class="bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl p-4 border border-green-100"
+          >
+            <div class="flex items-center justify-between mb-3">
+              <span class="text-green-600 bg-green-100 p-2 rounded-lg">
+                <i class="ri-check-line text-xl"></i>
+              </span>
+              <span
+                class="text-xs font-medium text-green-600 bg-green-100 px-2 py-1 rounded-full"
+                >출석</span
+              >
+            </div>
+            <h3 class="text-sm font-medium text-gray-600 mb-1">출석률</h3>
+            <p class="text-2xl font-bold text-gray-900" id="attendanceRate">
               -
             </p>
           </div>
-          <div class="bg-yellow-50 p-4 rounded-lg">
-            <h3 class="text-sm font-medium text-yellow-700">지각률</h3>
-            <p class="text-2xl font-bold text-yellow-900" id="lateRate">-</p>
+
+          <!-- 지각률 카드 -->
+          <div
+            class="bg-gradient-to-br from-yellow-50 to-amber-50 rounded-xl p-4 border border-yellow-100"
+          >
+            <div class="flex items-center justify-between mb-3">
+              <span class="text-yellow-600 bg-yellow-100 p-2 rounded-lg">
+                <i class="ri-time-line text-xl"></i>
+              </span>
+              <span
+                class="text-xs font-medium text-yellow-600 bg-yellow-100 px-2 py-1 rounded-full"
+                >지각</span
+              >
+            </div>
+            <h3 class="text-sm font-medium text-gray-600 mb-1">지각률</h3>
+            <div class="flex items-baseline gap-2">
+              <p class="text-2xl font-bold text-gray-900" id="lateRate">-</p>
+              <p class="text-sm text-gray-500" id="avgLateTime">평균 -분</p>
+            </div>
           </div>
-          <div class="bg-red-50 p-4 rounded-lg">
-            <h3 class="text-sm font-medium text-red-700">결석률</h3>
-            <p class="text-2xl font-bold text-red-900" id="absentRate">-</p>
+
+          <!-- 결석률 카드 -->
+          <div
+            class="bg-gradient-to-br from-red-50 to-rose-50 rounded-xl p-4 border border-red-100"
+          >
+            <div class="flex items-center justify-between mb-3">
+              <span class="text-red-600 bg-red-100 p-2 rounded-lg">
+                <i class="ri-close-circle-line text-xl"></i>
+              </span>
+              <span
+                class="text-xs font-medium text-red-600 bg-red-100 px-2 py-1 rounded-full"
+                >결석</span
+              >
+            </div>
+            <h3 class="text-sm font-medium text-gray-600 mb-1">결석률</h3>
+            <p class="text-2xl font-bold text-gray-900" id="absentRate">-</p>
           </div>
-          <div class="bg-indigo-50 p-4 rounded-lg">
-            <h3 class="text-sm font-medium text-indigo-700">평균 지각 시간</h3>
-            <p class="text-2xl font-bold text-indigo-900" id="avgLateTime">-</p>
+
+          <!-- 인정결석률 카드 -->
+          <div
+            class="bg-gradient-to-br from-purple-50 to-fuchsia-50 rounded-xl p-4 border border-purple-100"
+          >
+            <div class="flex items-center justify-between mb-3">
+              <span class="text-purple-600 bg-purple-100 p-2 rounded-lg">
+                <i class="ri-calendar-check-line text-xl"></i>
+              </span>
+              <span
+                class="text-xs font-medium text-purple-600 bg-purple-100 px-2 py-1 rounded-full"
+                >인정</span
+              >
+            </div>
+            <h3 class="text-sm font-medium text-gray-600 mb-1">인정결석률</h3>
+            <p class="text-2xl font-bold text-gray-900" id="excusedRate">-</p>
           </div>
-          <div class="bg-purple-50 p-4 rounded-lg">
-            <h3 class="text-sm font-medium text-purple-700">인정결석률</h3>
-            <p class="text-2xl font-bold text-purple-900" id="excusedRate">-</p>
+
+          <!-- 전체 출석일수 카드 -->
+          <div
+            class="bg-gradient-to-br from-gray-50 to-slate-50 rounded-xl p-4 border border-gray-100"
+          >
+            <div class="flex items-center justify-between mb-3">
+              <span class="text-gray-600 bg-gray-100 p-2 rounded-lg">
+                <i class="ri-calendar-line text-xl"></i>
+              </span>
+              <span
+                class="text-xs font-medium text-gray-600 bg-gray-100 px-2 py-1 rounded-full"
+                >기간</span
+              >
+            </div>
+            <h3 class="text-sm font-medium text-gray-600 mb-1">
+              전체 출석일수
+            </h3>
+            <p class="text-2xl font-bold text-gray-900" id="totalDays">-</p>
           </div>
         </div>
       </section>
@@ -247,50 +334,78 @@
 
       <section class="bg-white rounded-lg shadow">
         <div class="p-6">
-          <h2 class="text-2xl font-bold mb-4">상세 통계</h2>
+          <h2 class="text-2xl font-bold mb-6 flex items-center">
+            <i class="ri-file-list-line mr-2"></i>
+            상세 통계
+          </h2>
+
           <div class="overflow-x-auto">
             <table class="min-w-full divide-y divide-gray-200">
-              <thead class="bg-gray-50">
-                <tr>
+              <thead>
+                <tr class="bg-gray-50">
                   <th
-                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                    class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap"
                   >
-                    학번
+                    <div class="flex items-center">
+                      <i class="ri-user-line mr-2"></i>
+                      학번
+                    </div>
                   </th>
                   <th
-                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                    class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap"
                   >
-                    이름
+                    <div class="flex items-center">
+                      <i class="ri-profile-line mr-2"></i>
+                      이름
+                    </div>
                   </th>
                   <th
-                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                    class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap"
                   >
-                    학년-반-번호
+                    <div class="flex items-center">
+                      <i class="ri-building-line mr-2"></i>
+                      학년-반-번호
+                    </div>
                   </th>
                   <th
-                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                    class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap"
                   >
-                    출석률
+                    <div class="flex items-center">
+                      <i class="ri-bar-chart-line mr-2"></i>
+                      출석률
+                    </div>
                   </th>
                   <th
-                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                    class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap"
                   >
-                    출석/지각/결석
+                    <div class="flex items-center">
+                      <i class="ri-calendar-check-line mr-2"></i>
+                      출석/지각/결석
+                    </div>
                   </th>
                   <th
-                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                    class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap"
                   >
-                    평균 지각시간
+                    <div class="flex items-center">
+                      <i class="ri-time-line mr-2"></i>
+                      평균 지각시간
+                    </div>
                   </th>
                   <th
-                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                    class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap"
                   >
-                    오늘의 출석
+                    <div class="flex items-center">
+                      <i class="ri-calendar-todo-line mr-2"></i>
+                      오늘의 출석
+                    </div>
                   </th>
                   <th
-                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                    class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap"
                   >
-                    상세
+                    <div class="flex items-center">
+                      <i class="ri-file-search-line mr-2"></i>
+                      상세
+                    </div>
                   </th>
                 </tr>
               </thead>
@@ -615,31 +730,44 @@
             const { summary } = student;
             return `
               <tr class="hover:bg-gray-50 transition-colors">
-                <td class="px-6 py-4 whitespace-nowrap">${
-                  student.studentId
-                }</td>
-                <td class="px-6 py-4 whitespace-nowrap">${student.name}</td>
-                <td class="px-6 py-4 whitespace-nowrap">${student.grade}-${
-              student.class
-            }-${student.number}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-medium">
+                  ${student.studentId}
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                  ${student.name}
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  ${student.grade}-${student.class}-${student.number}
+                </td>
                 <td class="px-6 py-4 whitespace-nowrap">
                   <div class="flex items-center">
                     <div class="w-16 bg-gray-200 rounded-full h-2 mr-2">
-                      <div class="bg-green-500 rounded-full h-2" style="width: ${
-                        summary.attendanceRate
-                      }%"></div>
+                      <div 
+                        class="bg-green-500 rounded-full h-2" 
+                        style="width: ${summary.attendanceRate}%"
+                      ></div>
                     </div>
-                    <span>${summary.attendanceRate}%</span>
+                    <span class="text-sm font-medium text-gray-900">${
+                      summary.attendanceRate
+                    }%</span>
                   </div>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap">
-                  <span class="text-green-600">${summary.presentCount}</span>
-                  <span class="text-gray-400">/</span>
-                  <span class="text-yellow-600">${summary.lateCount}</span>
-                  <span class="text-gray-400">/</span>
-                  <span class="text-red-600">${summary.absentCount}</span>
+                  <div class="flex items-center space-x-2 text-sm">
+                    <span class="text-green-600 font-medium">${
+                      summary.presentCount
+                    }</span>
+                    <span class="text-gray-400">/</span>
+                    <span class="text-yellow-600 font-medium">${
+                      summary.lateCount
+                    }</span>
+                    <span class="text-gray-400">/</span>
+                    <span class="text-red-600 font-medium">${
+                      summary.absentCount
+                    }</span>
+                  </div>
                 </td>
-                <td class="px-6 py-4 whitespace-nowrap">
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                   ${
                     summary.lateCount > 0
                       ? `${(
@@ -654,22 +782,23 @@
                       ? `<span class="${getStatusBadgeClass(
                           student.todayStatus.status
                         )}">
-                      ${getStatusText(student.todayStatus.status)}
-                      ${
-                        student.todayStatus.lateMinutes
-                          ? `(${student.todayStatus.lateMinutes}분)`
-                          : ""
-                      }
-                    </span>`
-                      : '<span class="text-gray-400">미출석</span>'
+                          ${getStatusText(student.todayStatus.status)}
+                          ${
+                            student.todayStatus.lateMinutes
+                              ? `(${student.todayStatus.lateMinutes}분)`
+                              : ""
+                          }
+                        </span>`
+                      : '<span class="text-gray-400 text-sm">미출석</span>'
                   }
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap">
                   <button 
                     onclick="showStudentDetail('${student.studentId}')"
-                    class="text-primary hover:text-secondary transition-colors"
+                    class="text-primary hover:text-secondary transition-colors inline-flex items-center text-sm font-medium"
                   >
-                    <i class="ri-file-list-line mr-1"></i>상세보기
+                    <i class="ri-file-list-line mr-1"></i>
+                    상세보기
                   </button>
                 </td>
               </tr>
@@ -1157,7 +1286,7 @@
               : '<div class="text-gray-500">오늘의 출석 정보가 없습니다.</div>';
           }
 
-          // 전체 통계 요약 업데이트
+          // 전체 ���계 요약 업데이트
           const modalSummary = document.getElementById("modalSummary");
           if (modalSummary && totalStats) {
             modalSummary.innerHTML = `
@@ -1314,7 +1443,7 @@
           .join("");
       }
 
-      // 월��� 통계 계산 함수
+      // 월 통계 계산 함수
       function calculateMonthStats(records) {
         return {
           present: records.filter((r) => r.status === "present").length,
