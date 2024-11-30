@@ -120,21 +120,89 @@
         document.getElementById("error-message").classList.add("hidden");
       }
 
-      async function fetchStudentInfo() {
+      function checkAuth() {
+        const token = localStorage.getItem("token");
+        if (!token) {
+          window.location.href =
+            "index.html?error=" + encodeURIComponent("로그인이 필요합니다.");
+          return false;
+        }
+        return true;
+      }
+
+      async function apiRequest(url, options = {}) {
         try {
           const token = localStorage.getItem("token");
-          const response = await fetch(`${API_BASE_URL}/student-info`, {
+          const response = await fetch(url, {
+            ...options,
             headers: {
+              ...options.headers,
               Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
             },
           });
-          if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(
-              errorData.message || "Failed to fetch student info"
+
+          if (response.status === 401) {
+            const refreshToken = localStorage.getItem("refreshToken");
+            if (!refreshToken) {
+              throw new Error("리프레시 토큰이 없습니다.");
+            }
+
+            // 토큰 갱신 시도
+            const refreshResponse = await fetch(
+              `${API_BASE_URL}/refresh-token`,
+              {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ refreshToken }),
+              }
             );
+
+            if (!refreshResponse.ok) {
+              throw new Error("토큰 갱신에 실패했습니다.");
+            }
+
+            const { accessToken, refreshToken: newRefreshToken } =
+              await refreshResponse.json();
+            localStorage.setItem("token", accessToken);
+            localStorage.setItem("refreshToken", newRefreshToken);
+
+            // 원래 요청 재시도
+            return await fetch(url, {
+              ...options,
+              headers: {
+                ...options.headers,
+                Authorization: `Bearer ${accessToken}`,
+                "Content-Type": "application/json",
+              },
+            });
           }
+
+          return response;
+        } catch (error) {
+          console.error("API request error:", error);
+          localStorage.removeItem("token");
+          localStorage.removeItem("refreshToken");
+          window.location.href =
+            "index.html?error=" +
+            encodeURIComponent("세션이 만료되었습니다. 다시 로그인해주세요.");
+          throw error;
+        }
+      }
+
+      async function fetchStudentInfo() {
+        try {
+          if (!checkAuth()) return;
+
+          const response = await apiRequest(`${API_BASE_URL}/student-info`);
           const data = await response.json();
+
+          if (!response.ok) {
+            throw new Error(data.message || "Failed to fetch student info");
+          }
+
           studentId = data.studentId;
           studentName = data.name;
           document.getElementById(
@@ -144,36 +212,21 @@
         } catch (error) {
           console.error("Error fetching student info:", error);
           showError(`학생 정보를 가져오는데 실패했습니다: ${error.message}`);
-          setTimeout(() => {
-            window.location.href = "hub.html";
-          }, 3000);
         }
       }
 
       async function generateQRCode() {
-        if (!studentId || !studentName) {
-          await fetchStudentInfo();
-        }
-
-        const timestamp = Math.floor(Date.now() / 30000); // 30초마다 변경
-
         try {
-          const token = localStorage.getItem("token");
-          const response = await fetch(`${API_BASE_URL}/generate-qr`, {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${token}`,
-            },
-            body: JSON.stringify({ studentId, timestamp }),
-          });
+          if (!checkAuth()) return;
 
-          if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(
-              errorData.message || "QR 코드 생성에 실패했습니다."
-            );
+          if (!studentId || !studentName) {
+            await fetchStudentInfo();
           }
+
+          const response = await apiRequest(`${API_BASE_URL}/generate-qr`, {
+            method: "POST",
+            body: JSON.stringify({ studentId }),
+          });
 
           const data = await response.json();
           if (!data.success) {
@@ -189,12 +242,6 @@
         } catch (error) {
           console.error("QR 코드 생성 오류:", error);
           showError(`QR 코드 생성 실패: ${error.message}`);
-
-          // 자동 재시도 로직 추가
-          setTimeout(() => {
-            console.log("QR 코드 생성 재시도...");
-            generateQRCode();
-          }, 5000);
         }
       }
 
@@ -232,8 +279,11 @@
           }
         });
 
-      // 페이지 로드 시 학생 정보 가져오기
-      fetchStudentInfo();
+      // 페이지 로드 시 즉시 인증 체크
+      document.addEventListener("DOMContentLoaded", () => {
+        if (!checkAuth()) return;
+        fetchStudentInfo();
+      });
 
       function showToast(message, type = "info") {
         const toast = document.createElement("div");
