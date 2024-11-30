@@ -6,6 +6,8 @@
     <title>디지털 출결관리</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment-timezone/0.5.33/moment-timezone-with-data.min.js"></script>
     <script>
       tailwind.config = {
         theme: {
@@ -66,8 +68,18 @@
 
             <div class="mt-6 bg-white rounded-lg shadow p-6">
               <h3 class="text-xl font-bold mb-4">오늘의 출석 상태</h3>
-              <div id="todayStatus" class="mb-6">
-                <!-- 동적으로 추가될 내용 -->
+              <div class="space-y-4">
+                <div class="flex items-center justify-between">
+                  <span class="text-gray-600">현재 시간</span>
+                  <span id="currentTime" class="font-semibold"></span>
+                </div>
+                <div class="flex items-center justify-between">
+                  <span class="text-gray-600">출석 마감</span>
+                  <span class="font-semibold text-red-600">09:00</span>
+                </div>
+                <div id="todayStatus" class="mt-4">
+                  <!-- 동적으로 추가될 내용 -->
+                </div>
               </div>
             </div>
 
@@ -312,7 +324,7 @@
           }
         });
 
-      // 페이지 로드 시 즉시 ���증 체크
+      // 페이지 로드 시 즉시 증 체크
       document.addEventListener("DOMContentLoaded", () => {
         if (!checkAuth()) return;
         fetchStudentInfo();
@@ -495,6 +507,18 @@
           closeModal();
         }
       });
+
+      // 현재 시간 업데이트 함수
+      function updateCurrentTime() {
+        const currentTime = document.getElementById("currentTime");
+        currentTime.textContent = moment().tz("Asia/Seoul").format("HH:mm:ss");
+      }
+
+      // 1초마다 시간 업데이트
+      setInterval(updateCurrentTime, 1000);
+
+      // 페이지 로드 시 즉시 시간 표시
+      updateCurrentTime();
     </script>
 
     <div

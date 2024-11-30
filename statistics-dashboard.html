@@ -611,20 +611,14 @@
 
       document.addEventListener("DOMContentLoaded", async function () {
         try {
-          // Chart.js 로드
           await loadChartJS();
-
-          // 나머지 초기화
           checkLoginAndRedirect();
           initializeDateRange();
           setupEventListeners();
           await Promise.all([fetchAttendanceStats(), updateExcusedList()]);
 
-          // 자동 결석 처리 타이머 설정
+          // 자동 결석 처리 타이머만 설정하고, 즉시 실행은 하지 않음
           setupAutoAbsentTimer();
-
-          // 페이지 로드 시 한 번 체크
-          await handleAutoAbsent();
         } catch (error) {
           console.error("초기화 중 오류:", error);
           alert("페이지 초기화 중 오류가 발생했습니다.");
@@ -797,8 +791,8 @@
                 <td class="px-6 py-4 whitespace-nowrap">
                   <div class="flex items-center">
                     <div class="w-16 bg-gray-200 rounded-full h-2 mr-2">
-                      <div 
-                        class="bg-green-500 rounded-full h-2" 
+                      <div
+                        class="bg-green-500 rounded-full h-2"
                         style="width: ${summary.attendanceRate}%"
                       ></div>
                     </div>
@@ -848,7 +842,7 @@
                   }
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap">
-                  <button 
+                  <button
                     onclick="showStudentDetail('${student.studentId}')"
                     class="text-primary hover:text-secondary transition-colors inline-flex items-center text-sm font-medium"
                   >
@@ -983,7 +977,7 @@
           <div class="mb-2 p-2 bg-white rounded shadow">
             <p>학번: ${absence.studentId}</p>
             <p>날짜: ${moment(absence.timestamp).format("YYYY-MM-DD")}</p>
-            <button 
+            <button
               onclick="handleExcuseAbsence('${absence.studentId}', '${
               absence.timestamp
             }')"
@@ -1059,7 +1053,7 @@
 
           if (!response.data.success) {
             throw new Error(
-              response.data.message || "인정결석 처리에 실패했습니다."
+              response.data.message || "인정결석 처리��� 실패했��니다."
             );
           }
 
@@ -1491,9 +1485,9 @@
                   <div class="flex justify-between items-center">
                     <span class="font-semibold">${month}</span>
                     <span class="text-sm text-gray-600">
-                      출석: ${monthStats.present}회 / 
-                      지각: ${monthStats.late}회 / 
-                      결석: ${monthStats.absent}회 / 
+                      출석: ${monthStats.present}회 /
+                      지각: ${monthStats.late}회 /
+                      결석: ${monthStats.absent}회 /
                       인정: ${monthStats.excused}회
                     </span>
                   </div>
@@ -1526,7 +1520,7 @@
                            attendance.reason || ""
                          }</div>`
                         : attendance.status === "absent"
-                        ? `<button 
+                        ? `<button
                         onclick="handleExcuseAbsence('${attendance.studentId}', '${attendance.date}')"
                         class="text-blue-600 hover:text-blue-800 text-sm"
                       >
@@ -1843,71 +1837,101 @@
         });
       }
 
-      // 개선도 차트 업데이트 함수 개선
+      // 개선도 차트 업데이트 함수
       async function updateImprovementChart(improvements) {
         if (!improvements || improvements.length === 0) return;
-        queueChartUpdate("improvement", () => {
-          const ctx = document.getElementById("improvementChart");
-          if (!ctx) return;
 
-          if (window.improvementChart instanceof Chart) {
-            window.improvementChart.destroy();
-          }
+        const ctx = document.getElementById("improvementChart");
+        if (!ctx) return;
 
-          const labels = improvements.map((imp) => imp.month);
-          const data = improvements.map((imp) => imp.improvement);
+        // 기존 차트 제거
+        if (window.improvementChart instanceof Chart) {
+          window.improvementChart.destroy();
+        }
 
-          window.improvementChart = new Chart(ctx, {
-            type: "line",
-            data: {
-              labels,
-              datasets: [
-                {
-                  label: "개선도",
-                  data,
-                  borderColor: chartColors.improvement.border,
-                  backgroundColor: chartColors.improvement.background,
-                  tension: 0.3,
-                  fill: true,
-                  pointBackgroundColor: data.map((value) =>
-                    value >= 0
-                      ? chartColors.present.border
-                      : chartColors.absent.border
-                  ),
-                  pointRadius: 5,
-                  pointHoverRadius: 7,
-                },
-              ],
-            },
-            options: {
-              ...chartConfig,
-              scales: {
-                ...chartConfig.scales,
-                y: {
-                  ...chartConfig.scales.y,
-                  grid: {
-                    color: "rgba(0, 0, 0, 0.05)",
-                    drawBorder: false,
-                  },
-                  ticks: {
-                    callback: (value) => `${value}%`,
-                    stepSize: 10,
+        const labels = improvements.map((imp) => imp.month);
+        const data = improvements.map((imp) => imp.improvement);
+
+        const config = {
+          type: "line",
+          data: {
+            labels: labels,
+            datasets: [
+              {
+                label: "개선도",
+                data: data,
+                borderColor: chartColors.improvement.border,
+                backgroundColor: chartColors.improvement.background,
+                tension: 0.3,
+                fill: true,
+                pointBackgroundColor: data.map((value) =>
+                  value >= 0
+                    ? chartColors.present.border
+                    : chartColors.absent.border
+                ),
+                pointRadius: 5,
+                pointHoverRadius: 7,
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: {
+                position: "bottom",
+                labels: {
+                  usePointStyle: true,
+                  padding: 20,
+                  font: {
+                    family: "'Inter', sans-serif",
+                    size: 12,
                   },
                 },
               },
-              plugins: {
-                ...chartConfig.plugins,
-                tooltip: {
-                  ...chartConfig.plugins.tooltip,
-                  callbacks: {
-                    label: (context) => `개선도: ${context.parsed.y}%`,
+              tooltip: {
+                mode: "index",
+                intersect: false,
+                padding: 12,
+                backgroundColor: "rgba(17, 24, 39, 0.8)",
+                callbacks: {
+                  label: (context) => `개선도: ${context.parsed.y}%`,
+                },
+              },
+            },
+            scales: {
+              y: {
+                beginAtZero: true,
+                grid: {
+                  color: "rgba(0, 0, 0, 0.05)",
+                  drawBorder: false,
+                },
+                ticks: {
+                  callback: (value) => `${value}%`,
+                  stepSize: 10,
+                  font: {
+                    family: "'Inter', sans-serif",
+                    size: 12,
+                  },
+                },
+              },
+              x: {
+                grid: {
+                  display: false,
+                },
+                ticks: {
+                  font: {
+                    family: "'Inter', sans-serif",
+                    size: 12,
                   },
                 },
               },
             },
-          });
-        });
+          },
+        };
       }
+
+      window.improvementChart = new Chart(ctx, config);
 
       function showLoading() {
         const loadingSpinner = document.getElementById("loading-spinner");
