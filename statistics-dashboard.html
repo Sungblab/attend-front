@@ -201,7 +201,7 @@
             <p class="text-2xl font-bold text-gray-900" id="absentRate">-</p>
           </div>
 
-          <!-- 인정결석률 카드 -->
+          <!-- 인��결석률 카드 -->
           <div
             class="bg-gradient-to-br from-purple-50 to-fuchsia-50 rounded-xl p-4 border border-purple-100"
           >
@@ -2089,6 +2089,8 @@
               throw new Error("로그인이 필요합니다.");
             }
 
+            console.log("Submitting holiday:", { date, reason }); // 제출 데이터 로그
+
             const response = await axios.post(
               "/api/holidays",
               { date, reason },
@@ -2099,12 +2101,18 @@
               }
             );
 
+            console.log("Server response:", response.data); // 서버 응답 로그
+
             if (response.data.success) {
               showToast("휴일이 등록되었습니다.", "success");
               document.getElementById("holidayForm").reset();
 
-              // 휴일 목록 업데이트
-              updateHolidayListUI(response.data.holidays);
+              // 휴일 목록 즉시 업데이트
+              if (response.data.holidays) {
+                updateHolidayListUI(response.data.holidays);
+              } else {
+                await updateHolidayList(); // 백업: 전체 목록 다시 조회
+              }
             }
           } catch (error) {
             console.error("휴일 등록 중 오류:", error);
@@ -2117,8 +2125,13 @@
 
       // 휴일 목록 UI 업데이트 함수 수정
       function updateHolidayListUI(holidays) {
+        console.log("Updating holiday list UI with:", holidays); // UI 업데이트 데이터 로그
+
         const holidayList = document.getElementById("holidayList");
-        if (!holidayList) return;
+        if (!holidayList) {
+          console.error("Holiday list element not found");
+          return;
+        }
 
         if (!holidays || holidays.length === 0) {
           holidayList.innerHTML =
@@ -2126,25 +2139,28 @@
           return;
         }
 
-        holidayList.innerHTML = holidays
-          .map(
-            (holiday) => `
+        const holidayItems = holidays.map((holiday) => {
+          const formattedDate = moment(holiday.date).format(
+            "YYYY년 MM월 DD일 (ddd)"
+          );
+          const formattedCreatedAt = moment(holiday.createdAt).format(
+            "YYYY-MM-DD HH:mm"
+          );
+
+          return `
             <div class="bg-white p-4 rounded-lg shadow-sm mb-3 hover:shadow-md transition-shadow">
               <div class="flex justify-between items-start">
                 <div>
-                  <p class="font-semibold text-lg text-gray-800">
-                    ${moment(holiday.date).format("YYYY년 MM월 DD일 (ddd)")}
-                  </p>
+                  <p class="font-semibold text-lg text-gray-800">${formattedDate}</p>
                   <p class="text-gray-600 mt-1">${holiday.reason}</p>
                 </div>
-                <span class="text-xs text-gray-500">
-                  ${moment(holiday.createdAt).format("YYYY-MM-DD HH:mm")}
-                </span>
+                <span class="text-xs text-gray-500">${formattedCreatedAt}</span>
               </div>
             </div>
-          `
-          )
-          .join("");
+          `;
+        });
+
+        holidayList.innerHTML = holidayItems.join("");
       }
 
       // 페이지 로드 시 휴일 목록 조회
