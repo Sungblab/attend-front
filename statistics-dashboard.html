@@ -327,10 +327,10 @@
 
     <div
       id="studentDetailModal"
-      class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full"
+      class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50"
     >
       <div
-        class="relative top-20 mx-auto p-5 border w-11/12 max-w-4xl shadow-lg rounded-md bg-white"
+        class="relative mx-auto my-8 p-6 border w-11/12 max-w-6xl shadow-lg rounded-lg bg-white"
       >
         <div class="flex justify-between items-center mb-4">
           <h3 class="text-2xl font-bold" id="modalTitle">학생 상세 통계</h3>
@@ -372,25 +372,39 @@
         </div>
 
         <!-- 전체 통계 요약 -->
-        <div class="mb-6">
-          <h4 class="text-lg font-semibold mb-2">전체 통계 요약</h4>
-          <div id="modalSummary" class="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div class="mb-8">
+          <h4 class="text-lg font-semibold mb-4">전체 통계 요약</h4>
+          <div
+            id="modalSummary"
+            class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4"
+          >
             <!-- 동적으로 추가될 내용 -->
           </div>
         </div>
 
-        <!-- 월별 통계 그래프 -->
-        <div class="mb-6">
-          <h4 class="text-lg font-semibold mb-2">월별 통계</h4>
-          <div class="bg-white p-4 rounded-lg shadow" style="height: 300px">
-            <canvas id="monthlyStatsChart"></canvas>
+        <!-- 차트 컨테이너 -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+          <!-- 월별 통계 그래프 -->
+          <div>
+            <h4 class="text-lg font-semibold mb-4">월별 통계</h4>
+            <div class="bg-white p-4 rounded-lg shadow" style="height: 300px">
+              <canvas id="monthlyStatsChart"></canvas>
+            </div>
+          </div>
+
+          <!-- 개선도 그래프 -->
+          <div>
+            <h4 class="text-lg font-semibold mb-4">개선도</h4>
+            <div class="bg-white p-4 rounded-lg shadow" style="height: 300px">
+              <canvas id="improvementChart"></canvas>
+            </div>
           </div>
         </div>
 
-        <!-- 출석 상세 기록 -->
-        <div class="mb-6">
-          <h4 class="text-lg font-semibold mb-2">출석 기록</h4>
-          <div class="overflow-x-auto">
+        <!-- 출석 기록 테이블 컨테이너 -->
+        <div class="mb-8">
+          <h4 class="text-lg font-semibold mb-4">출석 기록</h4>
+          <div class="overflow-x-auto rounded-lg shadow">
             <table class="min-w-full divide-y divide-gray-200">
               <thead class="bg-gray-50">
                 <tr>
@@ -423,14 +437,6 @@
                 <!-- 동적으로 추가될 내용 -->
               </tbody>
             </table>
-          </div>
-        </div>
-
-        <!-- 개선도 그래프 -->
-        <div class="mb-6">
-          <h4 class="text-lg font-semibold mb-2">개선도</h4>
-          <div class="bg-white p-4 rounded-lg shadow" style="height: 300px">
-            <canvas id="improvementChart"></canvas>
           </div>
         </div>
       </div>
@@ -1308,7 +1314,7 @@
           .join("");
       }
 
-      // 월별 통계 계산 함수
+      // 월��� 통계 계산 함수
       function calculateMonthStats(records) {
         return {
           present: records.filter((r) => r.status === "present").length,
@@ -1690,7 +1696,7 @@
       // 전역 에러 핸들러 추가
       window.onerror = function (msg, url, lineNo, columnNo, error) {
         console.error("Global error:", { msg, url, lineNo, columnNo, error });
-        showToast("예기치 않은 ���류가 발생했습니다.", "error");
+        showToast("예기치 않은 류가 발생했습니다.", "error");
         return false;
       };
 
