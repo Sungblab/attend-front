@@ -226,7 +226,7 @@
 
       <div class="bg-white overflow-hidden mb-8">
         <div class="p-6">
-          <h2 class="text-2xl font-bold mb-6 text-gray-800">특별 통계</h2>
+          <h2 class="text-2xl font-bold mb-6 text-gray-800">이달의 통계</h2>
           <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div class="bg-green-50 p-4 rounded-lg">
               <h3 class="font-semibold text-lg mb-2">이달의 출석왕</h3>
@@ -432,7 +432,25 @@
                 }</td>
                 <td class="px-6 py-4 whitespace-nowrap ${getStatusColor(
                   student.todayStatus
-                )}">${student.todayStatus || "미출석"}</td>
+                )}">
+                  ${
+                    student.isExcused
+                      ? `<span class="text-blue-600">인정결석</span>`
+                      : `<span class="${getStatusColor(student.todayStatus)}">${
+                          student.todayStatus || "미출석"
+                        }</span>`
+                  }
+                  ${
+                    !student.isExcused && student.todayStatus === "absent"
+                      ? `<button 
+                      onclick="handleExcuseAbsence('${student.studentId}', '${student.lastAttendance}')"
+                      class="ml-2 text-blue-600 hover:text-blue-800 text-sm"
+                    >
+                      인정결석 처리
+                    </button>`
+                      : ""
+                  }
+                </td>
               </tr>
             `;
           })
@@ -447,6 +465,8 @@
             return "text-yellow-600";
           case "absent":
             return "text-red-600";
+          case "excused":
+            return "text-blue-600";
           default:
             return "text-gray-600";
         }
@@ -552,16 +572,16 @@
           }
         });
 
-      async function handleExcuseAbsence(studentId, timestamp) {
+      async function handleExcuseAbsence(studentId, date) {
         const reason = prompt("인정결석 사유를 입력해주세요:");
         if (!reason) return;
 
         try {
-          await axios.post(
+          const response = await axios.post(
             "/api/attendance/excuse",
             {
               studentId,
-              date: moment(timestamp).format("YYYY-MM-DD"),
+              date,
               reason,
             },
             {
@@ -571,8 +591,12 @@
             }
           );
 
-          alert("인정결석 처리가 완료되었습니다.");
-          fetchAttendanceStats();
+          if (!response.data.success) {
+            throw new Error(response.data.message);
+          }
+
+          alert(response.data.message);
+          fetchAttendanceStats(); // 통계 새로고침
         } catch (error) {
           console.error("인정결석 처리 중 오류:", error);
           alert(
