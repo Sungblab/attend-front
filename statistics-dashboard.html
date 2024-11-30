@@ -270,7 +270,7 @@
                   <th
                     class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
                   >
-                    ��석률
+                    출석률
                   </th>
                   <th
                     class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
@@ -449,7 +449,10 @@
           checkLoginAndRedirect();
           initializeDateRange();
           setupEventListeners();
-          await fetchAttendanceStats();
+          await Promise.all([
+            fetchAttendanceStats(),
+            updateExcusedList(), // 인정결석 목록 조회 추가
+          ]);
         } catch (error) {
           console.error("초기화 중 오류:", error);
           alert("페이지 초기화 중 오류가 발생했습니다.");
@@ -871,7 +874,10 @@
           }
 
           showToast(response.data.message, "success");
-          await fetchAttendanceStats();
+          await Promise.all([
+            fetchAttendanceStats(),
+            updateExcusedList(), // 인정결석 목록 갱신
+          ]);
         } catch (error) {
           console.error("인정결석 처리 중 오류:", error);
           showToast(
@@ -1705,6 +1711,53 @@
         if (modal) {
           modal.classList.remove("hidden");
           document.body.style.overflow = "hidden"; // 배경 스크롤 방지
+        }
+      }
+
+      // 최근 인정결석 목록 업데이트 함수
+      async function updateExcusedList() {
+        try {
+          const token = localStorage.getItem("token");
+          const response = await axios.get("/api/attendance/excused", {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          });
+
+          if (!response.data.success) {
+            throw new Error(response.data.message);
+          }
+
+          const excusedList = document.getElementById("excusedList");
+          if (excusedList) {
+            excusedList.innerHTML =
+              response.data.excused
+                .map(
+                  (item) => `
+                <div class="bg-white p-3 rounded-lg shadow-sm">
+                  <div class="flex justify-between items-start">
+                    <div>
+                      <p class="font-semibold">${item.studentName} (${
+                    item.studentId
+                  })</p>
+                      <p class="text-sm text-gray-600">${moment(
+                        item.date
+                      ).format("YYYY-MM-DD")}</p>
+                      <p class="text-sm text-gray-700 mt-1">${item.reason}</p>
+                    </div>
+                    <span class="text-xs text-gray-500">
+                      ${moment(item.excusedAt).format("YYYY-MM-DD HH:mm")}
+                    </span>
+                  </div>
+                </div>
+              `
+                )
+                .join("") ||
+              "<p class='text-center text-gray-500'>인정결석 기록이 없습니다.</p>";
+          }
+        } catch (error) {
+          console.error("인정결석 목록 조회 중 오류:", error);
+          showToast("인정결석 목록 조회에 실패했습니다.", "error");
         }
       }
     </script>
