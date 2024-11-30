@@ -201,7 +201,7 @@
             <p class="text-2xl font-bold text-gray-900" id="absentRate">-</p>
           </div>
 
-          <!-- 인���결석률 카드 -->
+          <!-- 인��결석률 카드 -->
           <div
             class="bg-gradient-to-br from-purple-50 to-fuchsia-50 rounded-xl p-4 border border-purple-100"
           >
@@ -489,86 +489,85 @@
       </div>
     </footer>
 
+    <!-- 상세보기 모달 -->
     <div
       id="studentDetailModal"
       class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50"
     >
       <div
-        class="relative mx-auto my-8 p-6 border w-11/12 max-w-6xl shadow-lg rounded-lg bg-white"
+        class="relative top-20 mx-auto p-5 border w-11/12 max-w-4xl shadow-lg rounded-md bg-white"
       >
-        <div class="flex justify-between items-center mb-4">
-          <h3 class="text-2xl font-bold" id="modalTitle">학생 상세 통계</h3>
+        <!-- 헤더 -->
+        <div class="flex justify-between items-center pb-3 border-b">
+          <h3 class="text-2xl font-bold text-gray-900" id="modalTitle">
+            학생 상세 정보
+          </h3>
           <button
             onclick="closeModal()"
-            class="text-gray-600 hover:text-gray-800"
+            class="text-gray-400 hover:text-gray-500"
           >
             <i class="ri-close-line text-2xl"></i>
           </button>
         </div>
 
         <!-- 학생 기본 정보 -->
-        <div class="bg-gray-50 p-4 rounded-lg mb-4">
+        <div class="bg-gray-50 p-4 rounded-lg mt-4">
           <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
             <div>
-              <p class="text-sm text-gray-600">학번</p>
+              <p class="text-sm text-gray-500">학번</p>
               <p class="font-semibold" id="modalStudentId"></p>
             </div>
             <div>
-              <p class="text-sm text-gray-600">이름</p>
+              <p class="text-sm text-gray-500">이름</p>
               <p class="font-semibold" id="modalStudentName"></p>
             </div>
             <div>
-              <p class="text-sm text-gray-600">학년-반</p>
+              <p class="text-sm text-gray-500">학년-반</p>
               <p class="font-semibold" id="modalStudentClass"></p>
             </div>
             <div>
-              <p class="text-sm text-gray-600">번</p>
+              <p class="text-sm text-gray-500">번호</p>
               <p class="font-semibold" id="modalStudentNumber"></p>
             </div>
           </div>
         </div>
 
         <!-- 오늘의 출석 상태 -->
-        <div class="bg-gray-50 p-4 rounded-lg mb-4">
-          <div id="modalTodayStatus">
-            <!-- 오늘의 출석 상태가 여기에 동적으로 추가됨 -->
-          </div>
-        </div>
-
-        <!-- 전체 통계 요약 -->
-        <div class="mb-8">
-          <h4 class="text-lg font-semibold mb-4">전체 통계 요약</h4>
-          <div
-            id="modalSummary"
-            class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4"
-          >
+        <div class="mt-4">
+          <h4 class="text-lg font-semibold mb-2">오늘의 출석 상태</h4>
+          <div id="modalTodayStatus" class="bg-gray-50 p-4 rounded-lg">
             <!-- 동적으로 추가될 내용 -->
           </div>
         </div>
 
-        <!-- 차트 컨테이너 -->
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-          <!-- 월별 통계 그래프 -->
+        <!-- 통계 요약 -->
+        <div class="mt-4">
+          <h4 class="text-lg font-semibold mb-2">출석 통계</h4>
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-4" id="modalSummary">
+            <!-- 동적으로 추가될 내용 -->
+          </div>
+        </div>
+
+        <!-- 차트 -->
+        <div class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <h4 class="text-lg font-semibold mb-4">월별 통계</h4>
-            <div class="bg-white p-4 rounded-lg shadow" style="height: 300px">
+            <h4 class="text-lg font-semibold mb-2">월별 통계</h4>
+            <div class="bg-white p-4 rounded-lg shadow-sm">
               <canvas id="monthlyStatsChart"></canvas>
             </div>
           </div>
-
-          <!-- 개선도 그래프 -->
           <div>
-            <h4 class="text-lg font-semibold mb-4">개선도</h4>
-            <div class="bg-white p-4 rounded-lg shadow" style="height: 300px">
+            <h4 class="text-lg font-semibold mb-2">출석률 추이</h4>
+            <div class="bg-white p-4 rounded-lg shadow-sm">
               <canvas id="improvementChart"></canvas>
             </div>
           </div>
         </div>
 
-        <!-- 출석 기록 테이블 컨테이너 -->
-        <div class="mb-8">
-          <h4 class="text-lg font-semibold mb-4">출석 기록</h4>
-          <div class="overflow-x-auto rounded-lg shadow">
+        <!-- 출석 기록 테이블 -->
+        <div class="mt-4">
+          <h4 class="text-lg font-semibold mb-2">출석 기록</h4>
+          <div class="overflow-x-auto">
             <table class="min-w-full divide-y divide-gray-200">
               <thead class="bg-gray-50">
                 <tr>
@@ -580,12 +579,12 @@
                   <th
                     class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase"
                   >
-                    상태
+                    시간
                   </th>
                   <th
                     class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase"
                   >
-                    지각시간
+                    상태
                   </th>
                   <th
                     class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase"
@@ -618,7 +617,7 @@
           setupEventListeners();
           await Promise.all([fetchAttendanceStats(), updateExcusedList()]);
 
-          // 자동 결석 처리 타이머만 설정하고, 즉시 실행은 하지 않음
+          // 자동 결석 처리 타이머�� 설정하고, 즉시 실행은 하지 않음
           setupAutoAbsentTimer();
         } catch (error) {
           console.error("초기화 중 오류:", error);
@@ -1121,7 +1120,7 @@
             try {
               const refreshToken = localStorage.getItem("refreshToken");
               if (!refreshToken) {
-                throw new Error("리프레시 토큰이 없습니다.");
+                throw new Error("리프레시 토큰이 ���습니다.");
               }
 
               const response = await axios.post("/api/refresh-token", {
@@ -1855,7 +1854,10 @@
       async function updateImprovementChart(improvements) {
         if (!improvements || improvements.length === 0) return;
 
-        const ctx = document.getElementById("improvementChart");
+        const canvas = document.getElementById("improvementChart");
+        if (!canvas) return;
+
+        const ctx = canvas.getContext("2d");
         if (!ctx) return;
 
         // 기존 차트 제거
@@ -1866,14 +1868,14 @@
         const labels = improvements.map((imp) => imp.month);
         const data = improvements.map((imp) => imp.improvement);
 
-        const config = {
+        window.improvementChart = new Chart(ctx, {
           type: "line",
           data: {
-            labels: labels,
+            labels,
             datasets: [
               {
                 label: "개선도",
-                data: data,
+                data,
                 borderColor: chartColors.improvement.border,
                 backgroundColor: chartColors.improvement.background,
                 tension: 0.3,
@@ -1888,61 +1890,8 @@
               },
             ],
           },
-          options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-              legend: {
-                position: "bottom",
-                labels: {
-                  usePointStyle: true,
-                  padding: 20,
-                  font: {
-                    family: "'Inter', sans-serif",
-                    size: 12,
-                  },
-                },
-              },
-              tooltip: {
-                mode: "index",
-                intersect: false,
-                padding: 12,
-                backgroundColor: "rgba(17, 24, 39, 0.8)",
-                callbacks: {
-                  label: (context) => `개선도: ${context.parsed.y}%`,
-                },
-              },
-            },
-            scales: {
-              y: {
-                beginAtZero: true,
-                grid: {
-                  color: "rgba(0, 0, 0, 0.05)",
-                  drawBorder: false,
-                },
-                ticks: {
-                  callback: (value) => `${value}%`,
-                  stepSize: 10,
-                  font: {
-                    family: "'Inter', sans-serif",
-                    size: 12,
-                  },
-                },
-              },
-              x: {
-                grid: {
-                  display: false,
-                },
-                ticks: {
-                  font: {
-                    family: "'Inter', sans-serif",
-                    size: 12,
-                  },
-                },
-              },
-            },
-          },
-        };
+          options: chartConfig,
+        });
       }
 
       window.improvementChart = new Chart(ctx, config);
@@ -2133,16 +2082,22 @@
           try {
             const date = document.getElementById("holidayDate").value;
             const reason = document.getElementById("holidayReason").value;
+            const token = localStorage.getItem("token");
 
-            const response = await axios.post("/api/holidays", {
-              date,
-              reason,
-            });
+            const response = await axios.post(
+              "/api/holidays",
+              { date, reason },
+              {
+                headers: {
+                  Authorization: `Bearer ${token}`,
+                },
+              }
+            );
 
             if (response.data.success) {
               showToast("휴일이 등록되었습니다.", "success");
               document.getElementById("holidayForm").reset();
-              await updateHolidayList();
+              await updateHolidayList(); // 목록 갱신
             }
           } catch (error) {
             console.error("휴일 등록 중 오류:", error);
@@ -2156,21 +2111,26 @@
       // 휴일 목록 업데이트
       async function updateHolidayList() {
         try {
-          const response = await axios.get("/api/holidays");
-          const holidayList = document.getElementById("holidayList");
+          const token = localStorage.getItem("token");
+          const response = await axios.get("/api/holidays", {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          });
 
+          const holidayList = document.getElementById("holidayList");
           if (response.data.success) {
             holidayList.innerHTML =
               response.data.holidays
                 .map(
                   (holiday) => `
-                <div class="bg-white p-3 rounded-lg shadow-sm">
+                <div class="bg-white p-4 rounded-lg shadow-sm mb-2">
                   <div class="flex justify-between items-start">
                     <div>
-                      <p class="font-semibold">${moment(holiday.date).format(
-                        "YYYY-MM-DD (ddd)"
-                      )}</p>
-                      <p class="text-sm text-gray-600">${holiday.reason}</p>
+                      <p class="font-semibold text-lg">${moment(
+                        holiday.date
+                      ).format("YYYY년 MM월 DD일 (ddd)")}</p>
+                      <p class="text-gray-600 mt-1">${holiday.reason}</p>
                     </div>
                     <span class="text-xs text-gray-500">
                       ${moment(holiday.createdAt).format("YYYY-MM-DD HH:mm")}
@@ -2180,7 +2140,7 @@
               `
                 )
                 .join("") ||
-              "<p class='text-center text-gray-500'>등록된 휴일이 없습니다.</p>";
+              "<p class='text-center text-gray-500 py-4'>등록된 휴일이 없습니다.</p>";
           }
         } catch (error) {
           console.error("휴일 목록 조회 중 오류:", error);
