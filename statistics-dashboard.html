@@ -2079,108 +2079,97 @@
         }
       });
 
-      // 휴일 등록 폼 제출 처리
+      // 휴일 등록 폼 이벤트 리스너 추가
       document
         .getElementById("holidayForm")
         .addEventListener("submit", async (e) => {
           e.preventDefault();
 
-          const date = document.getElementById("holidayDate").value;
-          const reason = document.getElementById("holidayReason").value;
-
           try {
+            const date = document.getElementById("holidayDate").value;
+            const reason = document.getElementById("holidayReason").value;
+
+            const token = localStorage.getItem("token");
             const response = await axios.post(
               "/api/holidays",
-              {
-                date,
-                reason,
-              },
+              { date, reason },
               {
                 headers: {
-                  Authorization: `Bearer ${localStorage.getItem("token")}`,
+                  Authorization: `Bearer ${token}`,
                 },
               }
             );
 
             if (response.data.success) {
-              alert("휴일이 등록되었습니다.");
+              showToast("휴일이 등록되었습니다.", "success");
               document.getElementById("holidayForm").reset();
               await updateHolidayList();
             }
           } catch (error) {
             console.error("휴일 등록 중 오류:", error);
-            alert(error.response?.data?.message || "휴일 등록에 실패했습니다.");
+            showToast(
+              error.response?.data?.message || "휴일 등록에 실패했습니다.",
+              "error"
+            );
           }
         });
 
       // 휴일 목록 업데이트 함수
       async function updateHolidayList() {
         try {
+          const token = localStorage.getItem("token");
           const response = await axios.get("/api/holidays", {
             headers: {
-              Authorization: `Bearer ${localStorage.getItem("token")}`,
+              Authorization: `Bearer ${token}`,
             },
           });
 
+          if (!response.data.success) {
+            throw new Error(response.data.message);
+          }
+
           const holidayList = document.getElementById("holidayList");
-          if (response.data.success) {
+          if (holidayList) {
             holidayList.innerHTML =
               response.data.holidays
                 .map(
                   (holiday) => `
-              <div class="flex items-center justify-between bg-white p-3 rounded-lg shadow-sm mb-2">
-                <div>
-                  <p class="font-semibold">${moment(holiday.date).format(
-                    "YYYY-MM-DD (ddd)"
-                  )}</p>
-                  <p class="text-sm text-gray-600">${holiday.reason}</p>
-                  <p class="text-xs text-gray-500">등록: ${
-                    holiday.createdBy
-                  }</p>
+                <div class="bg-white p-3 rounded-lg shadow-sm mb-2">
+                  <div class="flex justify-between items-start">
+                    <div>
+                      <p class="font-semibold">${moment(holiday.date).format(
+                        "YYYY-MM-DD (ddd)"
+                      )}</p>
+                      <p class="text-sm text-gray-600">${holiday.reason}</p>
+                    </div>
+                    <span class="text-xs text-gray-500">
+                      ${moment(holiday.createdAt).format("YYYY-MM-DD HH:mm")}
+                    </span>
+                  </div>
                 </div>
-                <button 
-                  onclick="deleteHoliday('${holiday.id}')" 
-                  class="text-red-600 hover:text-red-800 text-sm"
-                >
-                  <i class="ri-delete-bin-line"></i>
-                  삭제
-                </button>
-              </div>
-            `
+              `
                 )
                 .join("") ||
               '<p class="text-center text-gray-500">등록된 휴일이 없습니다.</p>';
           }
         } catch (error) {
           console.error("휴일 목록 조회 중 오류:", error);
-          alert("휴일 목록을 불러오는데 실패했습니다.");
+          showToast("휴일 목록 조회에 실패했습니다.", "error");
         }
       }
 
-      // 휴일 삭제 함수
-      async function deleteHoliday(id) {
-        if (!confirm("정말로 이 휴일을 삭제하시겠습니까?")) return;
-
+      // 페이지 로드 시 초기화
+      document.addEventListener("DOMContentLoaded", async () => {
         try {
-          const response = await axios.delete(`/api/holidays/${id}`, {
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem("token")}`,
-            },
-          });
-
-          if (response.data.success) {
-            alert("휴일이 삭제되었습니다.");
-            await updateHolidayList();
-          }
+          await Promise.all([
+            fetchAttendanceStats(),
+            updateExcusedList(),
+            updateHolidayList(),
+          ]);
         } catch (error) {
-          console.error("휴일 삭제 중 오류:", error);
-          alert(error.response?.data?.message || "휴일 삭제에 실패했습니다.");
+          console.error("초기화 중 오류:", error);
+          showToast("데이터 로딩 중 오류가 발생했습니다.", "error");
         }
-      }
-
-      // 페이지 로드 시 휴일 목록 로드
-      document.addEventListener("DOMContentLoaded", () => {
-        updateHolidayList();
       });
     </script>
   </body>
