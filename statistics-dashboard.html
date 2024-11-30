@@ -1729,8 +1729,7 @@
 
       // 상태별 배지 스타일 클래스
       function getStatusBadgeClass(status) {
-        const baseClasses =
-          "inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium";
+        const baseClasses = "px-2 py-1 rounded-full text-xs font-medium";
         switch (status) {
           case "present":
             return `${baseClasses} bg-green-100 text-green-800`;
@@ -1741,6 +1740,21 @@
           default:
             return `${baseClasses} bg-gray-100 text-gray-800`;
         }
+      }
+
+      // 월별 통계 차트 업데이트 최적화
+      const chartUpdateQueue = new Set();
+
+      function queueChartUpdate(chartId, updateFn) {
+        if (chartUpdateQueue.has(chartId)) {
+          return;
+        }
+
+        chartUpdateQueue.add(chartId);
+        requestAnimationFrame(() => {
+          updateFn();
+          chartUpdateQueue.delete(chartId);
+        });
       }
 
       // 차트 업데이트 함수 수정
@@ -1823,51 +1837,71 @@
         });
       }
 
-      // 개선도 차트 업데이트 함수
+      // 개선도 차트 업데이트 함수 개선
       async function updateImprovementChart(improvements) {
         if (!improvements || improvements.length === 0) return;
+        queueChartUpdate("improvement", () => {
+          const ctx = document.getElementById("improvementChart");
+          if (!ctx) return;
 
-        const canvas = document.getElementById("improvementChart");
-        if (!canvas) return;
+          if (window.improvementChart instanceof Chart) {
+            window.improvementChart.destroy();
+          }
 
-        const ctx = canvas.getContext("2d");
-        if (!ctx) return;
+          const labels = improvements.map((imp) => imp.month);
+          const data = improvements.map((imp) => imp.improvement);
 
-        // 기존 차트 제거
-        if (window.improvementChart instanceof Chart) {
-          window.improvementChart.destroy();
-        }
-
-        const labels = improvements.map((imp) => imp.month);
-        const data = improvements.map((imp) => imp.improvement);
-
-        window.improvementChart = new Chart(ctx, {
-          type: "line",
-          data: {
-            labels,
-            datasets: [
-              {
-                label: "개선도",
-                data,
-                borderColor: chartColors.improvement.border,
-                backgroundColor: chartColors.improvement.background,
-                tension: 0.3,
-                fill: true,
-                pointBackgroundColor: data.map((value) =>
-                  value >= 0
-                    ? chartColors.present.border
-                    : chartColors.absent.border
-                ),
-                pointRadius: 5,
-                pointHoverRadius: 7,
+          window.improvementChart = new Chart(ctx, {
+            type: "line",
+            data: {
+              labels,
+              datasets: [
+                {
+                  label: "개선도",
+                  data,
+                  borderColor: chartColors.improvement.border,
+                  backgroundColor: chartColors.improvement.background,
+                  tension: 0.3,
+                  fill: true,
+                  pointBackgroundColor: data.map((value) =>
+                    value >= 0
+                      ? chartColors.present.border
+                      : chartColors.absent.border
+                  ),
+                  pointRadius: 5,
+                  pointHoverRadius: 7,
+                },
+              ],
+            },
+            options: {
+              ...chartConfig,
+              scales: {
+                ...chartConfig.scales,
+                y: {
+                  ...chartConfig.scales.y,
+                  grid: {
+                    color: "rgba(0, 0, 0, 0.05)",
+                    drawBorder: false,
+                  },
+                  ticks: {
+                    callback: (value) => `${value}%`,
+                    stepSize: 10,
+                  },
+                },
               },
-            ],
-          },
-          options: chartConfig,
+              plugins: {
+                ...chartConfig.plugins,
+                tooltip: {
+                  ...chartConfig.plugins.tooltip,
+                  callbacks: {
+                    label: (context) => `개선도: ${context.parsed.y}%`,
+                  },
+                },
+              },
+            },
+          });
         });
       }
-
-      window.improvementChart = new Chart(ctx, config);
 
       function showLoading() {
         const loadingSpinner = document.getElementById("loading-spinner");
