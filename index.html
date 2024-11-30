@@ -243,7 +243,7 @@
       // 페이지 로드 시 로그인 상태 확인
       window.addEventListener("load", checkLoginStatus);
 
-      // 로그인 폼 제출 이벤트 리스너
+      // 로그인 폼 제출 이벤트 리스너 수정
       document
         .getElementById("loginForm")
         .addEventListener("submit", async function (e) {
@@ -267,9 +267,12 @@
 
               const data = await response.json();
 
-              if (response.ok) {
-                localStorage.setItem("token", data.token);
+              if (response.ok && data.success) {
+                // accessToken과 refreshToken을 localStorage에 저장
+                localStorage.setItem("token", data.accessToken);
+                localStorage.setItem("refreshToken", data.refreshToken);
                 localStorage.setItem("userInfo", JSON.stringify(data.user));
+
                 showMessage("로그인 성공! 잠시 후 메인 페이지로 이동합니다.");
                 setTimeout(() => {
                   window.location.href = "hub.html";

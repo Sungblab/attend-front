@@ -100,7 +100,7 @@
           >
         </div>
         <div class="text-center">
-          <p>&copy; 2024 디지털 출결관리. All rights reserved.</p>
+          <p>&copy; 2024 디지�� 출결관리. All rights reserved.</p>
         </div>
       </div>
     </footer>
@@ -137,13 +137,15 @@
             throw new Error("토큰이 없습니다.");
           }
 
+          const headers = {
+            ...options.headers,
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          };
+
           const response = await fetch(url, {
             ...options,
-            headers: {
-              ...options.headers,
-              Authorization: `Bearer ${token}`,
-              "Content-Type": "application/json",
-            },
+            headers,
           });
 
           if (response.status === 401) {
@@ -164,17 +166,14 @@
                 }
               );
 
-              if (!refreshResponse.ok) {
-                throw new Error("토큰 갱신에 실패했습니다.");
-              }
-
               const refreshData = await refreshResponse.json();
-              if (!refreshData.success) {
+              if (!refreshResponse.ok || !refreshData.success) {
                 throw new Error(
                   refreshData.message || "토큰 갱신에 실패했습니다."
                 );
               }
 
+              // 새로운 토큰 저장
               localStorage.setItem("token", refreshData.accessToken);
               localStorage.setItem("refreshToken", refreshData.refreshToken);
 
@@ -191,6 +190,7 @@
               console.error("Token refresh error:", refreshError);
               localStorage.removeItem("token");
               localStorage.removeItem("refreshToken");
+              localStorage.removeItem("userInfo");
               window.location.href =
                 "index.html?error=" +
                 encodeURIComponent(
