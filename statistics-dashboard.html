@@ -8,7 +8,6 @@
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/moment-timezone/0.5.33/moment-timezone-with-data.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
       tailwind.config = {
         theme: {
@@ -121,120 +120,33 @@
       </section>
 
       <section class="bg-white rounded-lg shadow mb-6 p-6">
-        <h2 class="text-2xl font-bold mb-6 flex items-center">
-          <i class="ri-bar-chart-box-line mr-2"></i>
-          전체 통계
-        </h2>
-        <div
-          class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-6"
-        >
-          <!-- 전체 학생 카드 -->
-          <div
-            class="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-4 border border-blue-100"
-          >
-            <div class="flex items-center justify-between mb-3">
-              <span class="text-blue-600 bg-blue-100 p-2 rounded-lg">
-                <i class="ri-user-line text-xl"></i>
-              </span>
-              <span
-                class="text-xs font-medium text-blue-600 bg-blue-100 px-2 py-1 rounded-full"
-                >전체</span
-              >
-            </div>
-            <h3 class="text-sm font-medium text-gray-600 mb-1">전체 학생</h3>
-            <p class="text-2xl font-bold text-gray-900" id="totalStudents">-</p>
+        <h2 class="text-2xl font-bold mb-4">전체 통계</h2>
+        <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4">
+          <div class="bg-blue-50 p-4 rounded-lg">
+            <h3 class="text-sm font-medium text-blue-700">전체 학생</h3>
+            <p class="text-2xl font-bold text-blue-900" id="totalStudents">-</p>
           </div>
-
-          <!-- 출석률 카드 -->
-          <div
-            class="bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl p-4 border border-green-100"
-          >
-            <div class="flex items-center justify-between mb-3">
-              <span class="text-green-600 bg-green-100 p-2 rounded-lg">
-                <i class="ri-check-line text-xl"></i>
-              </span>
-              <span
-                class="text-xs font-medium text-green-600 bg-green-100 px-2 py-1 rounded-full"
-                >출석</span
-              >
-            </div>
-            <h3 class="text-sm font-medium text-gray-600 mb-1">출석률</h3>
-            <p class="text-2xl font-bold text-gray-900" id="attendanceRate">
+          <div class="bg-green-50 p-4 rounded-lg">
+            <h3 class="text-sm font-medium text-green-700">출석률</h3>
+            <p class="text-2xl font-bold text-green-900" id="attendanceRate">
               -
             </p>
           </div>
-
-          <!-- 지각률 카드 -->
-          <div
-            class="bg-gradient-to-br from-yellow-50 to-amber-50 rounded-xl p-4 border border-yellow-100"
-          >
-            <div class="flex items-center justify-between mb-3">
-              <span class="text-yellow-600 bg-yellow-100 p-2 rounded-lg">
-                <i class="ri-time-line text-xl"></i>
-              </span>
-              <span
-                class="text-xs font-medium text-yellow-600 bg-yellow-100 px-2 py-1 rounded-full"
-                >지각</span
-              >
-            </div>
-            <h3 class="text-sm font-medium text-gray-600 mb-1">지각률</h3>
-            <div class="flex items-baseline gap-2">
-              <p class="text-2xl font-bold text-gray-900" id="lateRate">-</p>
-              <p class="text-sm text-gray-500" id="avgLateTime">평균 -분</p>
-            </div>
+          <div class="bg-yellow-50 p-4 rounded-lg">
+            <h3 class="text-sm font-medium text-yellow-700">지각률</h3>
+            <p class="text-2xl font-bold text-yellow-900" id="lateRate">-</p>
           </div>
-
-          <!-- 결석률 카드 -->
-          <div
-            class="bg-gradient-to-br from-red-50 to-rose-50 rounded-xl p-4 border border-red-100"
-          >
-            <div class="flex items-center justify-between mb-3">
-              <span class="text-red-600 bg-red-100 p-2 rounded-lg">
-                <i class="ri-close-circle-line text-xl"></i>
-              </span>
-              <span
-                class="text-xs font-medium text-red-600 bg-red-100 px-2 py-1 rounded-full"
-                >결석</span
-              >
-            </div>
-            <h3 class="text-sm font-medium text-gray-600 mb-1">결석률</h3>
-            <p class="text-2xl font-bold text-gray-900" id="absentRate">-</p>
+          <div class="bg-red-50 p-4 rounded-lg">
+            <h3 class="text-sm font-medium text-red-700">결석률</h3>
+            <p class="text-2xl font-bold text-red-900" id="absentRate">-</p>
           </div>
-
-          <!-- 인��결석률 카드 -->
-          <div
-            class="bg-gradient-to-br from-purple-50 to-fuchsia-50 rounded-xl p-4 border border-purple-100"
-          >
-            <div class="flex items-center justify-between mb-3">
-              <span class="text-purple-600 bg-purple-100 p-2 rounded-lg">
-                <i class="ri-calendar-check-line text-xl"></i>
-              </span>
-              <span
-                class="text-xs font-medium text-purple-600 bg-purple-100 px-2 py-1 rounded-full"
-                >인정</span
-              >
-            </div>
-            <h3 class="text-sm font-medium text-gray-600 mb-1">인정결석률</h3>
-            <p class="text-2xl font-bold text-gray-900" id="excusedRate">-</p>
+          <div class="bg-indigo-50 p-4 rounded-lg">
+            <h3 class="text-sm font-medium text-indigo-700">평균 지각 시간</h3>
+            <p class="text-2xl font-bold text-indigo-900" id="avgLateTime">-</p>
           </div>
-
-          <!-- 전체 출석일수 카드 -->
-          <div
-            class="bg-gradient-to-br from-gray-50 to-slate-50 rounded-xl p-4 border border-gray-100"
-          >
-            <div class="flex items-center justify-between mb-3">
-              <span class="text-gray-600 bg-gray-100 p-2 rounded-lg">
-                <i class="ri-calendar-line text-xl"></i>
-              </span>
-              <span
-                class="text-xs font-medium text-gray-600 bg-gray-100 px-2 py-1 rounded-full"
-                >기간</span
-              >
-            </div>
-            <h3 class="text-sm font-medium text-gray-600 mb-1">
-              전체 출석일수
-            </h3>
-            <p class="text-2xl font-bold text-gray-900" id="totalDays">-</p>
+          <div class="bg-purple-50 p-4 rounded-lg">
+            <h3 class="text-sm font-medium text-purple-700">인정결석률</h3>
+            <p class="text-2xl font-bold text-purple-900" id="excusedRate">-</p>
           </div>
         </div>
       </section>
@@ -265,7 +177,7 @@
           >
             <h3 class="text-lg font-semibold mb-3">지각왕 TOP 3</h3>
             <div id="lateKings" class="space-y-2">
-              <!-- 동적으로 추가된 내용 -->
+              <!-- 동적으로 추가될 내용 -->
             </div>
           </div>
         </div>
@@ -325,7 +237,7 @@
             <h3 class="text-lg font-semibold mb-3">최근 인정결석 목록</h3>
             <div
               id="excusedList"
-              class="space-y-2 max-h-[300px] overflow-y-auto pr-2"
+              class="space-y-2 max-h-[calc(100vh-24rem)] overflow-y-auto"
             >
               <!-- 동적으로 추가될 내용 -->
             </div>
@@ -335,78 +247,50 @@
 
       <section class="bg-white rounded-lg shadow">
         <div class="p-6">
-          <h2 class="text-2xl font-bold mb-6 flex items-center">
-            <i class="ri-file-list-line mr-2"></i>
-            상세 통계
-          </h2>
-
+          <h2 class="text-2xl font-bold mb-4">상세 통계</h2>
           <div class="overflow-x-auto">
             <table class="min-w-full divide-y divide-gray-200">
-              <thead>
-                <tr class="bg-gray-50">
+              <thead class="bg-gray-50">
+                <tr>
                   <th
-                    class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap"
+                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
                   >
-                    <div class="flex items-center">
-                      <i class="ri-user-line mr-2"></i>
-                      학번
-                    </div>
+                    학번
                   </th>
                   <th
-                    class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap"
+                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
                   >
-                    <div class="flex items-center">
-                      <i class="ri-profile-line mr-2"></i>
-                      이름
-                    </div>
+                    이름
                   </th>
                   <th
-                    class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap"
+                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
                   >
-                    <div class="flex items-center">
-                      <i class="ri-building-line mr-2"></i>
-                      학년-반-번호
-                    </div>
+                    학년-반-번호
                   </th>
                   <th
-                    class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap"
+                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
                   >
-                    <div class="flex items-center">
-                      <i class="ri-bar-chart-line mr-2"></i>
-                      출석률
-                    </div>
+                    출석률
                   </th>
                   <th
-                    class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap"
+                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
                   >
-                    <div class="flex items-center">
-                      <i class="ri-calendar-check-line mr-2"></i>
-                      출석/지각/결석
-                    </div>
+                    출석/지각/결석
                   </th>
                   <th
-                    class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap"
+                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
                   >
-                    <div class="flex items-center">
-                      <i class="ri-time-line mr-2"></i>
-                      평균 지각시간
-                    </div>
+                    평균 지각시간
                   </th>
                   <th
-                    class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap"
+                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
                   >
-                    <div class="flex items-center">
-                      <i class="ri-calendar-todo-line mr-2"></i>
-                      오늘의 출석
-                    </div>
+                    오늘의 출석
                   </th>
                   <th
-                    class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap"
+                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
                   >
-                    <div class="flex items-center">
-                      <i class="ri-file-search-line mr-2"></i>
-                      상세
-                    </div>
+                    상세
                   </th>
                 </tr>
               </thead>
@@ -417,54 +301,6 @@
                 <!-- 동적으로 추가될 내용 -->
               </tbody>
             </table>
-          </div>
-        </div>
-      </section>
-
-      <!-- 휴일 관리 섹션 추가 -->
-      <section class="bg-white rounded-lg shadow mb-6 p-6">
-        <h2 class="text-2xl font-bold mb-4">휴일 관리</h2>
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <div class="bg-gray-50 p-4 rounded-lg">
-            <h3 class="text-lg font-semibold mb-3">휴일 등록</h3>
-            <form id="holidayForm" class="space-y-4">
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1"
-                  >날짜</label
-                >
-                <input
-                  type="date"
-                  id="holidayDate"
-                  class="w-full rounded-lg border-gray-300"
-                  required
-                />
-              </div>
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1"
-                  >사유</label
-                >
-                <input
-                  type="text"
-                  id="holidayReason"
-                  class="w-full rounded-lg border-gray-300"
-                  placeholder="예: 개교기념일"
-                  required
-                />
-              </div>
-              <button
-                type="submit"
-                class="w-full bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors"
-              >
-                휴일 등록
-              </button>
-            </form>
-          </div>
-
-          <div class="bg-gray-50 p-4 rounded-lg">
-            <h3 class="text-lg font-semibold mb-3">등록된 휴일 목록</h3>
-            <div id="holidayList" class="space-y-2">
-              <!-- 동적으로 추가될 내용 -->
-            </div>
           </div>
         </div>
       </section>
@@ -489,83 +325,70 @@
       </div>
     </footer>
 
-    <!-- 상세보기 모달 -->
     <div
       id="studentDetailModal"
-      class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50"
+      class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full"
     >
       <div
         class="relative top-20 mx-auto p-5 border w-11/12 max-w-4xl shadow-lg rounded-md bg-white"
       >
-        <!-- 헤더 -->
-        <div class="flex justify-between items-center pb-3 border-b">
-          <h3 class="text-2xl font-bold text-gray-900" id="modalTitle">
-            학생 상세 정보
-          </h3>
+        <div class="flex justify-between items-center mb-4">
+          <h3 class="text-2xl font-bold" id="modalTitle">학생 상세 통계</h3>
           <button
             onclick="closeModal()"
-            class="text-gray-400 hover:text-gray-500"
+            class="text-gray-600 hover:text-gray-800"
           >
             <i class="ri-close-line text-2xl"></i>
           </button>
         </div>
 
         <!-- 학생 기본 정보 -->
-        <div class="bg-gray-50 p-4 rounded-lg mt-4">
+        <div class="bg-gray-50 p-4 rounded-lg mb-4">
           <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
             <div>
-              <p class="text-sm text-gray-500">학번</p>
+              <p class="text-sm text-gray-600">학번</p>
               <p class="font-semibold" id="modalStudentId"></p>
             </div>
             <div>
-              <p class="text-sm text-gray-500">이름</p>
+              <p class="text-sm text-gray-600">이름</p>
               <p class="font-semibold" id="modalStudentName"></p>
             </div>
             <div>
-              <p class="text-sm text-gray-500">학년-반</p>
+              <p class="text-sm text-gray-600">학년-반</p>
               <p class="font-semibold" id="modalStudentClass"></p>
             </div>
             <div>
-              <p class="text-sm text-gray-500">번호</p>
+              <p class="text-sm text-gray-600">번</p>
               <p class="font-semibold" id="modalStudentNumber"></p>
             </div>
           </div>
         </div>
 
         <!-- 오늘의 출석 상태 -->
-        <div class="mt-4">
-          <h4 class="text-lg font-semibold mb-2">오늘의 출석 상태</h4>
-          <div id="modalTodayStatus" class="bg-gray-50 p-4 rounded-lg">
+        <div class="bg-gray-50 p-4 rounded-lg mb-4">
+          <div id="modalTodayStatus">
+            <!-- 오늘의 출석 상태가 여기에 동적으로 추가됨 -->
+          </div>
+        </div>
+
+        <!-- 전체 통계 요약 -->
+        <div class="mb-6">
+          <h4 class="text-lg font-semibold mb-2">전체 통계 요약</h4>
+          <div id="modalSummary" class="grid grid-cols-2 md:grid-cols-4 gap-4">
             <!-- 동적으로 추가될 내용 -->
           </div>
         </div>
 
-        <!-- 통계 요약 -->
-        <div class="mt-4">
-          <h4 class="text-lg font-semibold mb-2">출석 통계</h4>
-          <div class="grid grid-cols-2 md:grid-cols-4 gap-4" id="modalSummary">
-            <!-- 동적으로 추가될 내용 -->
+        <!-- 월별 통계 그래프 -->
+        <div class="mb-6">
+          <h4 class="text-lg font-semibold mb-2">월별 통계</h4>
+          <div class="bg-white p-4 rounded-lg shadow" style="height: 300px">
+            <canvas id="monthlyStatsChart"></canvas>
           </div>
         </div>
 
-        <!-- 차트 -->
-        <div class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <h4 class="text-lg font-semibold mb-2">월별 통계</h4>
-            <div class="bg-white p-4 rounded-lg shadow-sm">
-              <canvas id="monthlyStatsChart"></canvas>
-            </div>
-          </div>
-          <div>
-            <h4 class="text-lg font-semibold mb-2">출석률 추이</h4>
-            <div class="bg-white p-4 rounded-lg shadow-sm">
-              <canvas id="improvementChart"></canvas>
-            </div>
-          </div>
-        </div>
-
-        <!-- 출석 기록 테이블 -->
-        <div class="mt-4">
+        <!-- 출석 상세 기록 -->
+        <div class="mb-6">
           <h4 class="text-lg font-semibold mb-2">출석 기록</h4>
           <div class="overflow-x-auto">
             <table class="min-w-full divide-y divide-gray-200">
@@ -579,12 +402,12 @@
                   <th
                     class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase"
                   >
-                    시간
+                    상태
                   </th>
                   <th
                     class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase"
                   >
-                    상태
+                    지각시간
                   </th>
                   <th
                     class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase"
@@ -602,6 +425,14 @@
             </table>
           </div>
         </div>
+
+        <!-- 개선도 그래프 -->
+        <div class="mb-6">
+          <h4 class="text-lg font-semibold mb-2">개선도</h4>
+          <div class="bg-white p-4 rounded-lg shadow" style="height: 300px">
+            <canvas id="improvementChart"></canvas>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -611,14 +442,17 @@
 
       document.addEventListener("DOMContentLoaded", async function () {
         try {
+          // Chart.js 로드
           await loadChartJS();
+
+          // 나머지 초기화
           checkLoginAndRedirect();
           initializeDateRange();
           setupEventListeners();
-          await Promise.all([fetchAttendanceStats(), updateExcusedList()]);
-
-          // 자동 결석 처리 타이머 설정하고, 즉시 실행은 하지 않음
-          setupAutoAbsentTimer();
+          await Promise.all([
+            fetchAttendanceStats(),
+            updateExcusedList(), // 인정결석 목록 조회 추가
+          ]);
         } catch (error) {
           console.error("초기화 중 오류:", error);
           alert("페이지 초기화 중 오류가 발생했습니다.");
@@ -759,14 +593,6 @@
             (stats.totalPresent + stats.totalLate + stats.totalAbsent)) *
           100
         ).toFixed(1)}%`;
-
-        // 전체 출석일수 계산 수정
-        const totalDays =
-          stats.totalPresent +
-          stats.totalLate +
-          stats.totalAbsent +
-          stats.totalExcused;
-        document.getElementById("totalDays").textContent = `${totalDays}일`;
       }
 
       function updateStudentStats(stats) {
@@ -781,88 +607,33 @@
             if (!student) return "";
 
             const { summary } = student;
-
-            // 오늘의 출석 상태 셀 수정
-            const todayStatusCell = `
-              <td class="px-6 py-4 whitespace-nowrap">
-                ${
-                  student.todayStatus
-                    ? `
-                  <div class="flex flex-col">
-                    <span class="${getStatusBadgeClass(
-                      student.todayStatus.status
-                    )} mb-1">
-                      ${getStatusText(student.todayStatus.status)}
-                    </span>
-                    ${
-                      student.todayStatus.lateMinutes
-                        ? `
-                      <span class="text-xs text-yellow-600 font-medium">
-                        ${student.todayStatus.lateMinutes}분 지각
-                      </span>
-                    `
-                        : ""
-                    }
-                    ${
-                      student.todayStatus.timestamp
-                        ? `
-                      <span class="text-xs text-gray-500">
-                        ${moment(student.todayStatus.timestamp).format(
-                          "HH:mm:ss"
-                        )}
-                      </span>
-                    `
-                        : ""
-                    }
-                  </div>
-                `
-                    : `
-                  <span class="text-sm text-gray-400">미출석</span>
-                `
-                }
-              </td>
-            `;
-
             return `
               <tr class="hover:bg-gray-50 transition-colors">
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-medium">
-                  ${student.studentId}
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                  ${student.name}
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  ${student.grade}-${student.class}-${student.number}
-                </td>
+                <td class="px-6 py-4 whitespace-nowrap">${
+                  student.studentId
+                }</td>
+                <td class="px-6 py-4 whitespace-nowrap">${student.name}</td>
+                <td class="px-6 py-4 whitespace-nowrap">${student.grade}-${
+              student.class
+            }-${student.number}</td>
                 <td class="px-6 py-4 whitespace-nowrap">
                   <div class="flex items-center">
                     <div class="w-16 bg-gray-200 rounded-full h-2 mr-2">
-                      <div
-                        class="bg-green-500 rounded-full h-2"
-                        style="width: ${summary.attendanceRate}%"
-                      ></div>
+                      <div class="bg-green-500 rounded-full h-2" style="width: ${
+                        summary.attendanceRate
+                      }%"></div>
                     </div>
-                    <span class="text-sm font-medium text-gray-900">${
-                      summary.attendanceRate
-                    }%</span>
+                    <span>${summary.attendanceRate}%</span>
                   </div>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap">
-                  <div class="flex items-center space-x-2 text-sm">
-                    <span class="text-green-600 font-medium">${
-                      summary.presentCount
-                    }</span>
-                    <span class="text-gray-400">/</span>
-                    <span class="text-yellow-600 font-medium">${
-                      summary.lateCount
-                    }</span>
-                    <span class="text-gray-400">/</span>
-                    <span class="text-red-600 font-medium">${
-                      summary.absentCount
-                    }</span>
-                  </div>
+                  <span class="text-green-600">${summary.presentCount}</span>
+                  <span class="text-gray-400">/</span>
+                  <span class="text-yellow-600">${summary.lateCount}</span>
+                  <span class="text-gray-400">/</span>
+                  <span class="text-red-600">${summary.absentCount}</span>
                 </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                <td class="px-6 py-4 whitespace-nowrap">
                   ${
                     summary.lateCount > 0
                       ? `${(
@@ -871,14 +642,28 @@
                       : "-"
                   }
                 </td>
-                ${todayStatusCell}
                 <td class="px-6 py-4 whitespace-nowrap">
-                  <button
+                  ${
+                    student.todayStatus
+                      ? `<span class="${getStatusBadgeClass(
+                          student.todayStatus.status
+                        )}">
+                      ${getStatusText(student.todayStatus.status)}
+                      ${
+                        student.todayStatus.lateMinutes
+                          ? `(${student.todayStatus.lateMinutes}분)`
+                          : ""
+                      }
+                    </span>`
+                      : '<span class="text-gray-400">미출석</span>'
+                  }
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <button 
                     onclick="showStudentDetail('${student.studentId}')"
-                    class="text-primary hover:text-secondary transition-colors inline-flex items-center text-sm font-medium"
+                    class="text-primary hover:text-secondary transition-colors"
                   >
-                    <i class="ri-file-list-line mr-1"></i>
-                    상세보기
+                    <i class="ri-file-list-line mr-1"></i>상세보기
                   </button>
                 </td>
               </tr>
@@ -1008,7 +793,7 @@
           <div class="mb-2 p-2 bg-white rounded shadow">
             <p>학번: ${absence.studentId}</p>
             <p>날짜: ${moment(absence.timestamp).format("YYYY-MM-DD")}</p>
-            <button
+            <button 
               onclick="handleExcuseAbsence('${absence.studentId}', '${
               absence.timestamp
             }')"
@@ -1091,7 +876,7 @@
           showToast(response.data.message, "success");
           await Promise.all([
             fetchAttendanceStats(),
-            updateExcusedList(), // 인정결석 기록 갱신
+            updateExcusedList(), // 인정결석 목록 갱신
           ]);
         } catch (error) {
           console.error("인정결석 처리 중 오류:", error);
@@ -1311,150 +1096,135 @@
       // 모달 관련 함수들 가
       function updateStudentDetailModal(data) {
         if (!data) return;
-        const { student, todayStatus, totalStats, monthlyStats, improvements } =
-          data;
 
-        // 기본 정보 업데이트
-        document.getElementById(
-          "modalTitle"
-        ).textContent = `${student.name} 학생 상세 통계`;
-        document.getElementById("modalStudentId").textContent =
-          student.studentId;
-        document.getElementById("modalStudentName").textContent = student.name;
-        document.getElementById(
-          "modalStudentClass"
-        ).textContent = `${student.grade}-${student.class}`;
-        document.getElementById("modalStudentNumber").textContent =
-          student.number;
+        const {
+          student,
+          totalStats,
+          monthlyStats,
+          improvements,
+          attendances,
+          todayStatus,
+        } = data;
 
-        // 오늘의 출석 상태 업데이트
-        const modalTodayStatus = document.getElementById("modalTodayStatus");
-        if (modalTodayStatus) {
-          modalTodayStatus.innerHTML = todayStatus
-            ? `
-            <div class="bg-white p-4 rounded-lg shadow-sm">
-              <div class="flex items-center justify-between">
-                <div class="flex items-center space-x-3">
-                  <span class="${getStatusBadgeClass(todayStatus.status)}">
-                    ${getStatusText(todayStatus.status)}
-                  </span>
-                  ${
-                    todayStatus.lateMinutes
-                      ? `
-                    <span class="text-yellow-600 text-sm font-medium">
-                      ${todayStatus.lateMinutes}분 지각
+        try {
+          // 기본 정보 업데이트
+          document.getElementById(
+            "modalTitle"
+          ).textContent = `${student.name} 학생 상세 통계`;
+          document.getElementById("modalStudentId").textContent =
+            student.studentId;
+          document.getElementById("modalStudentName").textContent =
+            student.name;
+          document.getElementById(
+            "modalStudentClass"
+          ).textContent = `${student.grade}-${student.class}`;
+          document.getElementById("modalStudentNumber").textContent =
+            student.number;
+
+          // 오늘의 출석 상태 업데이트
+          const modalTodayStatus = document.getElementById("modalTodayStatus");
+          if (modalTodayStatus) {
+            modalTodayStatus.innerHTML = todayStatus
+              ? `
+                <div class="bg-gray-50 p-4 rounded-lg mb-4">
+                  <h4 class="text-lg font-semibold mb-2">늘의 출석 상태</h4>
+                  <div class="flex items-center space-x-4">
+                    <span class="${getStatusBadgeClass(todayStatus.status)}">
+                      ${getStatusText(todayStatus.status)}
+                      ${
+                        todayStatus.lateMinutes
+                          ? `(${todayStatus.lateMinutes}분)`
+                          : ""
+                      }
                     </span>
-                  `
-                      : ""
-                  }
-                  ${
-                    todayStatus.isExcused
-                      ? `
-                    <span class="text-blue-600 text-sm font-medium">
-                      인정결석
-                    </span>
-                  `
-                      : ""
-                  }
+                    ${
+                      todayStatus.isExcused
+                        ? `<span class="text-blue-600">인정결석</span>
+                         <span class="text-sm text-gray-500">${
+                           todayStatus.reason || ""
+                         }</span>`
+                        : ""
+                    }
+                  </div>
                 </div>
-                <span class="text-sm text-gray-500">
-                  ${moment(todayStatus.timestamp).format("HH:mm:ss")}
-                </span>
-              </div>
-              ${
-                todayStatus.reason
-                  ? `
-                <p class="mt-2 text-sm text-gray-600">
-                  사유: ${todayStatus.reason}
-                </p>
               `
-                  : ""
-              }
-            </div>
-          `
-            : '<div class="text-center text-gray-500 p-4">오늘의 출석 정보가 없습니다.</div>';
-        }
+              : '<div class="text-gray-500">오늘의 출석 정보가 없습니다.</div>';
+          }
 
-        // 통계 요약 업데이트
-        const modalSummary = document.getElementById("modalSummary");
-        if (modalSummary && totalStats) {
-          modalSummary.innerHTML = `
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-              <div class="bg-gradient-to-br from-green-50 to-green-100 p-4 rounded-lg shadow-sm">
-                <div class="flex items-center justify-between mb-2">
-                  <h4 class="text-sm font-medium text-green-800">출석</h4>
-                  <span class="text-xs font-medium text-green-600 bg-green-200 px-2 py-1 rounded-full">
-                    ${totalStats.attendanceRate}%
-                  </span>
+          // 전체 통계 요약 업데이트
+          const modalSummary = document.getElementById("modalSummary");
+          if (modalSummary && totalStats) {
+            modalSummary.innerHTML = `
+              <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+                <div class="bg-gradient-to-br from-green-50 to-green-100 p-6 rounded-xl shadow-sm">
+                  <div class="flex flex-col">
+                    <h5 class="text-sm font-semibold text-green-800 mb-1">출석률</h5>
+                    <p class="text-3xl font-bold text-green-700 mb-2">${
+                      totalStats.attendanceRate
+                    }%</p>
+                    <div class="flex items-center text-green-600">
+                      <i class="ri-checkbox-circle-line mr-1"></i>
+                      <span class="text-sm">${totalStats.present}회</span>
+                    </div>
+                  </div>
                 </div>
-                <p class="text-2xl font-bold text-green-700">${
-                  totalStats.present
-                }회</p>
-                <div class="mt-2 text-sm text-green-600">
-                  전체 ${totalStats.total}일 중
+
+                <div class="bg-gradient-to-br from-yellow-50 to-yellow-100 p-6 rounded-xl shadow-sm">
+                  <div class="flex flex-col">
+                    <h5 class="text-sm font-semibold text-yellow-800 mb-1">지각률</h5>
+                    <p class="text-3xl font-bold text-yellow-700 mb-2">${(
+                      (totalStats.late / totalStats.total) *
+                      100
+                    ).toFixed(1)}%</p>
+                    <div class="flex items-center text-yellow-600">
+                      <i class="ri-time-line mr-1"></i>
+                      <span class="text-sm">${totalStats.late}회 (평균 ${(
+              totalStats.lateMinutes / totalStats.late || 0
+            ).toFixed(1)}분)</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="bg-gradient-to-br from-red-50 to-red-100 p-6 rounded-xl shadow-sm">
+                  <div class="flex flex-col">
+                    <h5 class="text-sm font-semibold text-red-800 mb-1">결석률</h5>
+                    <p class="text-3xl font-bold text-red-700 mb-2">${(
+                      (totalStats.absent / totalStats.total) *
+                      100
+                    ).toFixed(1)}%</p>
+                    <div class="flex items-center text-red-600">
+                      <i class="ri-close-circle-line mr-1"></i>
+                      <span class="text-sm">${totalStats.absent}회</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="bg-gradient-to-br from-blue-50 to-blue-100 p-6 rounded-xl shadow-sm">
+                  <div class="flex flex-col">
+                    <h5 class="text-sm font-semibold text-blue-800 mb-1">인정결석</h5>
+                    <p class="text-3xl font-bold text-blue-700 mb-2">${
+                      totalStats.excused
+                    }회</p>
+                    <div class="flex items-center text-blue-600">
+                      <i class="ri-calendar-check-line mr-1"></i>
+                      <span class="text-sm">${(
+                        (totalStats.excused / totalStats.total) *
+                        100
+                      ).toFixed(1)}%</span>
+                    </div>
+                  </div>
                 </div>
               </div>
+            `;
+          }
 
-              <div class="bg-gradient-to-br from-yellow-50 to-yellow-100 p-4 rounded-lg shadow-sm">
-                <div class="flex items-center justify-between mb-2">
-                  <h4 class="text-sm font-medium text-yellow-800">지각</h4>
-                  <span class="text-xs font-medium text-yellow-600 bg-yellow-200 px-2 py-1 rounded-full">
-                    ${((totalStats.late / totalStats.total) * 100).toFixed(1)}%
-                  </span>
-                </div>
-                <p class="text-2xl font-bold text-yellow-700">${
-                  totalStats.late
-                }회</p>
-                <div class="mt-2 text-sm text-yellow-600">
-                  평균 ${(
-                    totalStats.lateMinutes / totalStats.late || 0
-                  ).toFixed(1)}분
-                </div>
-              </div>
-
-              <div class="bg-gradient-to-br from-red-50 to-red-100 p-4 rounded-lg shadow-sm">
-                <div class="flex items-center justify-between mb-2">
-                  <h4 class="text-sm font-medium text-red-800">결석</h4>
-                  <span class="text-xs font-medium text-red-600 bg-red-200 px-2 py-1 rounded-full">
-                    ${((totalStats.absent / totalStats.total) * 100).toFixed(
-                      1
-                    )}%
-                  </span>
-                </div>
-                <p class="text-2xl font-bold text-red-700">${
-                  totalStats.absent
-                }회</p>
-                <div class="mt-2 text-sm text-red-600">
-                  미인정 결석
-                </div>
-              </div>
-
-              <div class="bg-gradient-to-br from-blue-50 to-blue-100 p-4 rounded-lg shadow-sm">
-                <div class="flex items-center justify-between mb-2">
-                  <h4 class="text-sm font-medium text-blue-800">인정결석</h4>
-                  <span class="text-xs font-medium text-blue-600 bg-blue-200 px-2 py-1 rounded-full">
-                    ${((totalStats.excused / totalStats.total) * 100).toFixed(
-                      1
-                    )}%
-                  </span>
-                </div>
-                <p class="text-2xl font-bold text-blue-700">${
-                  totalStats.excused
-                }회</p>
-                <div class="mt-2 text-sm text-blue-600">
-                  총 ${totalStats.total}일 중
-                </div>
-              </div>
-            </div>
-          `;
-        }
-
-        // 차트 업데이트
-        if (monthlyStats) {
-          updateMonthlyStatsChart(monthlyStats);
-        }
-        if (improvements) {
-          updateImprovementChart(improvements);
+          // 차트와 테이블 업데이트
+          if (monthlyStats) updateMonthlyStatsChart(monthlyStats);
+          if (attendances) updateAttendanceTable(attendances);
+          if (improvements) updateImprovementChart(improvements);
+        } catch (error) {
+          console.error("모달 업데이트 중 오류:", error);
+          showToast("상세 정보 표시 중 오류가 발생했습니다.", "error");
         }
       }
 
@@ -1485,9 +1255,9 @@
                   <div class="flex justify-between items-center">
                     <span class="font-semibold">${month}</span>
                     <span class="text-sm text-gray-600">
-                      출석: ${monthStats.present}회 /
-                      지각: ${monthStats.late}회 /
-                      결석: ${monthStats.absent}회 /
+                      출석: ${monthStats.present}회 / 
+                      지각: ${monthStats.late}회 / 
+                      결석: ${monthStats.absent}회 / 
                       인정: ${monthStats.excused}회
                     </span>
                   </div>
@@ -1520,7 +1290,7 @@
                            attendance.reason || ""
                          }</div>`
                         : attendance.status === "absent"
-                        ? `<button
+                        ? `<button 
                         onclick="handleExcuseAbsence('${attendance.studentId}', '${attendance.date}')"
                         class="text-blue-600 hover:text-blue-800 text-sm"
                       >
@@ -1538,7 +1308,7 @@
           .join("");
       }
 
-      // 월 통계 계산 함수
+      // 월별 통계 계산 함수
       function calculateMonthStats(records) {
         return {
           present: records.filter((r) => r.status === "present").length,
@@ -1729,8 +1499,7 @@
 
       // 상태별 배지 스타일 클래스
       function getStatusBadgeClass(status) {
-        const baseClasses =
-          "inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium";
+        const baseClasses = "px-2 py-1 rounded-full text-xs font-medium";
         switch (status) {
           case "present":
             return `${baseClasses} bg-green-100 text-green-800`;
@@ -1741,6 +1510,21 @@
           default:
             return `${baseClasses} bg-gray-100 text-gray-800`;
         }
+      }
+
+      // 월별 통계 차트 업데이트 최적화
+      const chartUpdateQueue = new Set();
+
+      function queueChartUpdate(chartId, updateFn) {
+        if (chartUpdateQueue.has(chartId)) {
+          return;
+        }
+
+        chartUpdateQueue.add(chartId);
+        requestAnimationFrame(() => {
+          updateFn();
+          chartUpdateQueue.delete(chartId);
+        });
       }
 
       // 차트 업데이트 함수 수정
@@ -1823,51 +1607,71 @@
         });
       }
 
-      // 개선도 차트 업데이트 함수
+      // 개선도 차트 업데이트 함수 개선
       async function updateImprovementChart(improvements) {
         if (!improvements || improvements.length === 0) return;
+        queueChartUpdate("improvement", () => {
+          const ctx = document.getElementById("improvementChart");
+          if (!ctx) return;
 
-        const canvas = document.getElementById("improvementChart");
-        if (!canvas) return;
+          if (window.improvementChart instanceof Chart) {
+            window.improvementChart.destroy();
+          }
 
-        const ctx = canvas.getContext("2d");
-        if (!ctx) return;
+          const labels = improvements.map((imp) => imp.month);
+          const data = improvements.map((imp) => imp.improvement);
 
-        // 기존 차트 제거
-        if (window.improvementChart instanceof Chart) {
-          window.improvementChart.destroy();
-        }
-
-        const labels = improvements.map((imp) => imp.month);
-        const data = improvements.map((imp) => imp.improvement);
-
-        window.improvementChart = new Chart(ctx, {
-          type: "line",
-          data: {
-            labels,
-            datasets: [
-              {
-                label: "개선도",
-                data,
-                borderColor: chartColors.improvement.border,
-                backgroundColor: chartColors.improvement.background,
-                tension: 0.3,
-                fill: true,
-                pointBackgroundColor: data.map((value) =>
-                  value >= 0
-                    ? chartColors.present.border
-                    : chartColors.absent.border
-                ),
-                pointRadius: 5,
-                pointHoverRadius: 7,
+          window.improvementChart = new Chart(ctx, {
+            type: "line",
+            data: {
+              labels,
+              datasets: [
+                {
+                  label: "개선도",
+                  data,
+                  borderColor: chartColors.improvement.border,
+                  backgroundColor: chartColors.improvement.background,
+                  tension: 0.3,
+                  fill: true,
+                  pointBackgroundColor: data.map((value) =>
+                    value >= 0
+                      ? chartColors.present.border
+                      : chartColors.absent.border
+                  ),
+                  pointRadius: 5,
+                  pointHoverRadius: 7,
+                },
+              ],
+            },
+            options: {
+              ...chartConfig,
+              scales: {
+                ...chartConfig.scales,
+                y: {
+                  ...chartConfig.scales.y,
+                  grid: {
+                    color: "rgba(0, 0, 0, 0.05)",
+                    drawBorder: false,
+                  },
+                  ticks: {
+                    callback: (value) => `${value}%`,
+                    stepSize: 10,
+                  },
+                },
               },
-            ],
-          },
-          options: chartConfig,
+              plugins: {
+                ...chartConfig.plugins,
+                tooltip: {
+                  ...chartConfig.plugins.tooltip,
+                  callbacks: {
+                    label: (context) => `개선도: ${context.parsed.y}%`,
+                  },
+                },
+              },
+            },
+          });
         });
       }
-
-      window.improvementChart = new Chart(ctx, config);
 
       function showLoading() {
         const loadingSpinner = document.getElementById("loading-spinner");
@@ -1886,7 +1690,7 @@
       // 전역 에러 핸들러 추가
       window.onerror = function (msg, url, lineNo, columnNo, error) {
         console.error("Global error:", { msg, url, lineNo, columnNo, error });
-        showToast("예기치 않은 류가 발생했습니다.", "error");
+        showToast("예기치 않은 ���류가 발생했습니다.", "error");
         return false;
       };
 
@@ -1934,9 +1738,10 @@
       // 최근 인정결석 목록 업데이트 함수
       async function updateExcusedList() {
         try {
+          const token = localStorage.getItem("token");
           const response = await axios.get("/api/attendance/excused", {
             headers: {
-              Authorization: `Bearer ${localStorage.getItem("token")}`,
+              Authorization: `Bearer ${token}`,
             },
           });
 
@@ -1948,186 +1753,34 @@
           if (excusedList) {
             excusedList.innerHTML =
               response.data.excused
-                .slice(0, 20) // 최근 20개만 표시
                 .map(
                   (item) => `
-                <div class="bg-white p-3 rounded-lg shadow-sm hover:shadow-md transition-shadow">
+                <div class="bg-white p-3 rounded-lg shadow-sm">
                   <div class="flex justify-between items-start">
                     <div>
-                      <p class="font-semibold text-gray-800">${
-                        item.studentName
-                      }</p>
-                      <p class="text-sm text-gray-600">${item.studentId}</p>
+                      <p class="font-semibold">${item.studentName} (${
+                    item.studentId
+                  })</p>
+                      <p class="text-sm text-gray-600">${moment(
+                        item.date
+                      ).format("YYYY-MM-DD")}</p>
                       <p class="text-sm text-gray-700 mt-1">${item.reason}</p>
                     </div>
-                    <div class="text-right">
-                      <p class="text-sm font-medium text-gray-600">
-                        ${moment(item.date).format("YYYY-MM-DD")}
-                      </p>
-                      <p class="text-xs text-gray-500">
-                        ${moment(item.excusedAt).format("HH:mm")}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              `
-                )
-                .join("") ||
-              '<p class="text-center text-gray-500 py-4">인정결석 기록이 없습니다.</p>';
-          }
-        } catch (error) {
-          console.error("인정결석 목록 조회 중 오류:", error);
-          showToast("인정결석 목록 조회에 실패했습니다.", "error");
-        }
-      }
-
-      // 자동 결석 처리 함수 추가
-      async function handleAutoAbsent() {
-        try {
-          const token = localStorage.getItem("token");
-          if (!token) throw new Error("로그인이 필요합니다.");
-
-          // 현재 시간이 9시 이후인지 확인
-          const now = new Date();
-          const cutoffTime = new Date(now);
-          cutoffTime.setHours(9, 0, 0, 0);
-
-          if (now < cutoffTime) {
-            console.log("아직 자동 결석 처리 시간이 되지 않았습니다.");
-            return;
-          }
-
-          const response = await axios.post(
-            "/api/attendance/auto-absent",
-            {},
-            {
-              headers: {
-                Authorization: `Bearer ${token}`,
-              },
-            }
-          );
-
-          if (response.data.success) {
-            showToast(
-              `${response.data.count}명의 학생이 결석 처리되었습니다.`,
-              "success"
-            );
-            await fetchAttendanceStats(); // 통계 새로고침
-          }
-        } catch (error) {
-          console.error("자동 결석 처리 중 오류:", error);
-          showToast(
-            error.response?.data?.message ||
-              "자동 결석 처리 중 오류가 발생했습니다.",
-            "error"
-          );
-        }
-      }
-
-      // 9시 자동 결석 처리 타이머 설정
-      function setupAutoAbsentTimer() {
-        const now = new Date();
-        const target = new Date(now);
-        target.setHours(9, 0, 0, 0);
-
-        // 이미 9시가 지났다면 다음날 9시로 설정
-        if (now > target) {
-          target.setDate(target.getDate() + 1);
-        }
-
-        const timeUntilTarget = target - now;
-        console.log(
-          `다음 자동 결석 처리까지 ${timeUntilTarget / 1000}초 남았습니다.`
-        );
-
-        // 9시가 되면 자동 결석 처리 실행
-        setTimeout(async () => {
-          console.log("자동 결석 처리 실행");
-          await handleAutoAbsent();
-          // 다음 날을 위한 타이머 재설정
-          setupAutoAbsentTimer();
-        }, timeUntilTarget);
-      }
-
-      // 휴일 등록 폼 이벤트 리스너
-      document
-        .getElementById("holidayForm")
-        .addEventListener("submit", async (e) => {
-          e.preventDefault();
-
-          try {
-            const date = document.getElementById("holidayDate").value;
-            const reason = document.getElementById("holidayReason").value;
-            const token = localStorage.getItem("token");
-
-            const response = await axios.post(
-              "/api/holidays",
-              { date, reason },
-              {
-                headers: {
-                  Authorization: `Bearer ${token}`,
-                },
-              }
-            );
-
-            if (response.data.success) {
-              showToast("휴일이 등록되었습니다.", "success");
-              document.getElementById("holidayForm").reset();
-              await updateHolidayList(); // 목록 갱신
-            }
-          } catch (error) {
-            console.error("휴일 등록 중 오류:", error);
-            showToast(
-              error.response?.data?.message || "휴일 등록에 실패했습니다.",
-              "error"
-            );
-          }
-        });
-
-      // 휴일 목록 업데이트
-      async function updateHolidayList() {
-        try {
-          const token = localStorage.getItem("token");
-          const response = await axios.get("/api/holidays", {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          });
-
-          const holidayList = document.getElementById("holidayList");
-          if (response.data.success) {
-            holidayList.innerHTML =
-              response.data.holidays
-                .map(
-                  (holiday) => `
-                <div class="bg-white p-4 rounded-lg shadow-sm mb-2">
-                  <div class="flex justify-between items-start">
-                    <div>
-                      <p class="font-semibold text-lg">${moment(
-                        holiday.date
-                      ).format("YYYY년 MM월 DD일 (ddd)")}</p>
-                      <p class="text-gray-600 mt-1">${holiday.reason}</p>
-                    </div>
                     <span class="text-xs text-gray-500">
-                      ${moment(holiday.createdAt).format("YYYY-MM-DD HH:mm")}
+                      ${moment(item.excusedAt).format("YYYY-MM-DD HH:mm")}
                     </span>
                   </div>
                 </div>
               `
                 )
                 .join("") ||
-              "<p class='text-center text-gray-500 py-4'>등록된 휴일이 없습니다.</p>";
+              "<p class='text-center text-gray-500'>인정결석 기록이 없습니다.</p>";
           }
         } catch (error) {
-          console.error("휴일 목록 조회 중 오류:", error);
-          showToast("휴일 목록 조회에 실패했습니다.", "error");
+          console.error("인정결석 목록 조회 중 오류:", error);
+          showToast("인정결석 목록 조회에 실패했습니다.", "error");
         }
       }
-
-      // 페이지 로드 시 휴일 목록 조회
-      document.addEventListener("DOMContentLoaded", () => {
-        updateHolidayList();
-      });
     </script>
   </body>
 </html>
