@@ -100,7 +100,7 @@
           >
         </div>
         <div class="text-center">
-          <p>&copy; 2024 디지�� 출결관리. All rights reserved.</p>
+          <p>&copy; 2024 디지 출결관리. All rights reserved.</p>
         </div>
       </div>
     </footer>
@@ -122,7 +122,10 @@
 
       function checkAuth() {
         const token = localStorage.getItem("token");
-        if (!token) {
+        const refreshToken = localStorage.getItem("refreshToken");
+
+        if (!token || !refreshToken) {
+          localStorage.clear(); // 토큰이 하나라도 없으면 전체 초기화
           window.location.href =
             "index.html?error=" + encodeURIComponent("로그인이 필요합니다.");
           return false;
@@ -132,11 +135,9 @@
 
       async function apiRequest(url, options = {}) {
         try {
-          const token = localStorage.getItem("token");
-          if (!token) {
-            throw new Error("토큰이 없습니다.");
-          }
+          if (!checkAuth()) return;
 
+          const token = localStorage.getItem("token");
           const headers = {
             ...options.headers,
             Authorization: `Bearer ${token}`,
@@ -155,6 +156,7 @@
             }
 
             try {
+              console.log("Attempting token refresh..."); // 디버깅용
               const refreshResponse = await fetch(
                 `${API_BASE_URL}/refresh-token`,
                 {
@@ -167,6 +169,8 @@
               );
 
               const refreshData = await refreshResponse.json();
+              console.log("Refresh response:", refreshData); // 디버깅용
+
               if (!refreshResponse.ok || !refreshData.success) {
                 throw new Error(
                   refreshData.message || "토큰 갱신에 실패했습니다."
@@ -188,9 +192,7 @@
               });
             } catch (refreshError) {
               console.error("Token refresh error:", refreshError);
-              localStorage.removeItem("token");
-              localStorage.removeItem("refreshToken");
-              localStorage.removeItem("userInfo");
+              localStorage.clear();
               window.location.href =
                 "index.html?error=" +
                 encodeURIComponent(
