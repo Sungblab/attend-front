@@ -330,6 +330,13 @@
 
       async function fetchAttendanceStats() {
         try {
+          const token = localStorage.getItem("token");
+          if (!token) {
+            window.location.href =
+              "index.html?error=" + encodeURIComponent("로그인이 필요합니다.");
+            return;
+          }
+
           const response = await axios.get("/api/attendance/stats", {
             params: {
               startDate: document.getElementById("startDate").value,
@@ -338,9 +345,15 @@
               classNum: document.getElementById("classSelect").value,
             },
             headers: {
-              Authorization: `Bearer ${localStorage.getItem("token")}`,
+              Authorization: `Bearer ${token}`,
             },
           });
+
+          if (!response.data.success) {
+            throw new Error(
+              response.data.message || "통계 조회에 실패했습니다."
+            );
+          }
 
           const { studentStats, overallStats, specialStats } = response.data;
           updateOverallStats(overallStats);
@@ -348,7 +361,7 @@
           updateSpecialStats(specialStats);
         } catch (error) {
           console.error("통계 조회 중 오류 발생:", error);
-          alert("통계 조회 중 오류가 발생했습니다.");
+          alert(error.message || "통계 조회 중 오류가 발생했습니다.");
         }
       }
 
@@ -375,29 +388,54 @@
       }
 
       function updateStudentStats(stats) {
+        if (!stats || !Array.isArray(stats)) {
+          console.error("Invalid stats data:", stats);
+          return;
+        }
+
         const tbody = document.getElementById("studentStatsBody");
         tbody.innerHTML = stats
-          .map(
-            (student) => `
-    <tr>
-      <td class="px-6 py-4 whitespace-nowrap">${student.studentId}</td>
-      <td class="px-6 py-4 whitespace-nowrap">${student.name}</td>
-      <td class="px-6 py-4 whitespace-nowrap">${student.grade}</td>
-      <td class="px-6 py-4 whitespace-nowrap">${student.class}</td>
-      <td class="px-6 py-4 whitespace-nowrap">${student.number}</td>
-      <td class="px-6 py-4 whitespace-nowrap">${student.presentCount}</td>
-      <td class="px-6 py-4 whitespace-nowrap">${student.lateCount}</td>
-      <td class="px-6 py-4 whitespace-nowrap">${student.absentCount}</td>
-      <td class="px-6 py-4 whitespace-nowrap">${
-        student.totalLateMinutes
-      } 분</td>
-      <td class="px-6 py-4 whitespace-nowrap">${student.lastAttendance}</td>
-      <td class="px-6 py-4 whitespace-nowrap ${getStatusColor(
-        student.todayStatus
-      )}">${student.todayStatus}</td>
-    </tr>
-  `
-          )
+          .map((student) => {
+            if (!student) return "";
+
+            return `
+              <tr>
+                <td class="px-6 py-4 whitespace-nowrap">${
+                  student.studentId || "N/A"
+                }</td>
+                <td class="px-6 py-4 whitespace-nowrap">${
+                  student.name || "N/A"
+                }</td>
+                <td class="px-6 py-4 whitespace-nowrap">${
+                  student.grade || "N/A"
+                }</td>
+                <td class="px-6 py-4 whitespace-nowrap">${
+                  student.class || "N/A"
+                }</td>
+                <td class="px-6 py-4 whitespace-nowrap">${
+                  student.number || "N/A"
+                }</td>
+                <td class="px-6 py-4 whitespace-nowrap">${
+                  student.presentCount || 0
+                }</td>
+                <td class="px-6 py-4 whitespace-nowrap">${
+                  student.lateCount || 0
+                }</td>
+                <td class="px-6 py-4 whitespace-nowrap">${
+                  student.absentCount || 0
+                }</td>
+                <td class="px-6 py-4 whitespace-nowrap">${
+                  student.totalLateMinutes || 0
+                } 분</td>
+                <td class="px-6 py-4 whitespace-nowrap">${
+                  student.lastAttendance || "없음"
+                }</td>
+                <td class="px-6 py-4 whitespace-nowrap ${getStatusColor(
+                  student.todayStatus
+                )}">${student.todayStatus || "미출석"}</td>
+              </tr>
+            `;
+          })
           .join("");
       }
 
