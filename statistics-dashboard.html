@@ -441,13 +441,15 @@
                         }</span>`
                   }
                   ${
-                    !student.isExcused && student.todayStatus === "absent"
+                    student.todayStatus === "absent" && !student.isExcused
                       ? `<button 
-                      onclick="handleExcuseAbsence('${student.studentId}', '${student.lastAttendance}')"
-                      class="ml-2 text-blue-600 hover:text-blue-800 text-sm"
-                    >
-                      인정결석 처리
-                    </button>`
+                          onclick="handleExcuseAbsence('${
+                            student.studentId
+                          }', '${moment().format("YYYY-MM-DD")}')"
+                          class="ml-2 text-blue-600 hover:text-blue-800 text-sm"
+                        >
+                          인정결석 처리
+                        </button>`
                       : ""
                   }
                 </td>
@@ -577,30 +579,38 @@
         if (!reason) return;
 
         try {
+          const token = localStorage.getItem("token");
+          if (!token) {
+            throw new Error("로그인이 필요합니다.");
+          }
+
           const response = await axios.post(
             "/api/attendance/excuse",
             {
               studentId,
-              date,
+              date: moment(date).format("YYYY-MM-DD"),
               reason,
             },
             {
               headers: {
-                Authorization: `Bearer ${localStorage.getItem("token")}`,
+                Authorization: `Bearer ${token}`,
               },
             }
           );
 
           if (!response.data.success) {
-            throw new Error(response.data.message);
+            throw new Error(
+              response.data.message || "인정결석 처리에 실패했습니다."
+            );
           }
 
           alert(response.data.message);
-          fetchAttendanceStats(); // 통계 새로고침
+          await fetchAttendanceStats(); // 통계 새로고침
         } catch (error) {
           console.error("인정결석 처리 중 오류:", error);
           alert(
             error.response?.data?.message ||
+              error.message ||
               "인정결석 처리 중 오류가 발생했습니다."
           );
         }
