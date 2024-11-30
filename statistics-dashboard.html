@@ -1306,6 +1306,187 @@
         }
       }
 
+      // 상세 보기 버튼 클릭 이벤트 처리
+      async function showStudentDetail(studentId) {
+        try {
+          showLoading();
+          const response = await axios.get(
+            `/api/attendance/student/${studentId}`,
+            {
+              headers: {
+                Authorization: `Bearer ${localStorage.getItem("token")}`,
+              },
+            }
+          );
+
+          if (!response.data.success) {
+            throw new Error(
+              response.data.message || "상세 정보 조회에 실패했습니다."
+            );
+          }
+
+          updateStudentDetailModal(response.data);
+          document
+            .getElementById("studentDetailModal")
+            .classList.remove("hidden");
+        } catch (error) {
+          console.error("상세 정보 조회 중 오류:", error);
+          showToast(error.message || "상세 정보 조회에 실패했습니다.", "error");
+        } finally {
+          hideLoading();
+        }
+      }
+
+      // 모달 관련 함수들 가
+      function updateStudentDetailModal(data) {
+        if (!data) return;
+        const { student, todayStatus, totalStats, monthlyStats, improvements } =
+          data;
+
+        // 기본 정보 업데이트
+        document.getElementById(
+          "modalTitle"
+        ).textContent = `${student.name} 학생 상세 통계`;
+        document.getElementById("modalStudentId").textContent =
+          student.studentId;
+        document.getElementById("modalStudentName").textContent = student.name;
+        document.getElementById(
+          "modalStudentClass"
+        ).textContent = `${student.grade}-${student.class}`;
+        document.getElementById("modalStudentNumber").textContent =
+          student.number;
+
+        // 오늘의 출석 상태 업데이트
+        const modalTodayStatus = document.getElementById("modalTodayStatus");
+        if (modalTodayStatus) {
+          modalTodayStatus.innerHTML = todayStatus
+            ? `
+            <div class="bg-white p-4 rounded-lg shadow-sm">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                  <span class="${getStatusBadgeClass(todayStatus.status)}">
+                    ${getStatusText(todayStatus.status)}
+                  </span>
+                  ${
+                    todayStatus.lateMinutes
+                      ? `
+                    <span class="text-yellow-600 text-sm font-medium">
+                      ${todayStatus.lateMinutes}분 지각
+                    </span>
+                  `
+                      : ""
+                  }
+                  ${
+                    todayStatus.isExcused
+                      ? `
+                    <span class="text-blue-600 text-sm font-medium">
+                      인정결석
+                    </span>
+                  `
+                      : ""
+                  }
+                </div>
+                <span class="text-sm text-gray-500">
+                  ${moment(todayStatus.timestamp).format("HH:mm:ss")}
+                </span>
+              </div>
+              ${
+                todayStatus.reason
+                  ? `
+                <p class="mt-2 text-sm text-gray-600">
+                  사유: ${todayStatus.reason}
+                </p>
+              `
+                  : ""
+              }
+            </div>
+          `
+            : '<div class="text-center text-gray-500 p-4">오늘의 출석 정보가 없습니다.</div>';
+        }
+
+        // 통계 요약 업데이트
+        const modalSummary = document.getElementById("modalSummary");
+        if (modalSummary && totalStats) {
+          modalSummary.innerHTML = `
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+              <div class="bg-gradient-to-br from-green-50 to-green-100 p-4 rounded-lg shadow-sm">
+                <div class="flex items-center justify-between mb-2">
+                  <h4 class="text-sm font-medium text-green-800">출석</h4>
+                  <span class="text-xs font-medium text-green-600 bg-green-200 px-2 py-1 rounded-full">
+                    ${totalStats.attendanceRate}%
+                  </span>
+                </div>
+                <p class="text-2xl font-bold text-green-700">${
+                  totalStats.present
+                }회</p>
+                <div class="mt-2 text-sm text-green-600">
+                  전체 ${totalStats.total}일 중
+                </div>
+              </div>
+
+              <div class="bg-gradient-to-br from-yellow-50 to-yellow-100 p-4 rounded-lg shadow-sm">
+                <div class="flex items-center justify-between mb-2">
+                  <h4 class="text-sm font-medium text-yellow-800">지각</h4>
+                  <span class="text-xs font-medium text-yellow-600 bg-yellow-200 px-2 py-1 rounded-full">
+                    ${((totalStats.late / totalStats.total) * 100).toFixed(1)}%
+                  </span>
+                </div>
+                <p class="text-2xl font-bold text-yellow-700">${
+                  totalStats.late
+                }회</p>
+                <div class="mt-2 text-sm text-yellow-600">
+                  평균 ${(
+                    totalStats.lateMinutes / totalStats.late || 0
+                  ).toFixed(1)}분
+                </div>
+              </div>
+
+              <div class="bg-gradient-to-br from-red-50 to-red-100 p-4 rounded-lg shadow-sm">
+                <div class="flex items-center justify-between mb-2">
+                  <h4 class="text-sm font-medium text-red-800">결석</h4>
+                  <span class="text-xs font-medium text-red-600 bg-red-200 px-2 py-1 rounded-full">
+                    ${((totalStats.absent / totalStats.total) * 100).toFixed(
+                      1
+                    )}%
+                  </span>
+                </div>
+                <p class="text-2xl font-bold text-red-700">${
+                  totalStats.absent
+                }회</p>
+                <div class="mt-2 text-sm text-red-600">
+                  미인정 결석
+                </div>
+              </div>
+
+              <div class="bg-gradient-to-br from-blue-50 to-blue-100 p-4 rounded-lg shadow-sm">
+                <div class="flex items-center justify-between mb-2">
+                  <h4 class="text-sm font-medium text-blue-800">인정결석</h4>
+                  <span class="text-xs font-medium text-blue-600 bg-blue-200 px-2 py-1 rounded-full">
+                    ${((totalStats.excused / totalStats.total) * 100).toFixed(
+                      1
+                    )}%
+                  </span>
+                </div>
+                <p class="text-2xl font-bold text-blue-700">${
+                  totalStats.excused
+                }회</p>
+                <div class="mt-2 text-sm text-blue-600">
+                  총 ${totalStats.total}일 중
+                </div>
+              </div>
+            </div>
+          `;
+        }
+
+        // 차트 업데이트
+        if (monthlyStats) {
+          updateMonthlyStatsChart(monthlyStats);
+        }
+        if (improvements) {
+          updateImprovementChart(improvements);
+        }
+      }
+
       // 전역 에러 핸들러 추가
       window.onerror = function (msg, url, lineNo, columnNo, error) {
         console.error("Global error:", { msg, url, lineNo, columnNo, error });
