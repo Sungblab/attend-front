@@ -122,9 +122,14 @@
                   name="password"
                   aria-label="비밀번호 입력"
                   aria-required="true"
+                  aria-describedby="password-requirements"
                   class="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-primary focus:border-transparent transition duration-200"
                   required
                 />
+              </div>
+              <div id="password-requirements" class="sr-only">
+                비밀번호는 8자 이상이며, 대문자, 소문자, 숫자, 특수문자를
+                포함해야 합니다.
               </div>
             </div>
             <button

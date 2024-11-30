@@ -84,13 +84,23 @@ self.addEventListener("push", function (event) {
   }
 });
 
-// 오프라인 페이지 추가
+// 오프라인 페이지 개선
 const OFFLINE_PAGE = "/offline.html";
 
 self.addEventListener("fetch", (event) => {
   event.respondWith(
     fetch(event.request).catch(() => {
-      return caches.match(OFFLINE_PAGE);
+      return caches.match(OFFLINE_PAGE).then((response) => {
+        if (response) {
+          return response;
+        }
+        return new Response(
+          "오프라인 상태입니다. 인터넷 연결을 확인해주세요.",
+          {
+            headers: { "Content-Type": "text/plain" },
+          }
+        );
+      });
     })
   );
 });

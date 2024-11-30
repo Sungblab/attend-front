@@ -187,8 +187,14 @@
           document.getElementById("qrcode").innerHTML = qr.createImgTag(5);
           hideError();
         } catch (error) {
-          console.error("Error generating QR code:", error);
-          showError(`QR 코드 생성에 실패했습니다: ${error.message}`);
+          console.error("QR 코드 생성 오류:", error);
+          showError(`QR 코드 생성 실패: ${error.message}`);
+
+          // 자동 재시도 로직 추가
+          setTimeout(() => {
+            console.log("QR 코드 생성 재시도...");
+            generateQRCode();
+          }, 5000);
         }
       }
 

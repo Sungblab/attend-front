@@ -223,6 +223,71 @@
           <span class="ml-2">데이터를 불러오는 중...</span>
         </div>
       </div>
+
+      <div class="bg-white overflow-hidden mb-8">
+        <div class="p-6">
+          <h2 class="text-2xl font-bold mb-6 text-gray-800">특별 통계</h2>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="bg-green-50 p-4 rounded-lg">
+              <h3 class="font-semibold text-lg mb-2">이달의 출석왕</h3>
+              <div id="attendanceKing" class="text-green-700"></div>
+            </div>
+
+            <div class="bg-yellow-50 p-4 rounded-lg">
+              <h3 class="font-semibold text-lg mb-2">이달의 지각왕</h3>
+              <div id="lateKing" class="text-yellow-700"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-white overflow-hidden mb-8">
+        <div class="p-6">
+          <h2 class="text-2xl font-bold mb-6 text-gray-800">결석 관리</h2>
+
+          <form id="excuseForm" class="mb-6">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <input
+                type="text"
+                id="excuseStudentId"
+                placeholder="학번"
+                class="p-2 border rounded"
+              />
+              <input type="date" id="excuseDate" class="p-2 border rounded" />
+              <input
+                type="text"
+                id="excuseReason"
+                placeholder="사유"
+                class="p-2 border rounded"
+              />
+            </div>
+            <button
+              type="submit"
+              class="mt-4 bg-blue-500 text-white px-4 py-2 rounded"
+            >
+              인정결석 처리
+            </button>
+          </form>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <h3 class="font-semibold text-lg mb-2">인정결석 목록</h3>
+              <div
+                id="excusedAbsencesList"
+                class="bg-gray-50 p-4 rounded-lg max-h-80 overflow-y-auto"
+              ></div>
+            </div>
+
+            <div>
+              <h3 class="font-semibold text-lg mb-2">일반 결석 목록</h3>
+              <div
+                id="absencesList"
+                class="bg-gray-50 p-4 rounded-lg max-h-80 overflow-y-auto"
+              ></div>
+            </div>
+          </div>
+        </div>
+      </div>
     </main>
 
     <footer class="bg-white text-gray-600 py-2 sm:py-4 mt-auto">
@@ -265,21 +330,22 @@
 
       async function fetchAttendanceStats() {
         try {
-          const startDate = document.getElementById("startDate").value;
-          const endDate = document.getElementById("endDate").value;
-          const grade = document.getElementById("gradeSelect").value;
-          const classNum = document.getElementById("classSelect").value;
-
           const response = await axios.get("/api/attendance/stats", {
-            params: { startDate, endDate, grade, classNum },
+            params: {
+              startDate: document.getElementById("startDate").value,
+              endDate: document.getElementById("endDate").value,
+              grade: document.getElementById("gradeSelect").value,
+              classNum: document.getElementById("classSelect").value,
+            },
             headers: {
               Authorization: `Bearer ${localStorage.getItem("token")}`,
             },
           });
 
-          const { studentStats, overallStats } = response.data;
+          const { studentStats, overallStats, specialStats } = response.data;
           updateOverallStats(overallStats);
           updateStudentStats(studentStats);
+          updateSpecialStats(specialStats);
         } catch (error) {
           console.error("통계 조회 중 오류 발생:", error);
           alert("통계 조회 중 오류가 발생했습니다.");
@@ -347,6 +413,190 @@
             return "text-gray-600";
         }
       }
+
+      function updateSpecialStats(specialStats) {
+        const attendanceKingDiv = document.getElementById("attendanceKing");
+        if (specialStats.monthlyAttendanceKing) {
+          const king = specialStats.monthlyAttendanceKing;
+          attendanceKingDiv.innerHTML = `
+            <p>학번: ${king._id}</p>
+            <p>출석 횟수: ${king.presentCount}회</p>
+          `;
+        }
+
+        const lateKingDiv = document.getElementById("lateKing");
+        if (specialStats.lateKing) {
+          const king = specialStats.lateKing;
+          lateKingDiv.innerHTML = `
+            <p>학번: ${king._id}</p>
+            <p>지각 횟수: ${king.lateCount}회</p>
+            <p>총 지각 시간: ${king.totalLateMinutes}분</p>
+          `;
+        }
+
+        updateAbsenceLists(specialStats.excusedAbsences, specialStats.absences);
+      }
+
+      function updateAbsenceLists(excused, normal) {
+        const excusedList = document.getElementById("excusedAbsencesList");
+        const normalList = document.getElementById("absencesList");
+
+        excusedList.innerHTML = excused
+          .map(
+            (absence) => `
+          <div class="mb-2 p-2 bg-white rounded shadow">
+            <p>학번: ${absence.studentId}</p>
+            <p>날짜: ${moment(absence.timestamp).format("YYYY-MM-DD")}</p>
+            <p>사유: ${absence.reason || "사유 없음"}</p>
+          </div>
+        `
+          )
+          .join("");
+
+        normalList.innerHTML = normal
+          .map(
+            (absence) => `
+          <div class="mb-2 p-2 bg-white rounded shadow">
+            <p>학번: ${absence.studentId}</p>
+            <p>날짜: ${moment(absence.timestamp).format("YYYY-MM-DD")}</p>
+            <button 
+              onclick="handleExcuseAbsence('${absence.studentId}', '${
+              absence.timestamp
+            }')"
+              class="mt-2 text-blue-600 hover:text-blue-800"
+            >
+              인정결석으로 변경
+            </button>
+          </div>
+        `
+          )
+          .join("");
+      }
+
+      document
+        .getElementById("excuseForm")
+        .addEventListener("submit", async (e) => {
+          e.preventDefault();
+
+          const studentId = document.getElementById("excuseStudentId").value;
+          const date = document.getElementById("excuseDate").value;
+          const reason = document.getElementById("excuseReason").value;
+
+          if (!studentId || !date || !reason) {
+            alert("모든 필드를 입력해주세요.");
+            return;
+          }
+
+          try {
+            const response = await axios.post(
+              "/api/attendance/excuse",
+              {
+                studentId,
+                date,
+                reason,
+              },
+              {
+                headers: {
+                  Authorization: `Bearer ${localStorage.getItem("token")}`,
+                },
+              }
+            );
+
+            alert("인정결석 처리가 완료되었습니다.");
+            document.getElementById("excuseForm").reset();
+            fetchAttendanceStats(); // 통계 새로고침
+          } catch (error) {
+            console.error("인정결석 처리 중 오류:", error);
+            alert(
+              error.response?.data?.message ||
+                "인정결석 처리 중 오류가 발생했습니다."
+            );
+          }
+        });
+
+      async function handleExcuseAbsence(studentId, timestamp) {
+        const reason = prompt("인정결석 사유를 입력해주세요:");
+        if (!reason) return;
+
+        try {
+          await axios.post(
+            "/api/attendance/excuse",
+            {
+              studentId,
+              date: moment(timestamp).format("YYYY-MM-DD"),
+              reason,
+            },
+            {
+              headers: {
+                Authorization: `Bearer ${localStorage.getItem("token")}`,
+              },
+            }
+          );
+
+          alert("인정결석 처리가 완료되었습니다.");
+          fetchAttendanceStats();
+        } catch (error) {
+          console.error("인정결석 처리 중 오류:", error);
+          alert(
+            error.response?.data?.message ||
+              "인정결석 처리 중 오류가 발생했습니다."
+          );
+        }
+      }
+
+      axios.interceptors.response.use(
+        (response) => response,
+        async (error) => {
+          const originalRequest = error.config;
+
+          if (error.response.status === 401 && !originalRequest._retry) {
+            originalRequest._retry = true;
+
+            try {
+              const refreshToken = localStorage.getItem("refreshToken");
+              if (!refreshToken) {
+                throw new Error("리프레시 토큰이 없습니다.");
+              }
+
+              const response = await axios.post("/api/refresh-token", {
+                refreshToken,
+              });
+
+              const { accessToken, refreshToken: newRefreshToken } =
+                response.data;
+
+              localStorage.setItem("token", accessToken);
+              localStorage.setItem("refreshToken", newRefreshToken);
+
+              originalRequest.headers[
+                "Authorization"
+              ] = `Bearer ${accessToken}`;
+              return axios(originalRequest);
+            } catch (error) {
+              console.error("토큰 갱신 실패:", error);
+              localStorage.clear();
+              window.location.href =
+                "/index.html?error=" +
+                encodeURIComponent(
+                  "세션이 만료되었습니다. 다시 로그인해주세요."
+                );
+              return Promise.reject(error);
+            }
+          }
+
+          return Promise.reject(error);
+        }
+      );
+
+      document.addEventListener("DOMContentLoaded", () => {
+        const today = moment().format("YYYY-MM-DD");
+        const firstDayOfMonth = moment().startOf("month").format("YYYY-MM-DD");
+
+        document.getElementById("startDate").value = firstDayOfMonth;
+        document.getElementById("endDate").value = today;
+
+        fetchAttendanceStats();
+      });
     </script>
   </body>
 </html>
