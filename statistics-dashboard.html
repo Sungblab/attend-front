@@ -201,7 +201,7 @@
             <p class="text-2xl font-bold text-gray-900" id="absentRate">-</p>
           </div>
 
-          <!-- 인정결석률 카드 -->
+          <!-- 인��결석률 카드 -->
           <div
             class="bg-gradient-to-br from-purple-50 to-fuchsia-50 rounded-xl p-4 border border-purple-100"
           >
@@ -325,7 +325,7 @@
             <h3 class="text-lg font-semibold mb-3">최근 인정결석 목록</h3>
             <div
               id="excusedList"
-              class="space-y-2 max-h-[calc(100vh-10rem)] overflow-y-auto"
+              class="space-y-2 max-h-[400px] overflow-y-auto"
             >
               <!-- 동적으로 추가될 내용 -->
             </div>
@@ -1470,69 +1470,27 @@
 
       // 차석 기록 테이블 업데이트 함수 개선
       function updateAttendanceTable(attendances) {
-        const groupedAttendances = groupAttendancesByMonth(attendances);
         const tableBody = document.getElementById("modalAttendanceList");
-
-        tableBody.innerHTML = Object.entries(groupedAttendances)
-          .map(([month, records]) => {
-            const monthStats = calculateMonthStats(records);
-
-            return `
-              <tr class="bg-gray-50">
-                <td colspan="4" class="px-6 py-2">
-                  <div class="flex justify-between items-center">
-                    <span class="font-semibold">${month}</span>
-                    <span class="text-sm text-gray-600">
-                      출석: ${monthStats.present}회 /
-                      지각: ${monthStats.late}회 /
-                      결석: ${monthStats.absent}회 /
-                      인정: ${monthStats.excused}회
-                    </span>
-                  </div>
+        tableBody.innerHTML = attendances
+          .map(
+            (attendance) => `
+              <tr class="hover:bg-gray-50 transition-colors">
+                <td class="px-6 py-4 whitespace-nowrap">
+                  ${moment(attendance.date).format("MM/DD (ddd)")}
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <span class="${getStatusBadgeClass(attendance.status)}">
+                    ${getStatusText(attendance.status)}
+                  </span>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  ${
+                    attendance.lateMinutes ? `${attendance.lateMinutes}분` : "-"
+                  }
                 </td>
               </tr>
-              ${records
-                .map(
-                  (attendance) => `
-                <tr class="hover:bg-gray-50 transition-colors">
-                  <td class="px-6 py-3 whitespace-nowrap">
-                    ${moment(attendance.date).format("MM/DD (ddd)")}
-                  </td>
-                  <td class="px-6 py-3 whitespace-nowrap">
-                    <span class="${getStatusBadgeClass(attendance.status)}">
-                      ${getStatusText(attendance.status)}
-                    </span>
-                  </td>
-                  <td class="px-6 py-3 whitespace-nowrap">
-                    ${
-                      attendance.lateMinutes
-                        ? `<span class="text-yellow-600">${attendance.lateMinutes}분</span>`
-                        : "-"
-                    }
-                  </td>
-                  <td class="px-6 py-3">
-                    ${
-                      attendance.isExcused
-                        ? `<div class="text-blue-600">인정결석</div>
-                         <div class="text-sm text-gray-500">${
-                           attendance.reason || ""
-                         }</div>`
-                        : attendance.status === "absent"
-                        ? `<button
-                        onclick="handleExcuseAbsence('${attendance.studentId}', '${attendance.date}')"
-                        class="text-blue-600 hover:text-blue-800 text-sm"
-                      >
-                        인정결석으로 변경
-                      </button>`
-                        : ""
-                    }
-                  </td>
-                </tr>
-              `
-                )
-                .join("")}
-            `;
-          })
+            `
+          )
           .join("");
       }
 
