@@ -83,3 +83,14 @@ self.addEventListener("push", function (event) {
     );
   }
 });
+
+// 오프라인 페이지 추가
+const OFFLINE_PAGE = "/offline.html";
+
+self.addEventListener("fetch", (event) => {
+  event.respondWith(
+    fetch(event.request).catch(() => {
+      return caches.match(OFFLINE_PAGE);
+    })
+  );
+});

@@ -269,6 +269,16 @@
         messageArea.classList.add("p-3", "rounded-md");
       }
 
+      function validateStudentId(studentId) {
+        // 학번 형식 검사 (예: 8자리 숫자)
+        return /^\d{8}$/.test(studentId);
+      }
+
+      function validateName(name) {
+        // 이름 형식 검사 (한글 2-4자)
+        return /^[가-힣]{2,4}$/.test(name);
+      }
+
       document
         .getElementById("signupForm")
         .addEventListener("submit", async function (e) {

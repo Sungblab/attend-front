@@ -353,26 +353,19 @@
         }
       }
 
-      function handleError(error) {
-        console.log("Handling error:", error); // 디버깅 로그
+      async function handleError(error) {
         if (error.response) {
-          console.error("Server responded with error:", error.response.data);
           if (error.response.status === 401) {
-            console.log("401 error detected, redirecting to login page"); // 디버깅 로그
-            window.location.href =
-              "index.html?error=" +
-              encodeURIComponent("인증이 만료되었습니다. 다시 로그인해주세요.");
+            alert("세션이 만료되었습니다. 다시 로그인해주세요.");
+            localStorage.clear();
+            window.location.href = "index.html";
           } else {
-            alert(`오류: ${error.response.data.message || "알 수 없는 오류"}`);
+            alert(`오류가 발생했습니다: ${error.response.data.message}`);
           }
         } else if (error.request) {
-          console.error("No response received:", error.request);
-          alert(
-            "서버로부터 응답을 받지 못했습니다. 네트워크 연결을 확인해주세요."
-          );
+          alert("서버와 통신할 수 없습니다. 인터넷 연결을 확인해주세요.");
         } else {
-          console.error("Error setting up request:", error.message);
-          alert(`요청 설정 중 오류가 발생했습니다: ${error.message}`);
+          alert("알 수 없는 오류가 발생했습니다.");
         }
       }
 
