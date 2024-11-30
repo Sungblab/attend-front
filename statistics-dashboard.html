@@ -364,6 +364,13 @@
           </div>
         </div>
 
+        <!-- 오늘의 출석 상태 -->
+        <div class="bg-gray-50 p-4 rounded-lg mb-4">
+          <div id="modalTodayStatus">
+            <!-- 오늘의 출석 상태가 여기에 동적으로 추가됨 -->
+          </div>
+        </div>
+
         <!-- 전체 통계 요약 -->
         <div class="mb-6">
           <h4 class="text-lg font-semibold mb-2">전체 통계 요약</h4>
@@ -484,7 +491,7 @@
       }
 
       function setupEventListeners() {
-        // 검색 버튼 클 이벤트
+        // 검 버튼 클 이벤트
         document
           .getElementById("searchBtn")
           .addEventListener("click", fetchAttendanceStats);
@@ -1085,6 +1092,8 @@
 
       // 모달 관련 함수들 가
       function updateStudentDetailModal(data) {
+        if (!data) return;
+
         const {
           student,
           totalStats,
@@ -1094,97 +1103,105 @@
           todayStatus,
         } = data;
 
-        // 학생 기본 정보 업데이트
-        document.getElementById(
-          "modalTitle"
-        ).textContent = `${student.name} 학생 상세 통계`;
-        document.getElementById("modalStudentId").textContent =
-          student.studentId;
-        document.getElementById("modalStudentName").textContent = student.name;
-        document.getElementById(
-          "modalStudentClass"
-        ).textContent = `${student.grade}-${student.class}`;
-        document.getElementById("modalStudentNumber").textContent =
-          student.number;
+        try {
+          // 기본 정보 업데이트
+          document.getElementById(
+            "modalTitle"
+          ).textContent = `${student.name} 학생 상세 통계`;
+          document.getElementById("modalStudentId").textContent =
+            student.studentId;
+          document.getElementById("modalStudentName").textContent =
+            student.name;
+          document.getElementById(
+            "modalStudentClass"
+          ).textContent = `${student.grade}-${student.class}`;
+          document.getElementById("modalStudentNumber").textContent =
+            student.number;
 
-        // 오늘의 출석 상태 표
-        const todayStatusHtml = todayStatus
-          ? `
-          <div class="bg-gray-50 p-4 rounded-lg mb-4">
-            <h4 class="text-lg font-semibold mb-2">오늘의 출석 상태</h4>
-            <div class="flex items-center space-x-4">
-              <span class="${getStatusBadgeClass(todayStatus.status)}">
-                ${getStatusText(todayStatus.status)}
-                ${
-                  todayStatus.lateMinutes
-                    ? `(${todayStatus.lateMinutes}분)`
-                    : ""
-                }
-              </span>
-              ${
-                todayStatus.isExcused
-                  ? `<span class="text-blue-600">인정결석</span>
-                 <span class="text-sm text-gray-500">${
-                   todayStatus.reason || ""
-                 }</span>`
-                  : ""
-              }
-            </div>
-          </div>
-        `
-          : "";
-        document.getElementById("modalTodayStatus").innerHTML = todayStatusHtml;
+          // 오늘의 출석 상태 업데이트
+          const modalTodayStatus = document.getElementById("modalTodayStatus");
+          if (modalTodayStatus) {
+            modalTodayStatus.innerHTML = todayStatus
+              ? `
+                <div class="bg-gray-50 p-4 rounded-lg mb-4">
+                  <h4 class="text-lg font-semibold mb-2">���늘의 출석 상태</h4>
+                  <div class="flex items-center space-x-4">
+                    <span class="${getStatusBadgeClass(todayStatus.status)}">
+                      ${getStatusText(todayStatus.status)}
+                      ${
+                        todayStatus.lateMinutes
+                          ? `(${todayStatus.lateMinutes}분)`
+                          : ""
+                      }
+                    </span>
+                    ${
+                      todayStatus.isExcused
+                        ? `<span class="text-blue-600">인정결석</span>
+                         <span class="text-sm text-gray-500">${
+                           todayStatus.reason || ""
+                         }</span>`
+                        : ""
+                    }
+                  </div>
+                </div>
+              `
+              : '<div class="text-gray-500">오늘의 출석 정보가 없습니다.</div>';
+          }
 
-        // 전체 통계 요약 업데이트
-        const summaryHtml = `
-          <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div class="bg-green-50 p-4 rounded-lg">
-              <h5 class="text-sm font-medium text-green-700">출석률</h5>
-              <p class="text-2xl font-bold text-green-900">${
-                totalStats.attendanceRate
-              }%</p>
-              <p class="text-sm text-green-600">${totalStats.present}회</p>
-            </div>
-            <div class="bg-yellow-50 p-4 rounded-lg">
-              <h5 class="text-sm font-medium text-yellow-700">지각률</h5>
-              <p class="text-2xl font-bold text-yellow-900">${(
-                (totalStats.late / totalStats.total) *
-                100
-              ).toFixed(1)}%</p>
-              <p class="text-sm text-yellow-600">${totalStats.late}회 (평균 ${(
-          totalStats.lateMinutes / totalStats.late || 0
-        ).toFixed(1)}분)</p>
-            </div>
-            <div class="bg-red-50 p-4 rounded-lg">
-              <h5 class="text-sm font-medium text-red-700">결석률</h5>
-              <p class="text-2xl font-bold text-red-900">${(
-                (totalStats.absent / totalStats.total) *
-                100
-              ).toFixed(1)}%</p>
-              <p class="text-sm text-red-600">${totalStats.absent}회</p>
-            </div>
-            <div class="bg-blue-50 p-4 rounded-lg">
-              <h5 class="text-sm font-medium text-blue-700">인정결석</h5>
-              <p class="text-2xl font-bold text-blue-900">${
-                totalStats.excused
-              }회</p>
-              <p class="text-sm text-blue-600">${(
-                (totalStats.excused / totalStats.total) *
-                100
-              ).toFixed(1)}%</p>
-            </div>
-          </div>
-        `;
-        document.getElementById("modalSummary").innerHTML = summaryHtml;
+          // 전체 통계 요약 업데이트
+          const modalSummary = document.getElementById("modalSummary");
+          if (modalSummary && totalStats) {
+            modalSummary.innerHTML = `
+              <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div class="bg-green-50 p-4 rounded-lg">
+                  <h5 class="text-sm font-medium text-green-700">출석률</h5>
+                  <p class="text-2xl font-bold text-green-900">${
+                    totalStats.attendanceRate
+                  }%</p>
+                  <p class="text-sm text-green-600">${totalStats.present}회</p>
+                </div>
+                <div class="bg-yellow-50 p-4 rounded-lg">
+                  <h5 class="text-sm font-medium text-yellow-700">지각률</h5>
+                  <p class="text-2xl font-bold text-yellow-900">${(
+                    (totalStats.late / totalStats.total) *
+                    100
+                  ).toFixed(1)}%</p>
+                  <p class="text-sm text-yellow-600">${
+                    totalStats.late
+                  }회 (평균 ${(
+              totalStats.lateMinutes / totalStats.late || 0
+            ).toFixed(1)}분)</p>
+                </div>
+                <div class="bg-red-50 p-4 rounded-lg">
+                  <h5 class="text-sm font-medium text-red-700">결석률</h5>
+                  <p class="text-2xl font-bold text-red-900">${(
+                    (totalStats.absent / totalStats.total) *
+                    100
+                  ).toFixed(1)}%</p>
+                  <p class="text-sm text-red-600">${totalStats.absent}회</p>
+                </div>
+                <div class="bg-blue-50 p-4 rounded-lg">
+                  <h5 class="text-sm font-medium text-blue-700">인정결석</h5>
+                  <p class="text-2xl font-bold text-blue-900">${
+                    totalStats.excused
+                  }회</p>
+                  <p class="text-sm text-blue-600">${(
+                    (totalStats.excused / totalStats.total) *
+                    100
+                  ).toFixed(1)}%</p>
+                </div>
+              </div>
+            `;
+          }
 
-        // 월별 통계 차트 업데이트
-        updateMonthlyStatsChart(monthlyStats);
-
-        // 출석 기록 테이블 업데이트
-        updateAttendanceTable(attendances);
-
-        // 개선도 차트 업데이트
-        updateImprovementChart(improvements);
+          // 차트와 테이블 업데이트
+          if (monthlyStats) updateMonthlyStatsChart(monthlyStats);
+          if (attendances) updateAttendanceTable(attendances);
+          if (improvements) updateImprovementChart(improvements);
+        } catch (error) {
+          console.error("모달 업데이트 중 오류:", error);
+          showToast("상세 정보 표시 중 오류가 발생했습니다.", "error");
+        }
       }
 
       // 출석 기록을 월별로 그룹화하는 함수
@@ -1245,9 +1262,9 @@
                     ${
                       attendance.isExcused
                         ? `<div class="text-blue-600">인정결석</div>
-                       <div class="text-sm text-gray-500">${
-                         attendance.reason || ""
-                       }</div>`
+                         <div class="text-sm text-gray-500">${
+                           attendance.reason || ""
+                         }</div>`
                         : attendance.status === "absent"
                         ? `<button 
                         onclick="handleExcuseAbsence('${attendance.studentId}', '${attendance.date}')"
@@ -1430,14 +1447,17 @@
       // 모달 닫기 함수 개선
       function closeModal() {
         const modal = document.getElementById("studentDetailModal");
-        modal.classList.add("hidden");
+        if (modal) {
+          modal.classList.add("hidden");
+          document.body.style.overflow = ""; // 배경 스크롤 복원
 
-        // 차트 정리
-        if (window.monthlyChart instanceof Chart) {
-          window.monthlyChart.destroy();
-        }
-        if (window.improvementChart instanceof Chart) {
-          window.improvementChart.destroy();
+          // 차트 정리
+          if (window.monthlyChart instanceof Chart) {
+            window.monthlyChart.destroy();
+          }
+          if (window.improvementChart instanceof Chart) {
+            window.improvementChart.destroy();
+          }
         }
       }
 
@@ -1682,6 +1702,14 @@
           return Promise.reject(error);
         }
       );
+
+      function showModal() {
+        const modal = document.getElementById("studentDetailModal");
+        if (modal) {
+          modal.classList.remove("hidden");
+          document.body.style.overflow = "hidden"; // 배경 스크롤 방지
+        }
+      }
     </script>
   </body>
 </html>
