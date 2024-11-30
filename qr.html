@@ -311,6 +311,174 @@
         document.body.appendChild(toast);
         setTimeout(() => toast.remove(), 3000);
       }
+
+      // 오늘의 출석 상태 조회 함수
+      async function checkTodayAttendance() {
+        try {
+          const response = await apiRequest(
+            `${API_BASE_URL}/attendance/student/${studentId}`
+          );
+          const data = await response.json();
+
+          if (!data.success) {
+            throw new Error(data.message);
+          }
+
+          const todayStatusDiv = document.getElementById("todayStatus");
+          if (data.todayStatus) {
+            const status = data.todayStatus;
+            const statusClass =
+              {
+                present: "bg-green-100 text-green-800",
+                late: "bg-yellow-100 text-yellow-800",
+                absent: "bg-red-100 text-red-800",
+              }[status.status] || "bg-gray-100 text-gray-800";
+
+            const statusText =
+              {
+                present: "출석",
+                late: "지각",
+                absent: "결석",
+              }[status.status] || "미출석";
+
+            todayStatusDiv.innerHTML = `
+              <div class="flex items-center space-x-4">
+                <span class="px-4 py-2 rounded-full ${statusClass} font-medium">
+                  ${statusText}
+                  ${status.lateMinutes ? `(${status.lateMinutes}분 지각)` : ""}
+                </span>
+                ${
+                  status.isExcused
+                    ? `<span class="bg-blue-100 text-blue-800 px-4 py-2 rounded-full">인정결석</span>
+                   <span class="text-gray-600">${status.reason || ""}</span>`
+                    : ""
+                }
+              </div>
+            `;
+          } else {
+            todayStatusDiv.innerHTML = `
+              <div class="text-gray-500">
+                아직 출석 기록이 없습니다.
+              </div>
+            `;
+          }
+        } catch (error) {
+          console.error("출석 상태 조회 중 오류:", error);
+          showError("출석 상태를 조회하는데 실패했습니다.");
+        }
+      }
+
+      // 출결 상세 정보 조회 함수
+      async function showAttendanceDetails() {
+        try {
+          const response = await apiRequest(
+            `${API_BASE_URL}/attendance/student/${studentId}`
+          );
+          const data = await response.json();
+
+          if (!data.success) {
+            throw new Error(data.message);
+          }
+
+          // 통계 업데이트
+          document.getElementById("presentCount").textContent =
+            data.totalStats.present;
+          document.getElementById("lateCount").textContent =
+            data.totalStats.late;
+          document.getElementById("absentCount").textContent =
+            data.totalStats.absent;
+          document.getElementById("excusedCount").textContent =
+            data.totalStats.excused;
+
+          // 출결 기록 테이블 업데이트
+          const attendanceList = document.getElementById("attendanceList");
+          attendanceList.innerHTML = data.attendances
+            .sort((a, b) => moment(b.date).valueOf() - moment(a.date).valueOf())
+            .map(
+              (attendance) => `
+              <tr class="hover:bg-gray-50">
+                <td class="px-6 py-4 whitespace-nowrap">
+                  ${moment(attendance.date).format("YYYY-MM-DD (ddd)")}
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <span class="${getStatusBadgeClass(attendance.status)}">
+                    ${getStatusText(attendance.status)}
+                  </span>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  ${
+                    attendance.lateMinutes
+                      ? `${attendance.lateMinutes}분 지각`
+                      : "-"
+                  }
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  ${
+                    attendance.isExcused
+                      ? `<span class="text-blue-600">인정결석</span>
+                     <span class="text-sm text-gray-500">${
+                       attendance.reason || ""
+                     }</span>`
+                      : ""
+                  }
+                </td>
+              </tr>
+            `
+            )
+            .join("");
+
+          // 모달 표시
+          document.getElementById("attendanceModal").classList.remove("hidden");
+        } catch (error) {
+          console.error("출결 기록 조회 중 오류:", error);
+          showError("출결 기록을 조회하는데 실패했습니다.");
+        }
+      }
+
+      // 모달 닫기 함수
+      function closeModal() {
+        document.getElementById("attendanceModal").classList.add("hidden");
+      }
+
+      // 상태별 배지 스타일 클래스
+      function getStatusBadgeClass(status) {
+        const baseClasses = "px-2 py-1 rounded-full text-xs font-medium";
+        switch (status) {
+          case "present":
+            return `${baseClasses} bg-green-100 text-green-800`;
+          case "late":
+            return `${baseClasses} bg-yellow-100 text-yellow-800`;
+          case "absent":
+            return `${baseClasses} bg-red-100 text-red-800`;
+          default:
+            return `${baseClasses} bg-gray-100 text-gray-800`;
+        }
+      }
+
+      // 상태 텍스트 변환
+      function getStatusText(status) {
+        return (
+          {
+            present: "출석",
+            late: "지각",
+            absent: "결석",
+          }[status] || "미출석"
+        );
+      }
+
+      // 페이지 로드 시 출석 상태 확인
+      document.addEventListener("DOMContentLoaded", async () => {
+        if (!checkAuth()) return;
+        await fetchStudentInfo();
+        await checkTodayAttendance();
+      });
+
+      // ESC 키로 모달 닫기
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") {
+          closeModal();
+        }
+      });
     </script>
   </body>
 </html>
