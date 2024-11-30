@@ -420,54 +420,6 @@
           </div>
         </div>
       </section>
-
-      <!-- 휴일 관리 섹션 추가 -->
-      <section class="bg-white rounded-lg shadow mb-6 p-6">
-        <h2 class="text-2xl font-bold mb-4">휴일 관리</h2>
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <div class="bg-gray-50 p-4 rounded-lg">
-            <h3 class="text-lg font-semibold mb-3">휴일 등록</h3>
-            <form id="holidayForm" class="space-y-4">
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1"
-                  >날짜</label
-                >
-                <input
-                  type="date"
-                  id="holidayDate"
-                  class="w-full rounded-lg border-gray-300"
-                  required
-                />
-              </div>
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1"
-                  >사유</label
-                >
-                <input
-                  type="text"
-                  id="holidayReason"
-                  class="w-full rounded-lg border-gray-300"
-                  placeholder="예: 개교기념일"
-                  required
-                />
-              </div>
-              <button
-                type="submit"
-                class="w-full bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors"
-              >
-                휴일 등록
-              </button>
-            </form>
-          </div>
-
-          <div class="bg-gray-50 p-4 rounded-lg">
-            <h3 class="text-lg font-semibold mb-3">등록된 휴일 목록</h3>
-            <div id="holidayList" class="space-y-2">
-              <!-- 동적으로 추가될 내용 -->
-            </div>
-          </div>
-        </div>
-      </section>
     </main>
 
     <footer class="bg-white text-gray-600 py-2 sm:py-4 mt-auto">
