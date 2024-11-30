@@ -714,6 +714,10 @@
             (stats.totalPresent + stats.totalLate + stats.totalAbsent)) *
           100
         ).toFixed(1)}%`;
+        // 전체 출석일수 업데이트 추가
+        document.getElementById(
+          "totalDays"
+        ).textContent = `${stats.totalDays}일`;
       }
 
       function updateStudentStats(stats) {
@@ -1337,7 +1341,7 @@
                   </div>
                 </div>
 
-                <!-- 인정결석 카드 -->
+                <!-- 인정결석 카�� -->
                 <div class="flex-1 min-w-[240px] bg-gradient-to-br from-blue-50 to-blue-100 p-6 rounded-xl shadow-sm">
                   <div class="flex flex-col">
                     <h5 class="text-sm font-semibold text-blue-800 mb-1">인정결석</h5>
