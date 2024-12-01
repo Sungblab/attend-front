@@ -134,6 +134,20 @@
                 포함해야 합니다.
               </div>
             </div>
+            <div class="flex items-center">
+              <input
+                type="checkbox"
+                id="keep-logged-in"
+                name="keep-logged-in"
+                class="h-4 w-4 text-primary border-gray-300 rounded focus:ring-primary"
+              />
+              <label
+                for="keep-logged-in"
+                class="ml-2 block text-sm text-gray-700"
+              >
+                로그인 상태 유지
+              </label>
+            </div>
             <button
               type="submit"
               class="w-full bg-primary hover:bg-secondary text-white font-semibold py-2 sm:py-3 px-4 rounded-lg transition duration-300 transform hover:scale-105 flex items-center justify-center text-sm sm:text-base"
@@ -253,61 +267,26 @@
 
           const studentId = document.getElementById("student-id").value;
           const password = document.getElementById("password").value;
-
-          // 로그인 버튼 비활성화
-          const submitButton = this.querySelector('button[type="submit"]');
-          submitButton.disabled = true;
-          submitButton.innerHTML =
-            '<i class="ri-loader-2-line animate-spin mr-2"></i>로그인 중...';
+          const keepLoggedIn =
+            document.getElementById("keep-logged-in").checked;
 
           try {
-            // 재시도 로직 추가
-            const maxRetries = 3;
-            let retryCount = 0;
+            const response = await axios.post("/api/login", {
+              studentId,
+              password,
+              keepLoggedIn,
+            });
 
-            while (retryCount < maxRetries) {
-              try {
-                const response = await axios.post("/api/login", {
-                  studentId,
-                  password,
-                });
+            if (response.data.success) {
+              localStorage.setItem("token", response.data.accessToken);
+              localStorage.setItem("refreshToken", response.data.refreshToken);
+              localStorage.setItem(
+                "userInfo",
+                JSON.stringify(response.data.user)
+              );
+              localStorage.setItem("keepLoggedIn", keepLoggedIn);
 
-                const data = response.data;
-
-                if (!data.success) {
-                  showMessage(data.message || "로그인에 실패했습니다.", true);
-                  break;
-                }
-
-                if (!data.accessToken || !data.refreshToken) {
-                  showMessage("서버 응답에 토큰이 없습니다.", true);
-                  break;
-                }
-
-                localStorage.clear();
-                localStorage.setItem("token", data.accessToken);
-                localStorage.setItem("refreshToken", data.refreshToken);
-                localStorage.setItem("userInfo", JSON.stringify(data.user));
-
-                showMessage("로그인 성공! 잠시 후 메인 페이지로 이동합니다.");
-                setTimeout(() => {
-                  window.location.href = "hub.html";
-                }, 1000);
-
-                break;
-              } catch (error) {
-                if (error.response && error.response.status === 429) {
-                  retryCount++;
-                  if (retryCount < maxRetries) {
-                    // 지수 백오프: 재시도 간격을 점점 늘림
-                    await new Promise((resolve) =>
-                      setTimeout(resolve, 1000 * Math.pow(2, retryCount))
-                    );
-                    continue;
-                  }
-                }
-                throw error;
-              }
+              window.location.href = "hub.html";
             }
           } catch (error) {
             console.error("Login error:", error);
@@ -330,11 +309,6 @@
             }
 
             showMessage(errorMessage, true);
-          } finally {
-            // 로그인 버튼 재활성화
-            submitButton.disabled = false;
-            submitButton.innerHTML =
-              '<i class="ri-login-circle-line mr-2"></i>로그인';
           }
         });
 
