@@ -260,18 +260,12 @@
           }
 
           try {
-            const response = await fetch(
-              "https://port-0-attend-backend-m0tl39wtc3a73922.sel4.cloudtype.app/api/login",
-              {
-                method: "POST",
-                headers: {
-                  "Content-Type": "application/json",
-                },
-                body: JSON.stringify({ studentId, password }),
-              }
-            );
+            const response = await axios.post("/api/login", {
+              studentId,
+              password,
+            });
 
-            const data = await response.json();
+            const data = response.data;
             console.log("Login response:", data); // 디버깅용
 
             if (!data.success) {

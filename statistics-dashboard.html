@@ -544,39 +544,13 @@
     </div>
 
     <script>
-      // axios 기본 설정
-      axios.defaults.baseURL =
-        "https://port-0-attend-backend-m0tl39wtc3a73922.sel4.cloudtype.app";
-
-      // axios 인터셉터 설정
-      axios.interceptors.request.use(
-        (config) => {
-          const token = localStorage.getItem("token");
-          if (token) {
-            config.headers.Authorization = `Bearer ${token}`;
-          }
-          return config;
-        },
-        (error) => {
-          return Promise.reject(error);
-        }
-      );
-
-      axios.interceptors.response.use(
-        (response) => response,
-        async (error) => {
-          // ... 기존 인터셉터 코드 제거
-        }
-      );
-
       // 차트 설정
       const chartConfig = {
         responsive: true,
         maintainAspectRatio: false,
-        // ... 나머지 차트 설정 유지
       };
 
-      // 인정결석 등록 API 호출 수정
+      // 인정결석 등록 API 호출
       async function submitExcuse(event) {
         event.preventDefault();
         try {
@@ -587,7 +561,6 @@
           };
 
           const response = await axios.post("/api/attendance/excuse", formData);
-
           const data = response.data;
 
           if (!response.status === 200) {
@@ -603,7 +576,44 @@
         }
       }
 
-      // ... 나머지 코드도 비슷한 방식으로 axios로 변경
+      // 나머지 API 호출 함수들도 axios를 사용하도록 수정
+      async function updateExcusedList() {
+        try {
+          const response = await axios.get("/api/attendance/excused");
+          const data = response.data;
+
+          if (!data.success) {
+            throw new Error(data.message);
+          }
+
+          const excusedList = document.getElementById("excusedList");
+          excusedList.innerHTML = data.excused
+            .map(
+              (item) => `
+              <div class="bg-white p-3 rounded-lg shadow-sm">
+                <div class="flex justify-between items-center">
+                  <span class="font-medium">${item.studentName} (${
+                item.studentId
+              })</span>
+                  <span class="text-sm text-gray-500">${moment(
+                    item.date
+                  ).format("YYYY-MM-DD")}</span>
+                </div>
+                <p class="text-sm text-gray-600 mt-1">${item.reason}</p>
+              </div>
+            `
+            )
+            .join("");
+        } catch (error) {
+          console.error("인정결석 목록 조회 중 오류:", error);
+          showToast("인정결석 목록을 불러오는데 실패했습니다.", "error");
+        }
+      }
+
+      // 페이지 로드 시 초기 데이터 로드
+      document.addEventListener("DOMContentLoaded", () => {
+        updateExcusedList();
+      });
     </script>
   </body>
 </html>
