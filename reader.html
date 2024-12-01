@@ -6,6 +6,8 @@
     <title>디지털 출결관리</title>
     <script src="https://unpkg.com/html5-qrcode"></script>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="js/axios-config.js"></script>
     <script>
       tailwind.config = {
         theme: {
@@ -30,6 +32,10 @@
       href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css"
       rel="stylesheet"
     />
+    <meta name="theme-color" content="#4F46E5" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+    <meta name="apple-mobile-web-app-title" content="디지털 출결관리" />
   </head>
   <body class="bg-white text-gray-900 font-sans flex flex-col min-h-screen">
     <header>
@@ -203,28 +209,19 @@
       const userInfo = JSON.parse(localStorage.getItem("userInfo"));
 
       if (!userInfo || !userInfo.isReader) {
-        const errorMessage = encodeURIComponent("리더 권한이 필요합니다.");
+        const errorMessage = encodeURIComponent("리더 ��한이 필요합니다.");
         window.location.href = `hub.html?error=${errorMessage}`;
       }
 
       async function sendAttendance(encryptedData) {
         try {
-          const token = localStorage.getItem("token");
-          const response = await fetch(
-            "https://port-0-attend-backend-m0tl39wtc3a73922.sel4.cloudtype.app/api/attendance",
-            {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${token}`,
-              },
-              body: JSON.stringify({ encryptedData }),
-            }
-          );
+          const response = await axios.post("/api/attendance", {
+            encryptedData,
+          });
 
-          const data = await response.json();
+          const data = response.data;
 
-          if (!response.ok) {
+          if (!response.status === 200) {
             throw new Error(data.message || "출석 처리에 실패했습니다.");
           }
 

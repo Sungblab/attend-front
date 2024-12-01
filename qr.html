@@ -8,6 +8,8 @@
     <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/moment-timezone/0.5.33/moment-timezone-with-data.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="js/axios-config.js"></script>
     <script>
       tailwind.config = {
         theme: {
@@ -32,6 +34,10 @@
       href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css"
       rel="stylesheet"
     />
+    <meta name="theme-color" content="#4F46E5" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+    <meta name="apple-mobile-web-app-title" content="디지털 출결관리" />
   </head>
   <body class="bg-white text-gray-900 font-sans flex flex-col min-h-screen">
     <header>
@@ -135,8 +141,6 @@
 
     <script>
       let studentId, studentName;
-      const API_BASE_URL =
-        "https://port-0-attend-backend-m0tl39wtc3a73922.sel4.cloudtype.app/api";
 
       function showError(message) {
         const errorElement = document.getElementById("error-message");
@@ -153,11 +157,12 @@
         const refreshToken = localStorage.getItem("refreshToken");
 
         if (!token || !refreshToken) {
-          localStorage.clear(); // 토큰이 하나라도 없으면 전체 초기화
+          localStorage.clear();
           window.location.href =
             "index.html?error=" + encodeURIComponent("로그인이 필요합니다.");
           return false;
         }
+        axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
         return true;
       }
 
@@ -165,16 +170,8 @@
         try {
           if (!checkAuth()) return;
 
-          const token = localStorage.getItem("token");
-          const headers = {
-            ...options.headers,
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          };
-
           const response = await fetch(url, {
             ...options,
-            headers,
           });
 
           if (response.status === 401) {
@@ -241,10 +238,10 @@
         try {
           if (!checkAuth()) return;
 
-          const response = await apiRequest(`${API_BASE_URL}/student-info`);
-          const data = await response.json();
+          const response = await axios.get("/api/student-info");
+          const data = response.data;
 
-          if (!response.ok) {
+          if (!response.status === 200) {
             throw new Error(data.message || "Failed to fetch student info");
           }
 

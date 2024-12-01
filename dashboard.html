@@ -6,6 +6,7 @@
     <title>디지털 출결관리</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="js/axios-config.js"></script>
     <script>
       tailwind.config = {
         theme: {
@@ -30,6 +31,10 @@
       href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css"
       rel="stylesheet"
     />
+    <meta name="theme-color" content="#4F46E5" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+    <meta name="apple-mobile-web-app-title" content="디지털 출결관리" />
   </head>
   <body class="bg-white text-gray-900 font-sans flex flex-col min-h-screen">
     <header>
@@ -185,9 +190,6 @@
     </footer>
 
     <script>
-      axios.defaults.baseURL =
-        "https://port-0-attend-backend-m0tl39wtc3a73922.sel4.cloudtype.app";
-
       function checkAuthAndRedirect() {
         const token = localStorage.getItem("token");
         console.log("Checking auth, token:", token); // 디버깅 로그
@@ -197,8 +199,6 @@
             "index.html?error=" + encodeURIComponent("로그인이 필요합니다.");
           return false;
         }
-        console.log("Token found, setting axios headers"); // 디버깅 로그
-        axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
         return true;
       }
 
