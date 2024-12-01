@@ -209,7 +209,7 @@
       const userInfo = JSON.parse(localStorage.getItem("userInfo"));
 
       if (!userInfo || !userInfo.isReader) {
-        const errorMessage = encodeURIComponent("리더 ��한이 필요합니다.");
+        const errorMessage = encodeURIComponent("리더 권한이 필요합니다.");
         window.location.href = `hub.html?error=${errorMessage}`;
       }
 
@@ -221,7 +221,7 @@
 
           const data = response.data;
 
-          if (!response.status === 200) {
+          if (!data.success) {
             throw new Error(data.message || "출석 처리에 실패했습니다.");
           }
 
