@@ -258,8 +258,16 @@
 
       async function sendAttendance(encryptedData) {
         try {
+          if (!encryptedData || typeof encryptedData !== "string") {
+            throw new Error("유효하지 않은 QR 코드 데이터입니다.");
+          }
+
+          if (!encryptedData.includes(":")) {
+            throw new Error("잘못된 QR 코드 형식입니다.");
+          }
+
           const response = await axios.post("/api/attendance", {
-            encryptedData,
+            encryptedData: encryptedData.trim(),
           });
 
           const data = response.data;
