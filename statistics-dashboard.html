@@ -1513,7 +1513,7 @@
             (attendance) => `
               <tr class="hover:bg-gray-50 transition-colors">
                 <td class="px-6 py-4 whitespace-nowrap">
-                  ${moment(attendance.date).format("MM/DD (ddd)")}
+                  ${moment(attendance.date).format("YYYY년 MM월 DD일 (ddd)")}
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap">
                   <span class="${getStatusBadgeClass(attendance.status)}">
@@ -1521,9 +1521,7 @@
                   </span>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap">
-                  ${
-                    attendance.lateMinutes ? `${attendance.lateMinutes}분` : "-"
-                  }
+                  ${attendance.lateMinutes ? `${attendance.lateMinutes}�` : "-"}
                 </td>
               </tr>
             `
@@ -1927,8 +1925,6 @@
         };
       }
 
-      window.improvementChart = new Chart(ctx, config);
-
       function showLoading() {
         const loadingSpinner = document.getElementById("loading-spinner");
         if (loadingSpinner) {
@@ -1979,7 +1975,7 @@
                       throw new Error(response.data.message);
                     }
 
-                    // 새로운 토큰 저장
+                    // 새로운 토토큰 저장
                     localStorage.setItem("token", response.data.accessToken);
                     localStorage.setItem(
                       "refreshToken",
@@ -2066,11 +2062,13 @@
                   })</p>
                       <p class="text-sm text-gray-600">${moment(
                         item.date
-                      ).format("YYYY-MM-DD")}</p>
+                      ).format("YYYY년 MM월 DD일 (ddd)")}</p>
                       <p class="text-sm text-gray-700 mt-1">${item.reason}</p>
                     </div>
                     <span class="text-xs text-gray-500">
-                      ${moment(item.excusedAt).format("YYYY-MM-DD HH:mm")}
+                      ${moment(item.excusedAt).format(
+                        "YYYY년 MM월 DD일 HH시 mm분"
+                      )}
                     </span>
                   </div>
                 </div>
@@ -2128,10 +2126,16 @@
             <div class="bg-white p-3 rounded-lg shadow-sm mb-2">
               <div class="flex justify-between items-start">
                 <div>
-                  <p class="font-semibold">${holiday.date}</p>
+                  <p class="font-semibold">${moment(holiday.date).format(
+                    "YYYY년 MM월 DD일 (ddd)"
+                  )}</p>
                   <p class="text-sm text-gray-700">${holiday.reason}</p>
-                  <p class="text-xs text-gray-500">등록: ${holiday.createdAt}</p>
-                  <p class="text-xs text-gray-500">등록자: ${holiday.createdBy}</p>
+                  <p class="text-xs text-gray-500">등록: ${moment(
+                    holiday.createdAt
+                  ).format("YYYY년 MM월 DD일 HH시 mm분")}</p>
+                  <p class="text-xs text-gray-500">등록자: ${
+                    holiday.createdBy
+                  }</p>
                 </div>
                 <button
                   onclick="deleteHoliday('${holiday.id}')"
