@@ -262,15 +262,17 @@
             await fetchStudentInfo();
           }
 
-          const response = await axios.post("/api/generate-qr", { studentId });
+          const response = await axios.post("/api/generate-qr", {
+            studentId: studentId.trim(),
+          });
 
           const data = response.data;
-          if (!data.success) {
+          if (!data.success || !data.encryptedData) {
             throw new Error(data.message || "QR 코드 생성에 실패했습니다.");
           }
 
           const qr = qrcode(0, "M");
-          qr.addData(data.encryptedData);
+          qr.addData(data.encryptedData.trim());
           qr.make();
 
           document.getElementById("qrcode").innerHTML = qr.createImgTag(5);
