@@ -102,13 +102,19 @@
       function checkLoginStatus() {
         const token = localStorage.getItem("token");
         if (!token) {
-          // 토큰이 없으면 로컬 스토리지 정리 후 index.html로 리다이렉트
           localStorage.removeItem("userInfo");
           localStorage.removeItem("token");
           window.location.href =
             "index.html?error=" + encodeURIComponent("로그인이 필요합니다.");
           return false;
         }
+
+        const userInfo = JSON.parse(localStorage.getItem("userInfo"));
+        if (!userInfo.isAdmin && !userInfo.isReader) {
+          window.location.href = "qr.html";
+          return false;
+        }
+
         return true;
       }
 

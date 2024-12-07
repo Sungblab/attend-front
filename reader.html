@@ -59,6 +59,16 @@
             <h1 class="text-3xl font-bold mb-6 text-center text-gray-800">
               QR 코드 출석 확인
             </h1>
+            <div class="mb-4 text-center">
+              <div
+                id="current-time"
+                class="text-xl font-semibold text-gray-700"
+              ></div>
+              <div
+                id="attendance-status"
+                class="mt-2 text-lg font-medium"
+              ></div>
+            </div>
             <div id="camera-select" class="mb-4">
               <select
                 id="camera-list"
@@ -77,7 +87,7 @@
             ></div>
             <div
               id="attendance-log"
-              class="text-sm text-gray-600 mb-6 h-40 overflow-y-auto bg-gray-50 p-4 rounded-lg"
+              class="text-sm text-gray-600 mb-6 h-96 overflow-y-auto bg-gray-50 p-4 rounded-lg"
             ></div>
             <div class="flex space-x-4">
               <button
@@ -213,6 +223,39 @@
         window.location.href = `hub.html?error=${errorMessage}`;
       }
 
+      function updateCurrentTime() {
+        const now = new Date();
+        const timeElement = document.getElementById("current-time");
+        const statusElement = document.getElementById("attendance-status");
+
+        timeElement.textContent = now.toLocaleTimeString("ko-KR", {
+          hour: "2-digit",
+          minute: "2-digit",
+          second: "2-digit",
+        });
+
+        const hour = now.getHours();
+        const minute = now.getMinutes();
+        const time = hour * 60 + minute;
+
+        if (time < 8 * 60 + 30) {
+          statusElement.textContent = "출석 시간 전입니다";
+          statusElement.className = "mt-2 text-lg font-medium text-gray-600";
+        } else if (time <= 8 * 60 + 40) {
+          statusElement.textContent = "정상 출석 시간입니다";
+          statusElement.className = "mt-2 text-lg font-medium text-green-600";
+        } else if (time <= 9 * 60) {
+          statusElement.textContent = "지각 처리됩니다";
+          statusElement.className = "mt-2 text-lg font-medium text-yellow-600";
+        } else {
+          statusElement.textContent = "결석 처리됩니다";
+          statusElement.className = "mt-2 text-lg font-medium text-red-600";
+        }
+      }
+
+      setInterval(updateCurrentTime, 1000);
+      updateCurrentTime();
+
       async function sendAttendance(encryptedData) {
         try {
           const response = await axios.post("/api/attendance", {
@@ -245,9 +288,18 @@
           }
 
           const logEntry = document.createElement("div");
-          logEntry.textContent = `${new Date().toLocaleTimeString()} - ${
-            data.message
-          }`;
+          logEntry.classList.add("py-1", "border-b", "border-gray-200");
+
+          const studentInfo = data.attendance
+            ? `[${data.attendance.studentId}] ${data.attendance.name || ""}`
+            : "알 수 없는 학생";
+
+          logEntry.innerHTML = `
+            <span class="text-gray-500">${new Date().toLocaleTimeString()}</span>
+            <span class="font-medium ml-2">${studentInfo}</span>
+            <span class="ml-2">${data.message}</span>
+          `;
+
           logEntry.classList.add(
             data.message.includes("결석 처리되었습니다")
               ? "text-red-600"
@@ -257,7 +309,12 @@
               ? "text-blue-600"
               : "text-green-600"
           );
+
           attendanceLog.prepend(logEntry);
+
+          if (attendanceLog.children.length > 100) {
+            attendanceLog.removeChild(attendanceLog.lastChild);
+          }
         } catch (error) {
           console.error("출석 처리 오류:", error);
           scanResult.innerText = `오류: ${error.message}`;
@@ -269,10 +326,11 @@
           scanResult.classList.add("text-red-600");
 
           const logEntry = document.createElement("div");
-          logEntry.textContent = `${new Date().toLocaleTimeString()} - 오류: ${
-            error.message
-          }`;
-          logEntry.classList.add("text-red-600");
+          logEntry.classList.add("py-1", "border-b", "border-gray-200");
+          logEntry.innerHTML = `
+            <span class="text-gray-500">${new Date().toLocaleTimeString()}</span>
+            <span class="text-red-600 ml-2">오류: ${error.message}</span>
+          `;
           attendanceLog.prepend(logEntry);
         }
       }

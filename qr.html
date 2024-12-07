@@ -60,9 +60,6 @@
       <div class="w-full max-w-md my-4 sm:my-8">
         <div class="bg-white overflow-hidden">
           <div class="sm:p-8">
-            <h2 class="text-3xl font-bold mb-6 text-center text-gray-800">
-              출석 QR코드
-            </h2>
             <div id="qrcode" class="flex justify-center mb-4"></div>
             <p
               id="student-info"
@@ -94,7 +91,7 @@
               class="w-full bg-primary hover:bg-secondary text-white font-semibold py-3 px-4 rounded-lg transition duration-300 flex items-center justify-center mt-4"
             >
               <i class="ri-file-list-line mr-2"></i>
-              내 출결 기록 보기
+              출결 기록 보기
             </button>
 
             <button
@@ -368,7 +365,7 @@
                 </span>
                 ${
                   status.isExcused
-                    ? `<span class="bg-blue-100 text-blue-800 px-4 py-2 rounded-full">인정결석</span>
+                    ? `<span class="bg-blue-100 text-blue-800 px-4 py-2 rounded-full">인정결석 </span>
                    <span class="text-gray-600">${status.reason || ""}</span>`
                     : ""
                 }
@@ -416,33 +413,46 @@
             .sort((a, b) => moment(b.date).valueOf() - moment(a.date).valueOf())
             .map(
               (attendance) => `
-              <tr class="hover:bg-gray-50">
-                <td class="px-6 py-4 whitespace-nowrap">
-                  ${moment(attendance.date).format("YYYY-MM-DD (ddd)")}
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap">
-                  <span class="${getStatusBadgeClass(attendance.status)}">
-                    ${getStatusText(attendance.status)}
-                  </span>
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap">
+              <div class="p-4 bg-white">
+                <div class="flex flex-col space-y-2">
+                  <div class="flex justify-between items-center">
+                    <span class="text-gray-900 font-medium">
+                      ${moment(attendance.date).format("YYYY-MM-DD")}
+                    </span>
+                    <span class="text-gray-500 text-sm">
+                      ${moment(attendance.date).format("(ddd)")}
+                    </span>
+                  </div>
+                  
+                  <div class="flex flex-wrap gap-2 items-center">
+                    <span class="${getStatusBadgeClass(attendance.status)}">
+                      ${getStatusText(attendance.status)}
+                    </span>
+                    ${
+                      attendance.lateMinutes
+                        ? `<span class="text-yellow-600 text-sm">
+                            ${attendance.lateMinutes}분 지각
+                          </span>`
+                        : ""
+                    }
+                    ${
+                      attendance.isExcused
+                        ? `<span class="text-blue-600 text-sm bg-blue-50 px-2 py-1 rounded">
+                            인정결석
+                          </span>`
+                        : ""
+                    }
+                  </div>
+                  
                   ${
-                    attendance.lateMinutes
-                      ? `${attendance.lateMinutes}분 지각`
-                      : "-"
-                  }
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap">
-                  ${
-                    attendance.isExcused
-                      ? `<span class="text-blue-600">인정결석</span>
-                     <span class="text-sm text-gray-500">${
-                       attendance.reason || ""
-                     }</span>`
+                    attendance.reason
+                      ? `<div class="text-sm text-gray-600 mt-1">
+                          ${attendance.reason}
+                        </div>`
                       : ""
                   }
-                </td>
-              </tr>
+                </div>
+              </div>
             `
             )
             .join("");
@@ -518,70 +528,69 @@
       class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50"
     >
       <div
-        class="relative mx-auto my-8 p-6 border w-11/12 max-w-2xl shadow-lg rounded-lg bg-white"
+        class="relative mx-auto p-0 sm:p-6 border w-full sm:w-11/12 max-w-2xl shadow-lg rounded-lg bg-white min-h-screen sm:min-h-0 sm:my-8"
       >
-        <div class="flex justify-between items-center mb-4">
-          <h3 class="text-2xl font-bold">출결 기록</h3>
-          <button
-            onclick="closeModal()"
-            class="text-gray-600 hover:text-gray-800"
-          >
-            <i class="ri-close-line text-2xl"></i>
-          </button>
-        </div>
-
-        <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
-          <div class="bg-green-50 p-4 rounded-lg">
-            <h4 class="text-sm font-medium text-green-700">출석</h4>
-            <p class="text-2xl font-bold text-green-900" id="presentCount">-</p>
-          </div>
-          <div class="bg-yellow-50 p-4 rounded-lg">
-            <h4 class="text-sm font-medium text-yellow-700">지각</h4>
-            <p class="text-2xl font-bold text-yellow-900" id="lateCount">-</p>
-          </div>
-          <div class="bg-red-50 p-4 rounded-lg">
-            <h4 class="text-sm font-medium text-red-700">결석</h4>
-            <p class="text-2xl font-bold text-red-900" id="absentCount">-</p>
-          </div>
-          <div class="bg-blue-50 p-4 rounded-lg">
-            <h4 class="text-sm font-medium text-blue-700">인정결석</h4>
-            <p class="text-2xl font-bold text-blue-900" id="excusedCount">-</p>
-          </div>
-        </div>
-
-        <div class="overflow-x-auto">
-          <table class="min-w-full divide-y divide-gray-200">
-            <thead class="bg-gray-50">
-              <tr>
-                <th
-                  class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase"
-                >
-                  날짜
-                </th>
-                <th
-                  class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase"
-                >
-                  상태
-                </th>
-                <th
-                  class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase"
-                >
-                  시간
-                </th>
-                <th
-                  class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase"
-                >
-                  비고
-                </th>
-              </tr>
-            </thead>
-            <tbody
-              id="attendanceList"
-              class="bg-white divide-y divide-gray-200"
+        <!-- 모달 헤더 수정 -->
+        <div class="sticky top-0 bg-white z-10 p-4 border-b">
+          <div class="flex justify-between items-center">
+            <h3 class="text-xl font-bold">출결 기록</h3>
+            <button
+              onclick="closeModal()"
+              class="p-2 hover:bg-gray-100 rounded-full"
+              aria-label="닫기"
             >
+              <i class="ri-close-line text-2xl"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- 통계 카드 섹션 수정 -->
+        <div class="p-4">
+          <div class="grid grid-cols-2 gap-3">
+            <div class="bg-green-50 p-4 rounded-lg">
+              <div class="flex flex-col items-center">
+                <span class="text-sm font-medium text-green-700">출석</span>
+                <span
+                  class="text-2xl font-bold text-green-900"
+                  id="presentCount"
+                  >-</span
+                >
+              </div>
+            </div>
+            <div class="bg-yellow-50 p-4 rounded-lg">
+              <div class="flex flex-col items-center">
+                <span class="text-sm font-medium text-yellow-700">지각</span>
+                <span class="text-2xl font-bold text-yellow-900" id="lateCount"
+                  >-</span
+                >
+              </div>
+            </div>
+            <div class="bg-red-50 p-4 rounded-lg">
+              <div class="flex flex-col items-center">
+                <span class="text-sm font-medium text-red-700">결석</span>
+                <span class="text-2xl font-bold text-red-900" id="absentCount"
+                  >-</span
+                >
+              </div>
+            </div>
+            <div class="bg-blue-50 p-4 rounded-lg">
+              <div class="flex flex-col items-center">
+                <span class="text-sm font-medium text-blue-700">인정결석</span>
+                <span class="text-2xl font-bold text-blue-900" id="excusedCount"
+                  >-</span
+                >
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 출결 기록 리스트 섹션 수정 -->
+        <div class="px-4 pb-4">
+          <div class="bg-gray-50 rounded-lg">
+            <div id="attendanceList" class="divide-y divide-gray-200">
               <!-- 동적으로 추가될 내용 -->
-            </tbody>
-          </table>
+            </div>
+          </div>
         </div>
       </div>
     </div>

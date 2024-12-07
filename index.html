@@ -251,8 +251,10 @@
       function checkLoginStatus() {
         const token = localStorage.getItem("token");
         if (token) {
-          // 토큰이 있으면 자동으로 hub.html로 리다이렉트
-          window.location.href = "hub.html";
+          const userInfo = JSON.parse(localStorage.getItem("userInfo"));
+          // 관리자나 리더는 hub.html로, 일반 사용자는 qr.html로 리다이렉트
+          window.location.href =
+            userInfo.isAdmin || userInfo.isReader ? "hub.html" : "qr.html";
         }
       }
 
@@ -286,7 +288,8 @@
               );
               localStorage.setItem("keepLoggedIn", keepLoggedIn);
 
-              window.location.href = "hub.html";
+              // 서버에서 받은 redirectUrl로 리다이렉트
+              window.location.href = response.data.redirectUrl;
             }
           } catch (error) {
             console.error("Login error:", error);
@@ -439,7 +442,7 @@
           async (error) => {
             const originalRequest = error.config;
 
-            // 토큰 만료 에러(401)이고 재시도하지 않은 요청일 경우
+            // 토큰 만료 에러러(401)이고 재시도하지 않은 요청일 경우
             if (error.response.status === 401 && !originalRequest._retry) {
               originalRequest._retry = true;
 
