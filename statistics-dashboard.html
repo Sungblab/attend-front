@@ -1102,11 +1102,11 @@
                   </div>
                   <div class="flex flex-col items-end">
                     <span class="text-xs text-gray-500">
-                      ${moment(item.excusedAt).format('YYYY년 MM월 DD일 HH시 mm분')}
+                      ${moment(item.excusedAt).format('YYYY-MM-DD HH:mm')}
                     </span>
                     <button 
                       onclick="cancelExcusedAbsence('${item._id}')"
-                      class="text-red-600 hover:text-red-800 text-sm mt-2"
+                      class="mt-2 text-red-600 hover:text-red-800 text-sm"
                     >
                       <i class="ri-delete-bin-line mr-1"></i>취소
                     </button>
