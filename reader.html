@@ -224,34 +224,43 @@
       }
 
       function updateCurrentTime() {
-        const now = new Date();
-        const timeElement = document.getElementById("current-time");
-        const statusElement = document.getElementById("attendance-status");
+  const now = new Date();
+  const timeElement = document.getElementById("current-time");
+  const statusElement = document.getElementById("attendance-status");
 
-        timeElement.textContent = now.toLocaleTimeString("ko-KR", {
-          hour: "2-digit",
-          minute: "2-digit",
-          second: "2-digit",
-        });
+  // 시간 표시 형식 유지
+  timeElement.textContent = now.toLocaleTimeString("ko-KR", {
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+  });
 
-        const hour = now.getHours();
-        const minute = now.getMinutes();
-        const time = hour * 60 + minute;
+  // 시간 계산 로직 수정
+  const currentHour = now.getHours();
+  const currentMinute = now.getMinutes();
+  const currentTime = currentHour * 60 + currentMinute;
 
-        if (time < 8 * 60 + 30) {
-          statusElement.textContent = "출석 시간 전입니다";
-          statusElement.className = "mt-2 text-lg font-medium text-gray-600";
-        } else if (time <= 8 * 60 + 40) {
-          statusElement.textContent = "정상 출석 시간입니다";
-          statusElement.className = "mt-2 text-lg font-medium text-green-600";
-        } else if (time <= 9 * 60) {
-          statusElement.textContent = "지각 처리됩니다";
-          statusElement.className = "mt-2 text-lg font-medium text-yellow-600";
-        } else {
-          statusElement.textContent = "결석 처리됩니다";
-          statusElement.className = "mt-2 text-lg font-medium text-red-600";
-        }
-      }
+  // 출석 시간 기준 설정
+  const attendanceStartTime = 8 * 60 + 30;  // 8:30
+  const normalAttendanceEndTime = 8 * 60 + 40;  // 8:40
+  const lateAttendanceEndTime = 9 * 60;  // 9:00
+
+  // 상태 업데이트
+  if (currentTime < attendanceStartTime) {
+    statusElement.textContent = "출석 시간 전입니다";
+    statusElement.className = "mt-2 text-lg font-medium text-gray-600";
+  } else if (currentTime <= normalAttendanceEndTime) {
+    statusElement.textContent = "정상 출석 시간입니다";
+    statusElement.className = "mt-2 text-lg font-medium text-green-600";
+  } else if (currentTime <= lateAttendanceEndTime) {
+    const lateMinutes = currentTime - normalAttendanceEndTime;
+    statusElement.textContent = `지각 처리됩니다 (${lateMinutes}분 지각)`;
+    statusElement.className = "mt-2 text-lg font-medium text-yellow-600";
+  } else {
+    statusElement.textContent = "결석 처리됩니다";
+    statusElement.className = "mt-2 text-lg font-medium text-red-600";
+  }
+}
 
       setInterval(updateCurrentTime, 1000);
       updateCurrentTime();
