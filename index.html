@@ -262,58 +262,68 @@
       window.addEventListener("load", checkLoginStatus);
 
       // 로그인 폼 제출 이벤트 리스너 수정
-      document
-        .getElementById("loginForm")
-        .addEventListener("submit", async function (e) {
-          e.preventDefault();
+      document.getElementById("loginForm").addEventListener("submit", async function (e) {
+        e.preventDefault();
 
-          const studentId = document.getElementById("student-id").value;
-          const password = document.getElementById("password").value;
-          const keepLoggedIn =
-            document.getElementById("keep-logged-in").checked;
+        const studentId = document.getElementById("student-id").value;
+        const password = document.getElementById("password").value;
+        const keepLoggedIn = document.getElementById("keep-logged-in").checked;
 
-          try {
-            const response = await axios.post("/api/login", {
-              studentId,
-              password,
-              keepLoggedIn,
-            });
+        try {
+          const response = await axios.post("/api/login", {
+            studentId,
+            password,
+            keepLoggedIn,
+          });
 
-            if (response.data.success) {
-              localStorage.setItem("token", response.data.accessToken);
-              localStorage.setItem("refreshToken", response.data.refreshToken);
-              localStorage.setItem(
-                "userInfo",
-                JSON.stringify(response.data.user)
-              );
-              localStorage.setItem("keepLoggedIn", keepLoggedIn);
+          if (response.data.success) {
+            // 토큰 저장
+            localStorage.setItem("token", response.data.accessToken);
+            localStorage.setItem("refreshToken", response.data.refreshToken);
+            
+            // 사용자 정보 저장
+            const userInfo = {
+              id: response.data.user.id,
+              studentId: response.data.user.studentId,
+              name: response.data.user.name,
+              isAdmin: response.data.user.isAdmin,
+              isReader: response.data.user.isReader
+            };
+            localStorage.setItem("userInfo", JSON.stringify(userInfo));
+            localStorage.setItem("keepLoggedIn", keepLoggedIn);
 
-              // 서버에서 받은 redirectUrl로 리다이렉트
+            // 성공 메시지 표시
+            showMessage("로그인 성공!", false);
+
+            // 리다이렉트
+            setTimeout(() => {
               window.location.href = response.data.redirectUrl;
-            }
-          } catch (error) {
-            console.error("Login error:", error);
-            let errorMessage =
-              "서버 오류가 발생했습니다. 나중에 다시 시도해주세요.";
-
-            if (error.response) {
-              switch (error.response.status) {
-                case 429:
-                  errorMessage =
-                    "너무 많은 로그인 시도가 있었습니다. 잠시 후 다시 시도해주세요.";
-                  break;
-                case 401:
-                  errorMessage = "아이디 또는 비밀번호가 올바르지 않습니다.";
-                  break;
-                case 403:
-                  errorMessage = "계정이 잠겼습니다. 관리자에게 문의하세요.";
-                  break;
-              }
-            }
-
-            showMessage(errorMessage, true);
+            }, 500);
           }
-        });
+        } catch (error) {
+          console.error("Login error:", error);
+          let errorMessage = "서버 오류가 발생했습니다. 나중에 다시 시도해주세요.";
+
+          if (error.response) {
+            switch (error.response.status) {
+              case 429:
+                errorMessage = "너무 많은 로그인 시도가 있었습니다. 잠시 후 다시 시도해주세요.";
+                break;
+              case 401:
+                errorMessage = "아이디 또는 비밀번호가 올바르지 않습니다.";
+                break;
+              case 403:
+                errorMessage = "계정이 잠겼습니다. 관리자에게 문의하세요.";
+                break;
+              case 400:
+                errorMessage = error.response.data.message || "입력 정보를 확인해주세요.";
+                break;
+            }
+          }
+
+          showMessage(errorMessage, true);
+        }
+      });
 
       // PWA 설치 관련 변수
       let deferredPrompt;

@@ -271,121 +271,6 @@
         </div>
       </section>
 
-      <section class="bg-white rounded-lg shadow mb-6 p-6">
-        <h2 class="text-2xl font-bold mb-4">인정결석 관리</h2>
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <div class="bg-gray-50 p-4 rounded-lg">
-            <h3 class="text-lg font-semibold mb-3">인정결석 등록</h3>
-            <form id="excuseForm" class="space-y-4">
-              <div class="grid grid-cols-2 gap-4">
-                <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-1"
-                    >학번</label
-                  >
-                  <input
-                    type="text"
-                    id="excuseStudentId"
-                    class="w-full rounded-lg border-gray-300"
-                    required
-                  />
-                </div>
-                <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-1"
-                    >날짜</label
-                  >
-                  <input
-                    type="date"
-                    id="excuseDate"
-                    class="w-full rounded-lg border-gray-300"
-                    required
-                  />
-                </div>
-              </div>
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1"
-                  >사유</label
-                >
-                <textarea
-                  id="excuseReason"
-                  class="w-full rounded-lg border-gray-300 resize-none"
-                  rows="3"
-                  required
-                ></textarea>
-              </div>
-              <button
-                type="submit"
-                class="w-full bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors"
-              >
-                인정결석 처리
-              </button>
-            </form>
-          </div>
-
-          <div class="bg-gray-50 p-4 rounded-lg">
-            <h3 class="text-lg font-semibold mb-3">최근 인정결석 목록</h3>
-            <div
-              id="excusedList"
-              class="space-y-2 max-h-[400px] overflow-y-auto"
-            >
-              <!-- 동적으로 추가될 내용 -->
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- 인정결석 관리 섹션 아래에 휴일 관리 섹션 추가 -->
-      <section class="bg-white rounded-lg shadow mb-6 p-6">
-        <h2 class="text-2xl font-bold mb-4">휴일 관리</h2>
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <!-- 휴일 등록 폼 -->
-          <div class="bg-gray-50 p-4 rounded-lg">
-            <h3 class="text-lg font-semibold mb-3">휴일 등록</h3>
-            <form id="holidayForm" class="space-y-4">
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1"
-                  >날짜</label
-                >
-                <input
-                  type="date"
-                  id="holidayDate"
-                  class="w-full rounded-lg border-gray-300"
-                  required
-                />
-              </div>
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1"
-                  >사유</label
-                >
-                <input
-                  type="text"
-                  id="holidayReason"
-                  class="w-full rounded-lg border-gray-300"
-                  placeholder="예: 개교기념일, 현충일 등"
-                  required
-                />
-              </div>
-              <button
-                type="submit"
-                class="w-full bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors"
-              >
-                휴일 등록
-              </button>
-            </form>
-          </div>
-
-          <!-- 휴일 목록 -->
-          <div class="bg-gray-50 p-4 rounded-lg">
-            <h3 class="text-lg font-semibold mb-3">등록된 휴일 목록</h3>
-            <div
-              id="holidayList"
-              class="space-y-2 max-h-[400px] overflow-y-auto"
-            >
-              <!-- 동적으로 추가될 내용 -->
-            </div>
-          </div>
-        </div>
-      </section>
-
       <section class="bg-white rounded-lg shadow">
         <div class="p-6">
           <h2 class="text-2xl font-bold mb-6 flex items-center">
@@ -470,6 +355,138 @@
                 <!-- 동적으로 추가될 내용 -->
               </tbody>
             </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- 인정결석 관리 섹션 수정 -->
+      <section class="bg-white rounded-lg shadow mb-6 p-6 mt-6">
+        <h2 class="text-2xl font-bold mb-4">인정결석 관리</h2>
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <!-- 개별 인정결석 등록 폼 -->
+          <div class="bg-gray-50 p-4 rounded-lg">
+            <h3 class="text-lg font-semibold mb-3">개별 인정결석 등록</h3>
+            <form id="excuseForm" class="space-y-4">
+              <div class="grid grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">학번</label>
+                  <input type="text" id="excuseStudentId" class="w-full rounded-lg border-gray-300" required />
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">날짜</label>
+                  <input type="date" id="excuseDate" class="w-full rounded-lg border-gray-300" required />
+                </div>
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">사유</label>
+                <textarea id="excuseReason" class="w-full rounded-lg border-gray-300 resize-none" rows="3" required></textarea>
+              </div>
+              <button type="submit" class="w-full bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors">
+                인정결석 처리
+              </button>
+            </form>
+          </div>
+
+          <!-- 단체 인정결석 등록 폼 추가 -->
+          <div class="bg-gray-50 p-4 rounded-lg">
+            <h3 class="text-lg font-semibold mb-3">단체 인정결석 등록</h3>
+            <form id="groupExcuseForm" class="space-y-4">
+              <div class="grid grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">날짜</label>
+                  <input type="date" id="groupExcuseDate" class="w-full rounded-lg border-gray-300" required />
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">학년</label>
+                  <select id="groupExcuseGrade" class="w-full rounded-lg border-gray-300">
+                    <option value="">전체</option>
+                    <option value="1">1학년</option>
+                    <option value="2">2학년</option>
+                    <option value="3">3학년</option>
+                  </select>
+                </div>
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">반</label>
+                <select id="groupExcuseClass" class="w-full rounded-lg border-gray-300">
+                  <option value="">전체</option>
+                  <option value="1">1반</option>
+                  <option value="2">2반</option>
+                  <option value="3">3반</option>
+                  <option value="4">4반</option>
+                  <option value="5">5반</option>
+                  <option value="6">6반</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">사유</label>
+                <textarea id="groupExcuseReason" class="w-full rounded-lg border-gray-300 resize-none" rows="3" required></textarea>
+              </div>
+              <button type="submit" class="w-full bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition-colors">
+                단체 인정결석 처리
+              </button>
+            </form>
+          </div>
+
+          <!-- 최근 인정결석 목록 -->
+          <div class="bg-gray-50 p-4 rounded-lg lg:col-span-2">
+            <h3 class="text-lg font-semibold mb-3">최근 인정결석 목록</h3>
+            <div id="excusedList" class="space-y-2 max-h-[400px] overflow-y-auto">
+              <!-- 동적으로 추가될 내용 -->
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 휴일 관리 섹션을 여기로 이동 -->
+      <section class="bg-white rounded-lg shadow mb-6 p-6">
+        <h2 class="text-2xl font-bold mb-4">휴일 관리</h2>
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <!-- 휴일 등록 폼... -->
+          <div class="bg-gray-50 p-4 rounded-lg">
+            <h3 class="text-lg font-semibold mb-3">휴일 등록</h3>
+            <form id="holidayForm" class="space-y-4">
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1"
+                  >날짜</label
+                >
+                <input
+                  type="date"
+                  id="holidayDate"
+                  class="w-full rounded-lg border-gray-300"
+                  required
+                />
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1"
+                  >사유</label
+                >
+                <input
+                  type="text"
+                  id="holidayReason"
+                  class="w-full rounded-lg border-gray-300"
+                  placeholder="예: 개교기념일, 현충일 등"
+                  required
+                />
+              </div>
+              <button
+                type="submit"
+                class="w-full bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors"
+              >
+                휴일 등록
+              </button>
+            </form>
+          </div>
+
+          <!-- 휴일 목록... -->
+          <div class="bg-gray-50 p-4 rounded-lg">
+            <h3 class="text-lg font-semibold mb-3">등록된 휴일 목록</h3>
+            <div
+              id="holidayList"
+              class="space-y-2 max-h-[400px] overflow-y-auto"
+            >
+              <!-- 동적으로 추가될 내용 -->
+            </div>
           </div>
         </div>
       </section>
@@ -902,7 +919,7 @@
             .join("");
         }
 
-        // 개선왕 TOP 3
+        // ��선왕 TOP 3
         const improvementKings = document.getElementById("improvementKings");
         if (improvementKings) {
           improvementKings.innerHTML = specialStats.improvement
@@ -991,94 +1008,117 @@
           .join("");
       }
 
-      const excuseForm = document.getElementById("excuseForm");
-      if (excuseForm) {
-        excuseForm.addEventListener("submit", async (e) => {
-          e.preventDefault();
-
-          const studentId = document.getElementById("excuseStudentId").value;
-          const date = document.getElementById("excuseDate").value;
-          const reason = document.getElementById("excuseReason").value;
-
-          if (!studentId || !date || !reason) {
-            alert("모든 필드를 입력해주세요.");
-            return;
-          }
-
-          try {
-            const response = await axios.post(
-              "/api/attendance/excuse",
-              {
-                studentId,
-                date,
-                reason,
-              },
-              {
-                headers: {
-                  Authorization: `Bearer ${localStorage.getItem("token")}`,
-                },
-              }
-            );
-
-            alert("인정결석 처리가 완료되었습니다.");
-            document.getElementById("excuseForm").reset();
-            fetchAttendanceStats(); // 통계 새로고침
-          } catch (error) {
-            console.error("인정결석 처리 중 오류:", error);
-            alert(
-              error.response?.data?.message ||
-                "인정결석 처 중 오류가 발생했습니다."
-            );
-          }
-        });
-      }
-
-      async function handleExcuseAbsence(studentId, date) {
+      // 기존 인정결석 처리 이벤트 리스너
+      document.getElementById('excuseForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
         try {
-          const reason = await showExcusePrompt();
-          if (!reason) return;
-
-          const token = localStorage.getItem("token");
-          if (!token) throw new Error("로그인이 필요합니다.");
-
-          const response = await axios.post(
-            "/api/attendance/excuse",
-            { studentId, date, reason },
-            {
-              headers: {
-                Authorization: `Bearer ${token}`,
-              },
+          const response = await axios.post('/api/attendance/excuse', {
+            studentId: document.getElementById('excuseStudentId').value,
+            date: document.getElementById('excuseDate').value,
+            reason: document.getElementById('excuseReason').value
+          }, {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem('token')}`
             }
-          );
+          });
 
-          if (!response.data.success) {
-            throw new Error(
-              response.data.message || "인정결석 처리에 실패했습니다."
-            );
-          }
-
-          showToast(response.data.message, "success");
-          await Promise.all([
-            fetchAttendanceStats(),
-            updateExcusedList(), // 인정결석 목록 갱신
-          ]);
+          showToast(response.data.message, 'success');
+          document.getElementById('excuseForm').reset();
+          await updateExcusedList();
         } catch (error) {
-          console.error("인정결석 처리 중 오류:", error);
-          showToast(
-            error.response?.data?.message ||
-              error.message ||
-              "인정결석 처리 중 오류가 발생했습니다.",
-            "error"
-          );
+          showToast(error.response?.data?.message || '인정결석 처리 중 오류가 발생했습니다.', 'error');
+        }
+      });
+
+      // 단체 인정결석 처리 이벤트 리스너 추가
+      document.getElementById('groupExcuseForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        try {
+          const filters = {
+            grade: document.getElementById('groupExcuseGrade').value,
+            class: document.getElementById('groupExcuseClass').value
+          };
+
+          // 필터 값이 비어있으면 해당 속성 제거
+          if (!filters.grade) delete filters.grade;
+          if (!filters.class) delete filters.class;
+
+          const response = await axios.post('/api/attendance/excuse-group', {
+            date: document.getElementById('groupExcuseDate').value,
+            reason: document.getElementById('groupExcuseReason').value,
+            filters
+          }, {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem('token')}`
+            }
+          });
+
+          showToast(response.data.message, 'success');
+          document.getElementById('groupExcuseForm').reset();
+          await updateExcusedList();
+        } catch (error) {
+          showToast(error.response?.data?.message || '단체 인정결석 처리 중 오류가 발생했습니다.', 'error');
+        }
+      });
+
+      // 인정결석 취소 함수 추가
+      async function cancelExcusedAbsence(id) {
+        if (!confirm('이 인정결석을 취소하시겠습니까?')) return;
+
+        try {
+          const response = await axios.delete(`/api/attendance/excuse/${id}`, {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem('token')}`
+            }
+          });
+
+          showToast(response.data.message, 'success');
+          await updateExcusedList();
+        } catch (error) {
+          showToast(error.response?.data?.message || '인정결석 취소 중 오류가 발생했습니다.', 'error');
         }
       }
 
-      // 인정결석 사유 입력 프롬프트
-      function showExcusePrompt() {
-        return new Promise((resolve) => {
-          const reason = prompt("인정결석 사유를 입력해주세요:");
-          resolve(reason?.trim() || null);
-        });
+      // 인정결석 목록 업데이트 함수 수정
+      async function updateExcusedList() {
+        try {
+          const response = await axios.get('/api/attendance/excused', {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem('token')}`
+            }
+          });
+
+          const excusedList = document.getElementById('excusedList');
+          if (excusedList) {
+            excusedList.innerHTML = response.data.excused.map(item => `
+              <div class="bg-white p-3 rounded-lg shadow-sm mb-2">
+                <div class="flex justify-between items-start">
+                  <div>
+                    <p class="font-semibold">${item.studentName} (${item.studentId})</p>
+                    <p class="text-sm text-gray-600">${moment(item.date).format('YYYY년 MM월 DD일 (ddd)')}</p>
+                    <p class="text-sm text-gray-700 mt-1">${item.reason}</p>
+                  </div>
+                  <div class="flex flex-col items-end">
+                    <span class="text-xs text-gray-500">
+                      ${moment(item.excusedAt).format('YYYY년 MM월 DD일 HH시 mm분')}
+                    </span>
+                    <button 
+                      onclick="cancelExcusedAbsence('${item._id}')"
+                      class="text-red-600 hover:text-red-800 text-sm mt-2"
+                    >
+                      <i class="ri-delete-bin-line mr-1"></i>취소
+                    </button>
+                  </div>
+                </div>
+              </div>
+            `).join('') || '<p class="text-center text-gray-500">인정결석 기록이 없습니다.</p>';
+          }
+        } catch (error) {
+          console.error('인정결석 목록 조회 중 오류:', error);
+          showToast('인정결석 목록 조회에 실패했습니다.', 'error');
+        }
       }
 
       // 토스트 메시지 표시 함수
@@ -1124,7 +1164,7 @@
                       throw new Error(response.data.message);
                     }
 
-                    // 새로운 토큰 저장
+                    // 새로운 토토큰 저장
                     localStorage.setItem("token", response.data.accessToken);
                     localStorage.setItem(
                       "refreshToken",
@@ -2035,65 +2075,6 @@
           document.body.style.overflow = "hidden"; // 배경 스크롤 방지
         }
       }
-
-      // 인정결석 목록 업데이트 함수 수정
-      async function updateExcusedList() {
-        try {
-          const token = localStorage.getItem("token");
-          const response = await axios.get("/api/attendance/excused", {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          });
-
-          if (!response.data.success) {
-            throw new Error(response.data.message);
-          }
-
-          const excusedList = document.getElementById("excusedList");
-          if (excusedList) {
-            excusedList.innerHTML =
-              response.data.excused
-                .map(
-                  (item) => `
-                <div class="bg-white p-3 rounded-lg shadow-sm mb-2">
-                  <div class="flex justify-between items-start">
-                    <div>
-                      <p class="font-semibold">${item.studentName} (${
-                    item.studentId
-                  })</p>
-                      <p class="text-sm text-gray-600">${moment(
-                        item.date
-                      ).format("YYYY년 MM월 DD일 (ddd)")}</p>
-                      <p class="text-sm text-gray-700 mt-1">${item.reason}</p>
-                    </div>
-                    <span class="text-xs text-gray-500">
-                      ${moment(item.excusedAt).format(
-                        "YYYY년 MM월 DD일 HH시 mm분"
-                      )}
-                    </span>
-                  </div>
-                </div>
-              `
-                )
-                .join("") ||
-              '<p class="text-center text-gray-500">인정결석 기록이 없습니다.</p>';
-          }
-        } catch (error) {
-          console.error("인정결석 목록 조회 중 오류:", error);
-          showToast("인정결석 목록 조회에 실패했습니다.", "error");
-        }
-      }
-
-      // 페이지 로드 시 초기화
-      document.addEventListener("DOMContentLoaded", async () => {
-        try {
-          await Promise.all([fetchAttendanceStats(), updateExcusedList()]);
-        } catch (error) {
-          console.error("초기화 중 오류:", error);
-          showToast("데이터 로딩 중 오류가 발생했습니다.", "error");
-        }
-      });
 
       // 휴일 관리 관련 함수들 수정
       async function fetchHolidays() {
