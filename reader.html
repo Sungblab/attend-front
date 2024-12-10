@@ -241,9 +241,9 @@
   const currentTime = currentHour * 60 + currentMinute;
 
   // 출석 시간 기준 설정
-  const attendanceStartTime = 8 * 60 + 30;  // 8:30
-  const normalAttendanceEndTime = 8 * 60 + 40;  // 8:40
-  const lateAttendanceEndTime = 9 * 60;  // 9:00
+  const attendanceStartTime = 7 * 60 + 30;    // 07:30
+const normalAttendanceEndTime = 8 * 60 + 3;  // 08:03
+const lateAttendanceEndTime = 9 * 60;  
 
   // 상태 업데이트
   if (currentTime < attendanceStartTime) {
