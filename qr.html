@@ -367,7 +367,7 @@
                 </span>
                 ${
                   status.isExcused
-                    ? `<span class="bg-blue-100 text-blue-800 px-4 py-2 rounded-full">인정결석 </span>
+                    ? `<span class="bg-blue-100 text-blue-800 px-4 py-2 rounded-full">인정출결 </span>
                    <span class="text-gray-600">${status.reason || ""}</span>`
                     : ""
                 }
@@ -440,7 +440,7 @@
                     ${
                       attendance.isExcused
                         ? `<span class="text-blue-600 text-sm bg-blue-50 px-2 py-1 rounded">
-                            인정결석
+                            인정출결
                           </span>`
                         : ""
                     }
@@ -577,7 +577,7 @@
             </div>
             <div class="bg-blue-50 p-4 rounded-lg">
               <div class="flex flex-col items-center">
-                <span class="text-sm font-medium text-blue-700">인정결석</span>
+                <span class="text-sm font-medium text-blue-700">인정출결</span>
                 <span class="text-2xl font-bold text-blue-900" id="excusedCount"
                   >-</span
                 >
