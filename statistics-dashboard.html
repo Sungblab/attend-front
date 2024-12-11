@@ -828,73 +828,97 @@
       }
 
       function updateStudentStats(stats) {
+        if (!stats || !Array.isArray(stats)) {
+          console.error("Invalid stats data:", stats);
+          return;
+        }
+
         const tbody = document.getElementById("statsTableBody");
         tbody.innerHTML = stats
           .map((student) => {
             if (!student) return "";
 
-            const { summary, todayStatus } = student;
-
-            // 오늘의 출석 상태 표시 로직
-            let todayStatusHtml = '';
-            if (todayStatus) {
-              const statusClass = {
-                present: 'bg-green-100 text-green-800',
-                late: 'bg-yellow-100 text-yellow-800',
-                absent: 'bg-red-100 text-red-800'
-              }[todayStatus.status] || 'bg-gray-100 text-gray-800';
-
-              let statusText = {
-                present: '출석',
-                late: todayStatus.lateMinutes ? `지각 (${todayStatus.lateMinutes}분)` : '지각',
-                absent: '결석'
-              }[todayStatus.status] || '미확인';
-
-              if (todayStatus.isExcused) {
-                statusText += ' (인정)';
-              }
-
-              todayStatusHtml = `
-                <span class="px-2 py-1 text-xs font-medium rounded-full ${statusClass}">
-                  ${statusText}
-                </span>
-                ${todayStatus.reason ? `<div class="text-xs text-gray-500 mt-1">${todayStatus.reason}</div>` : ''}
-              `;
-            } else {
-              todayStatusHtml = `
-                <span class="px-2 py-1 text-xs font-medium rounded-full bg-gray-100 text-gray-800">
-                  미확인
-                </span>
-              `;
-            }
-
+            const { summary } = student;
             return `
-              <tr class="hover:bg-gray-50">
-                <td class="px-6 py-4 whitespace-nowrap">
-                  <div class="text-sm font-medium text-gray-900">${student.studentId}</div>
+              <tr class="hover:bg-gray-50 transition-colors">
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-medium">
+                  ${student.studentId}
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                  ${student.name}
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  ${student.grade}-${student.class}-${student.number}
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap">
-                  <div class="text-sm font-medium text-gray-900">${student.name}</div>
+                  <div class="flex items-center">
+                    <div class="w-16 bg-gray-200 rounded-full h-2 mr-2">
+                      <div
+                        class="bg-green-500 rounded-full h-2"
+                        style="width: ${summary.attendanceRate}%"
+                      ></div>
+                    </div>
+                    <span class="text-sm font-medium text-gray-900">${
+                      summary.attendanceRate
+                    }%</span>
+                  </div>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap">
-                  <div class="text-sm text-gray-900">${student.grade}-${student.class}-${student.number}</div>
+                  <div class="flex items-center space-x-2 text-sm">
+                    <span class="text-green-600 font-medium">${
+                      summary.presentCount
+                    }</span>
+                    <span class="text-gray-400">/</span>
+                    <span class="text-yellow-600 font-medium">${
+                      summary.lateCount
+                    }</span>
+                    <span class="text-gray-400">/</span>
+                    <span class="text-red-600 font-medium">${
+                      summary.absentCount
+                    }</span>
+                  </div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  ${
+                    summary.lateCount > 0
+                      ? `${(
+                          summary.totalLateMinutes / summary.lateCount
+                        ).toFixed(1)}분`
+                      : "-"
+                  }
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap">
-                  <div class="text-sm font-medium text-gray-900">${summary.attendanceRate}%</div>
+                  ${
+                    student.todayStatus
+                      ? `<span class="${getStatusBadgeClass(
+                          student.todayStatus.status
+                        )}">
+                          ${getStatusText(student.todayStatus.status)}
+                          ${
+                            student.todayStatus.lateMinutes
+                              ? `(${student.todayStatus.lateMinutes}분)`
+                              : ""
+                          }
+                          ${
+                            student.todayStatus.timestamp
+                              ? `<br><span class="text-xs text-gray-500">
+                                ${moment(student.todayStatus.timestamp).format(
+                                  "HH:mm:ss"
+                                )}
+                              </span>`
+                              : ""
+                          }
+                        </span>`
+                      : '<span class="text-gray-400 text-sm">미출석</span>'
+                  }
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap">
-                  <div class="text-sm text-gray-900">${summary.present}/${summary.late}/${summary.absent}</div>
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap">
-                  <div class="text-sm text-gray-900">${summary.avgLateMinutes}분</div>
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap">
-                  ${todayStatusHtml}
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap">
-                  <button onclick="showStudentDetail('${student.studentId}')" 
-                          class="text-primary hover:text-secondary">
-                    <i class="ri-file-list-line text-lg"></i>
+                  <button
+                    onclick="showStudentDetail('${student.studentId}')"
+                    class="text-primary hover:text-secondary transition-colors inline-flex items-center text-sm font-medium"
+                  >
+                    <i class="ri-file-list-line mr-1"></i>
+                    상세보기
                   </button>
                 </td>
               </tr>
@@ -1790,10 +1814,8 @@
             return "지각";
           case "absent":
             return "결석";
-          case "excused":
-            return "인정출결";
           default:
-            return "미확인";
+            return "미출석";
         }
       }
 
@@ -1828,7 +1850,7 @@
 
       // 상태별 배지 스타일 클래스
       function getStatusBadgeClass(status) {
-        const baseClasses = "inline-flex flex-col items-center px-3 py-1 rounded-full text-sm font-medium";
+        const baseClasses = "px-2 py-1 rounded-full text-xs font-medium";
         switch (status) {
           case "present":
             return `${baseClasses} bg-green-100 text-green-800`;
@@ -1836,8 +1858,6 @@
             return `${baseClasses} bg-yellow-100 text-yellow-800`;
           case "absent":
             return `${baseClasses} bg-red-100 text-red-800`;
-          case "excused":
-            return `${baseClasses} bg-blue-100 text-blue-800`;
           default:
             return `${baseClasses} bg-gray-100 text-gray-800`;
         }
@@ -2226,7 +2246,7 @@
               }
             );
 
-            showToast("휴일이 등��되었습니다.", "success");
+            showToast("휴일이 등록되었습니다.", "success");
             holidayForm.reset();
             await fetchHolidays(); // 목록 새로고침
           } catch (error) {
