@@ -266,91 +266,80 @@ const lateAttendanceEndTime = 9 * 60;
       updateCurrentTime();
 
       async function sendAttendance(encryptedData) {
-        try {
-          if (!encryptedData || typeof encryptedData !== "string") {
-            throw new Error("유효하지 않은 QR 코드 데이터입니다.");
-          }
+  try {
+    const response = await axios.post("/api/attendance", {
+      encryptedData: encryptedData.trim(),
+    });
 
-          if (!encryptedData.includes(":")) {
-            throw new Error("잘못된 QR 코드 형식입니다.");
-          }
+    const data = response.data;
+    console.log("출석 처리 응답:", data);
 
-          const response = await axios.post("/api/attendance", {
-            encryptedData: encryptedData.trim(),
-          });
+    // 결과 메시지 표시
+    scanResult.innerText = data.message;
+    scanResult.classList.remove(
+      "text-red-600",
+      "text-blue-600",
+      "text-yellow-600",
+      "text-green-600"
+    );
 
-          const data = response.data;
+    // 상태에 따른 색상 설정
+    if (!data.success) {
+      scanResult.classList.add("text-red-600");
+    } else if (data.attendance.status === "late") {
+      scanResult.classList.add("text-yellow-600");
+    } else {
+      scanResult.classList.add("text-green-600");
+    }
 
-          if (!data.success) {
-            throw new Error(data.message || "출석 처리에 실패했습니다.");
-          }
+    // 로그 항목 생성
+    const logEntry = document.createElement("div");
+    logEntry.classList.add("py-1", "border-b", "border-gray-200");
 
-          console.log("출석 처리 성공:", data);
-          scanResult.innerText = data.message;
-          scanResult.classList.remove(
-            "text-red-600",
-            "text-blue-600",
-            "text-yellow-600",
-            "text-green-600"
-          );
+    const studentInfo = data.attendance
+      ? `[${data.attendance.studentId}] ${data.attendance.name || ""}`
+      : "알 수 없는 학생";
 
-          if (data.message.includes("결석 처리되었습니다")) {
-            scanResult.classList.add("text-red-600");
-          } else if (data.message.includes("지각")) {
-            scanResult.classList.add("text-yellow-600");
-          } else if (data.message.includes("이미 오늘 출석이 기록되었습니다")) {
-            scanResult.classList.add("text-blue-600");
-          } else {
-            scanResult.classList.add("text-green-600");
-          }
+    logEntry.innerHTML = `
+      <span class="text-gray-500">${new Date().toLocaleTimeString()}</span>
+      <span class="font-medium ml-2">${studentInfo}</span>
+      <span class="ml-2">${data.message}</span>
+    `;
 
-          const logEntry = document.createElement("div");
-          logEntry.classList.add("py-1", "border-b", "border-gray-200");
+    // 로그 항목 색상 설정
+    if (!data.success) {
+      logEntry.classList.add("text-red-600");
+    } else if (data.attendance.status === "late") {
+      logEntry.classList.add("text-yellow-600");
+    } else {
+      logEntry.classList.add("text-green-600");
+    }
 
-          const studentInfo = data.attendance
-            ? `[${data.attendance.studentId}] ${data.attendance.name || ""}`
-            : "알 수 없는 학생";
+    attendanceLog.prepend(logEntry);
 
-          logEntry.innerHTML = `
-            <span class="text-gray-500">${new Date().toLocaleTimeString()}</span>
-            <span class="font-medium ml-2">${studentInfo}</span>
-            <span class="ml-2">${data.message}</span>
-          `;
+    // 로그 항목 제한
+    if (attendanceLog.children.length > 100) {
+      attendanceLog.removeChild(attendanceLog.lastChild);
+    }
+  } catch (error) {
+    console.error("출석 처리 오류:", error);
+    scanResult.innerText = `오류: ${error.message}`;
+    scanResult.classList.remove(
+      "text-green-600",
+      "text-blue-600",
+      "text-yellow-600"
+    );
+    scanResult.classList.add("text-red-600");
 
-          logEntry.classList.add(
-            data.message.includes("결석 처리되었습니다")
-              ? "text-red-600"
-              : data.message.includes("지각")
-              ? "text-yellow-600"
-              : data.message.includes("이미 오늘 출석이 기록되었습니다")
-              ? "text-blue-600"
-              : "text-green-600"
-          );
-
-          attendanceLog.prepend(logEntry);
-
-          if (attendanceLog.children.length > 100) {
-            attendanceLog.removeChild(attendanceLog.lastChild);
-          }
-        } catch (error) {
-          console.error("출석 처리 오류:", error);
-          scanResult.innerText = `오류: ${error.message}`;
-          scanResult.classList.remove(
-            "text-green-600",
-            "text-blue-600",
-            "text-yellow-600"
-          );
-          scanResult.classList.add("text-red-600");
-
-          const logEntry = document.createElement("div");
-          logEntry.classList.add("py-1", "border-b", "border-gray-200");
-          logEntry.innerHTML = `
-            <span class="text-gray-500">${new Date().toLocaleTimeString()}</span>
-            <span class="text-red-600 ml-2">오류: ${error.message}</span>
-          `;
-          attendanceLog.prepend(logEntry);
-        }
-      }
+    const logEntry = document.createElement("div");
+    logEntry.classList.add("py-1", "border-b", "border-gray-200", "text-red-600");
+    logEntry.innerHTML = `
+      <span class="text-gray-500">${new Date().toLocaleTimeString()}</span>
+      <span class="ml-2">오류: ${error.message}</span>
+    `;
+    attendanceLog.prepend(logEntry);
+  }
+}
 
       // 초기 상태 설정
       stopButton.disabled = true;
