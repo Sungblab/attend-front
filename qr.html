@@ -91,7 +91,7 @@
               class="w-full bg-primary hover:bg-secondary text-white font-semibold py-3 px-4 rounded-lg transition duration-300 flex items-center justify-center mt-4"
             >
               <i class="ri-file-list-line mr-2"></i>
-              출결 기록 보기
+              ��결 기록 보기
             </button>
 
             <button
@@ -332,10 +332,7 @@
       // 오늘의 출석 상태 조회 함수
       async function checkTodayAttendance() {
         try {
-          const response = await axios.get(
-            `/api/attendance/student/${studentId}`
-          );
-
+          const response = await axios.get(`/api/attendance/student/${studentId}`);
           const data = response.data;
 
           if (!data.success) {
@@ -343,32 +340,35 @@
           }
 
           const todayStatusDiv = document.getElementById("todayStatus");
-          if (data.todayStatus) {
-            const status = data.todayStatus;
-            const statusClass =
-              {
-                present: "bg-green-100 text-green-800",
-                late: "bg-yellow-100 text-yellow-800",
-                absent: "bg-red-100 text-red-800",
-              }[status.status] || "bg-gray-100 text-gray-800";
+          // 오늘 날짜의 출석 기록 찾기
+          const today = moment().tz("Asia/Seoul").startOf("day");
+          const todayAttendance = data.attendances?.find(attendance => 
+            moment(attendance.timestamp).tz("Asia/Seoul").isSame(today, 'day')
+          );
 
-            const statusText =
-              {
-                present: "출석",
-                late: "지각",
-                absent: "결석",
-              }[status.status] || "미출석";
+          if (todayAttendance) {
+            const statusClass = {
+              present: "bg-green-100 text-green-800",
+              late: "bg-yellow-100 text-yellow-800",
+              absent: "bg-red-100 text-red-800",
+            }[todayAttendance.status] || "bg-gray-100 text-gray-800";
+
+            const statusText = {
+              present: "출석",
+              late: "지각",
+              absent: "결석",
+            }[todayAttendance.status] || "미출석";
 
             todayStatusDiv.innerHTML = `
               <div class="flex items-center space-x-4">
                 <span class="px-4 py-2 rounded-full ${statusClass} font-medium">
                   ${statusText}
-                  ${status.lateMinutes ? `(${status.lateMinutes}분 지각)` : ""}
+                  ${todayAttendance.lateMinutes ? `(${todayAttendance.lateMinutes}분 지각)` : ""}
                 </span>
                 ${
-                  status.isExcused
-                    ? `<span class="bg-blue-100 text-blue-800 px-4 py-2 rounded-full">인정출결 </span>
-                   <span class="text-gray-600">${status.reason || ""}</span>`
+                  todayAttendance.isExcused
+                    ? `<span class="bg-blue-100 text-blue-800 px-4 py-2 rounded-full">인정출결</span>
+                       <span class="text-gray-600">${todayAttendance.reason || ""}</span>`
                     : ""
                 }
               </div>
