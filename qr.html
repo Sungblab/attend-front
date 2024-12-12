@@ -170,7 +170,7 @@
           if (response.status === 401) {
             const refreshToken = localStorage.getItem("refreshToken");
             if (!refreshToken) {
-              throw new Error("��프레시 토큰이 없습니다.");
+              throw new Error("리프레시 토큰이 없습니다.");
             }
 
             try {
