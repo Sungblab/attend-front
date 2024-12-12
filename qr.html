@@ -70,7 +70,6 @@
             </p>
 
             <div class="mt-6 bg-white rounded-lg shadow p-6">
-              <h3 class="text-xl font-bold mb-4">오늘의 출석 상태</h3>
               <div class="space-y-4">
                 <div class="flex items-center justify-between">
                   <span class="text-gray-600">현재 시간</span>
@@ -79,9 +78,6 @@
                 <div class="flex items-center justify-between">
                   <span class="text-gray-600">출석 마감</span>
                   <span class="font-semibold text-red-600">09:00</span>
-                </div>
-                <div id="todayStatus" class="mt-4">
-                  <!-- 동적으로 추가될 내용 -->
                 </div>
               </div>
             </div>
@@ -174,7 +170,7 @@
           if (response.status === 401) {
             const refreshToken = localStorage.getItem("refreshToken");
             if (!refreshToken) {
-              throw new Error("리프레시 토큰이 없습니다.");
+              throw new Error("��프레시 토큰이 없습니다.");
             }
 
             try {
@@ -329,64 +325,7 @@
         setTimeout(() => toast.remove(), 3000);
       }
 
-      // 오늘의 출석 상태 조회 함수
-      async function checkTodayAttendance() {
-        try {
-          const response = await axios.get(`/api/attendance/student/${studentId}`);
-          const data = response.data;
-
-          if (!data.success) {
-            throw new Error(data.message);
-          }
-
-          const todayStatusDiv = document.getElementById("todayStatus");
-          // 오늘 날짜의 출석 기록 찾기
-          const today = moment().tz("Asia/Seoul").startOf("day");
-          const todayAttendance = data.attendances?.find(attendance => 
-            moment(attendance.timestamp).tz("Asia/Seoul").isSame(today, 'day')
-          );
-
-          if (todayAttendance) {
-            const statusClass = {
-              present: "bg-green-100 text-green-800",
-              late: "bg-yellow-100 text-yellow-800",
-              absent: "bg-red-100 text-red-800",
-            }[todayAttendance.status] || "bg-gray-100 text-gray-800";
-
-            const statusText = {
-              present: "출석",
-              late: "지각",
-              absent: "결석",
-            }[todayAttendance.status] || "미출석";
-
-            todayStatusDiv.innerHTML = `
-              <div class="flex items-center space-x-4">
-                <span class="px-4 py-2 rounded-full ${statusClass} font-medium">
-                  ${statusText}
-                  ${todayAttendance.lateMinutes ? `(${todayAttendance.lateMinutes}분 지각)` : ""}
-                </span>
-                ${
-                  todayAttendance.isExcused
-                    ? `<span class="bg-blue-100 text-blue-800 px-4 py-2 rounded-full">인정출결</span>
-                       <span class="text-gray-600">${todayAttendance.reason || ""}</span>`
-                    : ""
-                }
-              </div>
-            `;
-          } else {
-            todayStatusDiv.innerHTML = `
-              <div class="text-gray-500">
-                아직 출석 기록이 없습니다.
-              </div>
-            `;
-          }
-        } catch (error) {
-          console.error("출석 상태 조회 중 오류:", error);
-          showError("출석 상태를 조회하는데 실패했습니다.");
-        }
-      }
-
-      // 출결 상세 정보 조회 함수
+      // 오결 상세 정보 조회 함수
       async function showAttendanceDetails() {
         try {
           const response = await axios.get(
@@ -502,7 +441,6 @@
       document.addEventListener("DOMContentLoaded", async () => {
         if (!checkAuth()) return;
         await fetchStudentInfo();
-        await checkTodayAttendance();
       });
 
       // ESC 키로 모달 닫기
