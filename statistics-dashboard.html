@@ -1959,6 +1959,85 @@
         } = data;
 
         try {
+          // 모달 내용 초기화
+          document.getElementById("modalStudentId").textContent = "";
+          document.getElementById("modalStudentName").textContent = "";
+          document.getElementById("modalStudentClass").textContent = "";
+          document.getElementById("modalStudentNumber").textContent = "";
+          document.getElementById("modalTodayStatus").innerHTML = "";
+          document.getElementById("modalSummary").innerHTML = "";
+          document.getElementById("modalAttendanceList").innerHTML = "";
+
+          // 학생 기본 정보 업데이트
+          document.getElementById("modalStudentId").textContent =
+            student.studentId;
+          document.getElementById("modalStudentName").textContent =
+            student.name;
+          document.getElementById(
+            "modalStudentClass"
+          ).textContent = `${student.grade}-${student.class}`;
+          document.getElementById("modalStudentNumber").textContent =
+            student.number;
+
+          // 오늘의 출석 상태 업데이트
+          const modalTodayStatus = document.getElementById("modalTodayStatus");
+          if (modalTodayStatus) {
+            if (todayStatus) {
+              modalTodayStatus.innerHTML = `
+                <div class="flex items-center justify-between">
+                  <h4 class="text-lg font-semibold">오늘의 출석 상태</h4>
+                  <span class="${getStatusBadgeClass(todayStatus.status)}">
+                    ${getStatusText(todayStatus.status)}
+                    ${
+                      todayStatus.lateMinutes
+                        ? ` (${todayStatus.lateMinutes}분)`
+                        : ""
+                    }
+                  </span>
+                </div>
+                ${
+                  todayStatus.timestamp
+                    ? `
+                  <p class="text-sm text-gray-600 mt-1">
+                    <i class="ri-time-line mr-1"></i>
+                    ${moment(todayStatus.timestamp).format("HH:mm:ss")}
+                  </p>
+                `
+                    : ""
+                }
+                ${
+                  todayStatus.isExcused
+                    ? `
+                  <p class="text-sm text-blue-600 mt-1">
+                    <i class="ri-checkbox-circle-line mr-1"></i>
+                    인정출결
+                  </p>
+                  ${
+                    todayStatus.reason
+                      ? `
+                    <p class="text-sm text-gray-500 mt-1">
+                      <i class="ri-information-line mr-1"></i>
+                      ${todayStatus.reason}
+                    </p>
+                  `
+                      : ""
+                  }
+                `
+                    : ""
+                }
+              `;
+            } else {
+              modalTodayStatus.innerHTML = `
+                <div class="flex items-center justify-between">
+                  <h4 class="text-lg font-semibold">오늘의 출석 상태</h4>
+                  <span class="px-2 py-1 text-xs font-medium rounded-full bg-gray-100 text-gray-800">
+                    미출석
+                  </span>
+                </div>
+              `;
+            }
+          }
+
           // 전체 통계 요약 업데이트
           const modalSummary = document.getElementById("modalSummary");
           if (modalSummary && totalStats) {
