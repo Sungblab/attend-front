@@ -4,22 +4,14 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>디지털 출결관리</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-      tailwind.config = {
-        theme: {
-          extend: {
-            colors: {
-              primary: "#4F46E5",
-              secondary: "#3730A3",
-            },
-            fontFamily: {
-              sans: ["Inter", "sans-serif"],
-            },
-          },
-        },
-      };
-    </script>
+    <link href="css/output.css" rel="stylesheet" />
+
+    <link
+      rel="stylesheet"
+      as="style"
+      crossorigin
+      href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css"
+    />
     <link
       href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
       rel="stylesheet"
@@ -28,6 +20,39 @@
       href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css"
       rel="stylesheet"
     />
+    <style>
+      @media (max-width: 640px) {
+        .container {
+          padding-left: 1rem;
+          padding-right: 1rem;
+        }
+      }
+
+      @media (min-width: 641px) and (max-width: 1024px) {
+        .container {
+          padding-left: 2rem;
+          padding-right: 2rem;
+        }
+      }
+
+      .hover-scale {
+        transition: transform 0.2s ease-in-out;
+      }
+
+      .hover-scale:hover {
+        transform: scale(1.02);
+      }
+
+      .form-select {
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+        background-position: right 0.5rem center;
+        background-repeat: no-repeat;
+        background-size: 1.5em 1.5em;
+        padding-right: 2.5rem;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+    </style>
     <link
       rel="apple-touch-icon"
       sizes="180x180"
@@ -45,20 +70,15 @@
       sizes="16x16"
       href="/favicon/favicon-16x16.png"
     />
-    <link rel="manifest" href="/manifest.json" />
-    <meta name="theme-color" content="#4F46E5" />
-    <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="black" />
-    <meta name="apple-mobile-web-app-title" content="디지털 출결관리" />
   </head>
   <body class="bg-white text-gray-900 font-sans flex flex-col min-h-screen">
     <header>
       <nav
-        class="container mx-auto px-4 sm:px-6 lg:px-8 py-2 sm:py-4 flex justify-between items-center"
+        class="container mx-auto px-4 sm:px-6 lg:px-8 py-3 sm:py-5 flex justify-between items-center shadow-sm bg-white/80 backdrop-blur-md fixed top-0 left-0 right-0 z-50"
       >
         <a
           href="/hub.html"
-          class="text-xl sm:text-2xl font-bold text-primary flex items-center"
+          class="text-xl sm:text-2xl font-bold text-primary flex items-center hover-scale"
         >
           <i class="ri-calendar-check-fill mr-2"></i>
           디지털 출결관리
@@ -67,178 +87,179 @@
     </header>
 
     <main
-      class="flex-grow flex items-center justify-center px-4 sm:px-6 lg:px-8 py-4 sm:py-8"
+      class="flex-grow flex items-center justify-center px-4 sm:px-6 lg:px-8 py-4 sm:py-8 mt-16 sm:mt-20"
     >
       <div class="w-full max-w-md my-4 sm:my-8">
-        <div class="bg-white overflow-hidden">
-          <div class="sm:p-8">
-            <h2
-              class="text-2xl sm:text-3xl font-bold mb-4 sm:mb-6 text-center text-gray-800"
-            >
-              회원가입
-            </h2>
-            <div id="message-area" class="mb-6 text-center hidden"></div>
-            <form id="signupForm" class="space-y-4 sm:space-y-6">
-              <div>
-                <label
-                  for="student-id"
-                  class="block text-sm font-medium text-gray-700 mb-2"
-                  >학번</label
-                >
-                <div class="relative">
-                  <i
-                    class="ri-user-line absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
-                  ></i>
-                  <input
-                    type="text"
-                    id="student-id"
-                    name="student-id"
-                    class="w-full pl-8 sm:pl-10 pr-4 py-2 sm:py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-primary focus:border-transparent transition duration-200"
-                    required
-                  />
-                </div>
-              </div>
-              <div class="grid grid-cols-3 gap-4">
-                <div>
-                  <label
-                    for="grade"
-                    class="block text-sm font-medium text-gray-700 mb-2"
-                    >학년</label
-                  >
-                  <select
-                    id="grade"
-                    name="grade"
-                    class="w-full pl-3 pr-10 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-primary focus:border-transparent transition duration-200"
-                    required
-                  >
-                    <option value="">선택</option>
-                    <option value="1">1학년</option>
-                    <option value="2">2학년</option>
-                    <option value="3">3학년</option>
-                  </select>
-                </div>
-                <div>
-                  <label
-                    for="class"
-                    class="block text-sm font-medium text-gray-700 mb-2"
-                    >반</label
-                  >
-                  <select
-                    id="class"
-                    name="class"
-                    class="w-full pl-3 pr-10 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-primary focus:border-transparent transition duration-200"
-                    required
-                  >
-                    <option value="">선택</option>
-                    <option value="1">1반</option>
-                    <option value="2">2반</option>
-                    <option value="3">3반</option>
-                    <option value="4">4반</option>
-                    <option value="5">5반</option>
-                    <option value="6">6반</option>
-                  </select>
-                </div>
-                <div>
-                  <label
-                    for="number"
-                    class="block text-sm font-medium text-gray-700 mb-2"
-                    >번호</label
-                  >
-                  <input
-                    type="number"
-                    id="number"
-                    name="number"
-                    min="1"
-                    max="40"
-                    class="w-full pl-3 pr-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-primary focus:border-transparent transition duration-200"
-                    required
-                  />
-                </div>
-              </div>
-              <div>
-                <label
-                  for="name"
-                  class="block text-sm font-medium text-gray-700 mb-2"
-                  >이름</label
-                >
-                <div class="relative">
-                  <i
-                    class="ri-user-smile-line absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
-                  ></i>
-                  <input
-                    type="text"
-                    id="name"
-                    name="name"
-                    class="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-primary focus:border-transparent transition duration-200"
-                    required
-                  />
-                </div>
-              </div>
-              <div>
-                <label
-                  for="password"
-                  class="block text-sm font-medium text-gray-700 mb-2"
-                  >비밀번호</label
-                >
-                <div class="relative">
-                  <i
-                    class="ri-lock-line absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
-                  ></i>
-                  <input
-                    type="password"
-                    id="password"
-                    name="password"
-                    class="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-primary focus:border-transparent transition duration-200"
-                    required
-                  />
-                </div>
-              </div>
-              <div>
-                <label
-                  for="confirm-password"
-                  class="block text-sm font-medium text-gray-700 mb-2"
-                  >비밀번호 확인</label
-                >
-                <div class="relative">
-                  <i
-                    class="ri-lock-password-line absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
-                  ></i>
-                  <input
-                    type="password"
-                    id="confirm-password"
-                    name="confirm-password"
-                    class="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-primary focus:border-transparent transition duration-200"
-                    required
-                  />
-                </div>
-              </div>
-              <button
-                type="submit"
-                class="w-full bg-primary hover:bg-secondary text-white font-semibold py-2 sm:py-3 px-4 rounded-lg transition duration-300 transform hover:scale-105 flex items-center justify-center text-sm sm:text-base"
+        <div
+          class="bg-white/80 backdrop-blur-md p-6 sm:p-8 rounded-2xl shadow-lg"
+        >
+          <h2
+            class="text-2xl sm:text-3xl font-bold mb-6 sm:mb-8 text-center text-gray-800"
+          >
+            회원가입
+          </h2>
+          <div id="message-area" class="mb-6 text-center hidden"></div>
+          <form id="signupForm" class="space-y-5 sm:space-y-6">
+            <div>
+              <label
+                for="student-id"
+                class="block text-sm font-medium text-gray-700 mb-2"
+                >학번</label
               >
-                <i class="ri-user-add-line mr-1 sm:mr-2"></i>
-                회원가입
-              </button>
-            </form>
-            <div class="mt-6 text-center">
-              <a
-                href="index.html"
-                class="text-sm text-primary hover:text-secondary transition duration-200 flex items-center justify-center"
-              >
-                <i class="ri-login-circle-line mr-1"></i>
-                이미 계정이 있으신가요? 로그인하기
-              </a>
+              <div class="relative">
+                <i
+                  class="ri-user-line absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+                ></i>
+                <input
+                  type="text"
+                  id="student-id"
+                  name="student-id"
+                  class="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-primary focus:border-transparent transition duration-200 hover:border-primary"
+                  required
+                />
+              </div>
             </div>
+            <div class="grid grid-cols-3 gap-4">
+              <div>
+                <label
+                  for="grade"
+                  class="block text-sm font-medium text-gray-700 mb-2"
+                  >학년</label
+                >
+                <select
+                  id="grade"
+                  name="grade"
+                  class="w-full pl-3 pr-10 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-primary focus:border-transparent transition duration-200 hover:border-primary"
+                  required
+                >
+                  <option value="">선택</option>
+                  <option value="1">1학년</option>
+                  <option value="2">2학년</option>
+                  <option value="3">3학년</option>
+                </select>
+              </div>
+              <div>
+                <label
+                  for="class"
+                  class="block text-sm font-medium text-gray-700 mb-2"
+                  >반</label
+                >
+                <select
+                  id="class"
+                  name="class"
+                  class="w-full pl-3 pr-10 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-primary focus:border-transparent transition duration-200 hover:border-primary"
+                  required
+                >
+                  <option value="">선택</option>
+                  <option value="1">1반</option>
+                  <option value="2">2반</option>
+                  <option value="3">3반</option>
+                  <option value="4">4반</option>
+                  <option value="5">5반</option>
+                  <option value="6">6반</option>
+                </select>
+              </div>
+              <div>
+                <label
+                  for="number"
+                  class="block text-sm font-medium text-gray-700 mb-2"
+                  >번호</label
+                >
+                <input
+                  type="number"
+                  id="number"
+                  name="number"
+                  min="1"
+                  max="40"
+                  class="w-full pl-3 pr-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-primary focus:border-transparent transition duration-200 hover:border-primary"
+                  required
+                />
+              </div>
+            </div>
+            <div>
+              <label
+                for="name"
+                class="block text-sm font-medium text-gray-700 mb-2"
+                >이름</label
+              >
+              <div class="relative">
+                <i
+                  class="ri-user-smile-line absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+                ></i>
+                <input
+                  type="text"
+                  id="name"
+                  name="name"
+                  class="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-primary focus:border-transparent transition duration-200 hover:border-primary"
+                  required
+                />
+              </div>
+            </div>
+            <div>
+              <label
+                for="password"
+                class="block text-sm font-medium text-gray-700 mb-2"
+                >비밀번호</label
+              >
+              <div class="relative">
+                <i
+                  class="ri-lock-line absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+                ></i>
+                <input
+                  type="password"
+                  id="password"
+                  name="password"
+                  class="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-primary focus:border-transparent transition duration-200 hover:border-primary"
+                  required
+                />
+              </div>
+            </div>
+            <div>
+              <label
+                for="confirm-password"
+                class="block text-sm font-medium text-gray-700 mb-2"
+                >비밀번호 확인</label
+              >
+              <div class="relative">
+                <i
+                  class="ri-lock-password-line absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+                ></i>
+                <input
+                  type="password"
+                  id="confirm-password"
+                  name="confirm-password"
+                  class="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-primary focus:border-transparent transition duration-200 hover:border-primary"
+                  required
+                />
+              </div>
+            </div>
+            <button
+              type="submit"
+              class="w-full bg-primary hover:bg-secondary text-white font-semibold py-3 px-4 rounded-xl transition duration-300 hover-scale flex items-center justify-center text-base shadow-md"
+            >
+              <i class="ri-user-add-line mr-2"></i>
+              회원가입
+            </button>
+          </form>
+          <div class="mt-8 text-center">
+            <a
+              href="index.html"
+              class="text-sm text-primary hover:text-secondary transition duration-200 flex items-center justify-center hover-scale"
+            >
+              <i class="ri-login-circle-line mr-2"></i>
+              이미 계정이 있으신가요? 로그인하기
+            </a>
           </div>
         </div>
       </div>
     </main>
 
-    <footer class="bg-white text-gray-600 py-4 mt-auto">
+    <footer
+      class="bg-white/80 backdrop-blur-md text-gray-600 py-4 sm:py-6 mt-auto border-t border-gray-100"
+    >
       <div class="container mx-auto px-4">
         <div class="flex flex-col items-center text-center">
-          <h4 class="text-lg font-semibold mb-2">연락</h4>
-          <p class="mb-2">이메일: ksb19558@naver.com</p>
+          <p class="mb-2">이메일: sungblab@gmail.com</p>
           <a
             href="https://sungblab.vercel.app/blog"
             target="_blank"
@@ -305,7 +326,7 @@
             if (password === confirmPassword) {
               try {
                 const response = await fetch(
-                  "https://port-0-attend-backend-m0tl39wtc3a73922.sel4.cloudtype.app/api/signup",
+                  "http://127.0.0.1:5000/api/signup",
                   {
                     method: "POST",
                     headers: {

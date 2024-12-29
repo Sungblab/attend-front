@@ -4,70 +4,62 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>디지털 출결관리</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="css/output.css" rel="stylesheet" />
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <script src="js/axios-config.js"></script>
-    <script>
-      tailwind.config = {
-        theme: {
-          extend: {
-            colors: {
-              primary: "#4F46E5",
-              secondary: "#3730A3",
-              accent: "#EEF2FF",
-            },
-            fontFamily: {
-              sans: ["Inter", "sans-serif"],
-            },
-          },
-        },
-      };
-    </script>
     <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
       rel="stylesheet"
+      as="style"
+      crossorigin
+      href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css"
     />
     <link
       href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css"
       rel="stylesheet"
     />
-    <meta name="theme-color" content="#4F46E5" />
-    <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="black" />
-    <meta name="apple-mobile-web-app-title" content="디지털 출결관리" />
+    <style>
+      body {
+        font-family: "Pretendard Variable", Pretendard, -apple-system,
+          BlinkMacSystemFont, system-ui, Roboto, "Helvetica Neue", "Segoe UI",
+          "Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic",
+          "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", sans-serif;
+      }
+    </style>
   </head>
-  <body class="bg-white text-gray-900 font-sans flex flex-col min-h-screen">
-    <header>
+  <body class="bg-gray-50">
+    <header class="bg-white shadow-soft-down">
       <nav
-        class="container mx-auto px-4 sm:px-6 lg:px-8 py-2 sm:py-4 flex justify-between items-center"
+        class="container mx-auto px-6 lg:px-8 py-4 flex justify-between items-center"
       >
         <a
           href="/hub.html"
-          class="text-xl sm:text-2xl font-bold text-primary flex items-center"
+          class="text-xl sm:text-2xl font-bold text-primary flex items-center hover-scale"
         >
-          <i class="ri-calendar-check-fill mr-2"></i>
+          <i class="ri-calendar-check-fill mr-3 text-primary-500"></i>
           디지털 출결관리
         </a>
       </nav>
     </header>
 
-    <main class="flex-grow container mx-auto px-4 py-8">
-      <div class="bg-white overflow-hidden">
-        <div class="p-6">
-          <h2 class="text-2xl font-bold mb-6 text-gray-800">사용자 관리</h2>
+    <main class="flex-grow container mx-auto px-6 lg:px-8 py-8">
+      <div class="bg-white rounded-lg shadow-soft overflow-hidden">
+        <div class="p-8">
+          <h2
+            class="text-2xl lg:text-3xl font-bold mb-8 text-secondary-900 flex items-center"
+          >
+            <i class="ri-user-settings-line mr-3 text-primary-500 text-3xl"></i>
+            사용자 관리
+          </h2>
 
-          <div class="mb-6">
-            <div class="flex space-x-4">
-              <div class="flex-1">
+          <div class="mb-8">
+            <div class="grid grid-cols-2 lg:grid-cols-3 gap-6">
+              <div>
                 <label
                   for="grade"
-                  class="block text-sm font-medium text-gray-700 mb-1"
+                  class="block text-base font-medium text-secondary-700 mb-2"
                   >학년</label
                 >
-                <select
-                  id="grade"
-                  class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-                >
+                <select id="grade" class="input bg-white w-full">
                   <option value="">전체</option>
                   <option value="1">1학년</option>
                   <option value="2">2학년</option>
@@ -75,16 +67,13 @@
                 </select>
               </div>
 
-              <div class="flex-1">
+              <div>
                 <label
                   for="class"
-                  class="block text-sm font-medium text-gray-700 mb-1"
+                  class="block text-base font-medium text-secondary-700 mb-2"
                   >반</label
                 >
-                <select
-                  id="class"
-                  class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-                >
+                <select id="class" class="input bg-white w-full">
                   <option value="">전체</option>
                   <option value="1">1반</option>
                   <option value="2">2반</option>
@@ -95,46 +84,56 @@
                 </select>
               </div>
 
-              <div class="flex-1">
+              <div>
                 <label
                   for="search"
-                  class="block text-sm font-medium text-gray-700 mb-1"
+                  class="block text-base font-medium text-secondary-700 mb-2"
                   >검색</label
                 >
                 <input
                   type="text"
                   id="search"
                   placeholder="이름 또는 학번으로 검색"
-                  class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                  class="input bg-white w-full"
                 />
               </div>
             </div>
           </div>
 
-          <div class="mb-4 flex justify-between items-center">
-            <div class="flex space-x-2">
+          <div
+            class="mb-6 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4"
+          >
+            <div class="flex flex-wrap gap-3">
               <button
                 id="selectAllBtn"
-                class="px-4 py-2 bg-gray-100 text-gray-700 rounded hover:bg-gray-200"
+                class="btn btn-secondary text-base px-4 py-2"
               >
+                <i class="ri-checkbox-multiple-line mr-2"></i>
                 전체 선택
               </button>
               <button
                 id="bulkApprove"
-                class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
+                class="btn bg-green-500 text-white hover:bg-green-600 focus:ring-2 focus:ring-green-500 focus:ring-offset-2 text-base px-4 py-2"
               >
+                <i class="ri-check-double-line mr-2"></i>
                 선택 승인
               </button>
               <button
                 id="bulkDelete"
-                class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+                class="btn bg-red-500 text-white hover:bg-red-600 focus:ring-2 focus:ring-red-500 focus:ring-offset-2 text-base px-4 py-2"
               >
+                <i class="ri-delete-bin-line mr-2"></i>
                 선택 삭제
               </button>
             </div>
-            <div class="flex items-center space-x-2">
-              <label for="perPage" class="text-sm">페이지당 표시:</label>
-              <select id="perPage" class="border rounded p-1">
+            <div class="flex items-center gap-3">
+              <label for="perPage" class="text-base text-secondary-600"
+                >페이지당 표시:</label
+              >
+              <select
+                id="perPage"
+                class="input bg-white py-2 px-3 w-24 text-base"
+              >
                 <option value="10">10</option>
                 <option value="25">25</option>
                 <option value="50">50</option>
@@ -144,62 +143,66 @@
           </div>
 
           <div class="mt-6">
-            <!-- 테이블 헤더 본문을 하나의 테이블로 통합 -->
             <div class="overflow-x-auto">
-              <table class="min-w-full divide-y divide-gray-200">
-                <thead class="bg-gray-50">
+              <table class="min-w-full divide-y divide-secondary-200">
+                <thead class="bg-secondary-50">
                   <tr>
                     <th
-                      class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-10"
+                      class="px-6 py-4 text-left text-sm font-semibold text-secondary-600 uppercase tracking-wider w-16"
                     >
                       <input
                         type="checkbox"
                         id="headerCheckbox"
-                        class="form-checkbox h-5 w-5"
+                        class="form-checkbox h-5 w-5 text-primary-500 rounded border-secondary-300 focus:ring-primary-500"
                       />
                     </th>
                     <th
-                      class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                      class="px-6 py-4 text-left text-sm font-semibold text-secondary-600 uppercase tracking-wider w-32"
                     >
                       학번
                     </th>
                     <th
-                      class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                      class="px-6 py-4 text-left text-sm font-semibold text-secondary-600 uppercase tracking-wider w-32"
                     >
                       이름
                     </th>
                     <th
-                      class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                      class="px-6 py-4 text-left text-sm font-semibold text-secondary-600 uppercase tracking-wider w-24"
                     >
                       학년
                     </th>
                     <th
-                      class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                      class="px-6 py-4 text-left text-sm font-semibold text-secondary-600 uppercase tracking-wider w-24"
                     >
                       반
                     </th>
                     <th
-                      class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                      class="px-6 py-4 text-left text-sm font-semibold text-secondary-600 uppercase tracking-wider w-24"
                     >
                       번호
                     </th>
                     <th
-                      class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                      class="px-6 py-4 text-left text-sm font-semibold text-secondary-600 uppercase tracking-wider w-32"
                     >
                       승인 상태
                     </th>
                     <th
-                      class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                      class="px-6 py-4 text-left text-sm font-semibold text-secondary-600 uppercase tracking-wider w-32"
                     >
                       관리자
                     </th>
                     <th
-                      class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                      class="px-6 py-4 text-left text-sm font-semibold text-secondary-600 uppercase tracking-wider w-32"
+                    >
+                      선생님
+                    </th>
+                    <th
+                      class="px-6 py-4 text-left text-sm font-semibold text-secondary-600 uppercase tracking-wider w-32"
                     >
                       리더
                     </th>
                     <th
-                      class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                      class="px-6 py-4 text-left text-sm font-semibold text-secondary-600 uppercase tracking-wider w-24"
                     >
                       작업
                     </th>
@@ -207,7 +210,7 @@
                 </thead>
                 <tbody
                   id="userTableBody"
-                  class="bg-white divide-y divide-gray-200"
+                  class="bg-white divide-y divide-secondary-200"
                 >
                   <!-- 사용자 데이터가 여기에 동적으로 추가됩니다 -->
                 </tbody>
@@ -215,8 +218,8 @@
             </div>
           </div>
 
-          <div class="mt-4 flex justify-center">
-            <div class="flex space-x-2" id="pagination">
+          <div class="mt-8 flex justify-center">
+            <div class="flex flex-wrap gap-3" id="pagination">
               <!-- 페이지네이션 버튼들이 여기에 동적으로 추가됩니다 -->
             </div>
           </div>
@@ -224,21 +227,63 @@
       </div>
     </main>
 
-    <footer class="bg-white text-gray-600 py-2 sm:py-4 mt-auto">
-      <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+    <!-- 선생님 설정 모달 추가 -->
+    <div
+      id="teacherModal"
+      class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50"
+    >
+      <div class="bg-white rounded-lg p-6 w-96">
+        <h3 class="text-lg font-semibold mb-4">선생님 설정</h3>
+        <div class="space-y-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1"
+              >담당 학년</label
+            >
+            <select id="teacherGrade" class="input bg-white w-full">
+              <option value="">선택하세요</option>
+              <option value="1">1학년</option>
+              <option value="2">2학년</option>
+              <option value="3">3학년</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1"
+              >담당 반</label
+            >
+            <select id="teacherClass" class="input bg-white w-full">
+              <option value="">선택하세요</option>
+              <option value="1">1반</option>
+              <option value="2">2반</option>
+              <option value="3">3반</option>
+              <option value="4">4반</option>
+              <option value="5">5반</option>
+              <option value="6">6반</option>
+            </select>
+          </div>
+        </div>
+        <div class="mt-6 flex justify-end space-x-3">
+          <button id="teacherModalCancel" class="btn btn-secondary">
+            취소
+          </button>
+          <button id="teacherModalConfirm" class="btn btn-primary">확인</button>
+        </div>
+      </div>
+    </div>
+
+    <footer class="bg-white shadow-soft-up mt-auto">
+      <div class="container-custom py-6">
         <div class="flex flex-col items-center text-center">
-          <h4 class="text-lg font-semibold mb-2">연락</h4>
-          <p class="mb-2">이메일: ksb19558@naver.com</p>
+          <p class="mb-3 text-secondary-600">이메일: sungblab@gmail.com</p>
           <a
             href="https://sungblab.vercel.app/blog"
             target="_blank"
             rel="noopener noreferrer"
-            class="text-primary hover:underline mb-4"
+            class="text-primary-500 hover:text-primary-600 transition-colors mb-4"
             >개발자 블로그로 가기</a
           >
-        </div>
-        <div class="text-center">
-          <p>&copy; 2024 디지털 출결관리. All rights reserved.</p>
+          <p class="text-secondary-500">
+            &copy; 2024 디지털 출결관리. All rights reserved.
+          </p>
         </div>
       </div>
     </footer>
@@ -339,21 +384,30 @@
           })
           .forEach((user) => {
             const row = document.createElement("tr");
+            row.className = "hover:bg-secondary-50 transition-colors";
             row.innerHTML = `
-              <td class="px-6 py-4 whitespace-nowrap w-10">
-                <input type="checkbox" class="user-checkbox form-checkbox h-5 w-5 text-primary" value="${
+              <td class="px-6 py-4 whitespace-nowrap">
+                <input type="checkbox" class="user-checkbox form-checkbox h-5 w-5 text-primary-500 rounded border-secondary-300 focus:ring-primary-500" value="${
                   user._id
                 }">
               </td>
-              <td class="px-6 py-4 whitespace-nowrap w-24">${
+              <td class="px-6 py-4 whitespace-nowrap font-medium text-secondary-900">${
                 user.studentId
               }</td>
-              <td class="px-6 py-4 whitespace-nowrap w-24">${user.name}</td>
-              <td class="px-6 py-4 whitespace-nowrap w-16">${user.grade}</td>
-              <td class="px-6 py-4 whitespace-nowrap w-16">${user.class}</td>
-              <td class="px-6 py-4 whitespace-nowrap w-16">${user.number}</td>
+              <td class="px-6 py-4 whitespace-nowrap font-medium text-secondary-900">${
+                user.name
+              }</td>
+              <td class="px-6 py-4 whitespace-nowrap text-secondary-700">${
+                user.grade
+              }</td>
+              <td class="px-6 py-4 whitespace-nowrap text-secondary-700">${
+                user.class
+              }</td>
+              <td class="px-6 py-4 whitespace-nowrap text-secondary-700">${
+                user.number
+              }</td>
               <td class="px-6 py-4 whitespace-nowrap">
-                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
                   user.isApproved
                     ? "bg-green-100 text-green-800"
                     : "bg-red-100 text-red-800"
@@ -363,37 +417,55 @@
               </td>
               <td class="px-6 py-4 whitespace-nowrap">
                 <button onclick="updateAdmin('${user._id}', ${!user.isAdmin})" 
-                  class="px-2 py-1 rounded-full text-xs font-semibold ${
+                  class="px-3 py-1 rounded-full text-xs font-semibold transition-colors ${
                     user.isAdmin
-                      ? "bg-blue-100 text-blue-800 hover:bg-blue-200"
-                      : "bg-gray-100 text-gray-800 hover:bg-gray-200"
+                      ? "bg-primary-100 text-primary-800 hover:bg-primary-200"
+                      : "bg-secondary-100 text-secondary-800 hover:bg-secondary-200"
                   }">
                   ${user.isAdmin ? "관리자 해제" : "관리자 지정"}
+                </button>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <button onclick="updateTeacher('${
+                  user._id
+                }', ${!user.isTeacher})" 
+                  class="px-3 py-1 rounded-full text-xs font-semibold transition-colors ${
+                    user.isTeacher
+                      ? "bg-blue-100 text-blue-800 hover:bg-blue-200"
+                      : "bg-secondary-100 text-secondary-800 hover:bg-secondary-200"
+                  }">
+                  ${
+                    user.isTeacher
+                      ? `선생님 해제 (${user.teacherGrade}학년 ${user.teacherClass}반)`
+                      : "선생님 지정"
+                  }
                 </button>
               </td>
               <td class="px-6 py-4 whitespace-nowrap">
                 <button onclick="updateReader('${
                   user._id
                 }', ${!user.isReader})" 
-                  class="px-2 py-1 rounded-full text-xs font-semibold ${
+                  class="px-3 py-1 rounded-full text-xs font-semibold transition-colors ${
                     user.isReader
-                      ? "bg-purple-100 text-purple-800 hover:bg-purple-200"
-                      : "bg-gray-100 text-gray-800 hover:bg-gray-200"
+                      ? "bg-accent-100 text-accent-800 hover:bg-accent-200"
+                      : "bg-secondary-100 text-secondary-800 hover:bg-secondary-200"
                   }">
                   ${user.isReader ? "리더 해제" : "리더 지정"}
                 </button>
               </td>
               <td class="px-6 py-4 whitespace-nowrap">
-                <button onclick="deleteUser('${
-                  user._id
-                }')" class="text-red-600 hover:text-red-900 mr-2">
-                  <i class="ri-delete-bin-line"></i>
-                </button>
-                <button onclick="resetPassword('${
-                  user._id
-                }')" class="text-blue-600 hover:text-blue-900">
-                  <i class="ri-lock-unlock-line"></i>
-                </button>
+                <div class="flex items-center space-x-3">
+                  <button onclick="deleteUser('${
+                    user._id
+                  }')" class="text-red-600 hover:text-red-900 transition-colors">
+                    <i class="ri-delete-bin-line text-lg"></i>
+                  </button>
+                  <button onclick="resetPassword('${
+                    user._id
+                  }')" class="text-primary-600 hover:text-primary-900 transition-colors">
+                    <i class="ri-lock-unlock-line text-lg"></i>
+                  </button>
+                </div>
               </td>
             `;
             userTableBody.appendChild(row);
@@ -435,6 +507,98 @@
         } catch (error) {
           console.error("Error updating admin status:", error);
           alert("관리자 권한 업데이트에 실패했습니다.");
+        }
+      }
+
+      async function updateTeacher(userId, isTeacher) {
+        try {
+          if (isTeacher) {
+            // 모달 요소들 가져오기
+            const modal = document.getElementById("teacherModal");
+            const gradeSelect = document.getElementById("teacherGrade");
+            const classSelect = document.getElementById("teacherClass");
+            const cancelBtn = document.getElementById("teacherModalCancel");
+            const confirmBtn = document.getElementById("teacherModalConfirm");
+
+            // 현재 사용자 정보 가져오기
+            const response = await axios.get(`/api/admin/users/${userId}`);
+            const user = response.data;
+
+            // 기존 설정값이 있다면 선택
+            if (user.teacherGrade) {
+              gradeSelect.value = user.teacherGrade;
+            }
+            if (user.teacherClass) {
+              classSelect.value = user.teacherClass;
+            }
+
+            // 모달 표시
+            modal.classList.remove("hidden");
+
+            // ESC 키로 모달 닫기
+            const handleEsc = (e) => {
+              if (e.key === "Escape") {
+                modal.classList.add("hidden");
+                document.removeEventListener("keydown", handleEsc);
+              }
+            };
+            document.addEventListener("keydown", handleEsc);
+
+            // 모달 외부 클릭시 닫기
+            modal.onclick = (e) => {
+              if (e.target === modal) {
+                modal.classList.add("hidden");
+              }
+            };
+
+            // 취소 버튼 클릭 시
+            cancelBtn.onclick = () => {
+              modal.classList.add("hidden");
+            };
+
+            // 확인 버튼 클릭 시
+            confirmBtn.onclick = async () => {
+              const teacherGrade = parseInt(gradeSelect.value);
+              const teacherClass = parseInt(classSelect.value);
+
+              if (!teacherGrade || !teacherClass) {
+                alert("담당 학년과 반을 모두 선택해주세요.");
+                return;
+              }
+
+              try {
+                await axios.post("/api/admin/set-teacher", {
+                  userId,
+                  isTeacher: true,
+                  teacherGrade,
+                  teacherClass,
+                });
+                alert("선생님으로 지정되었습니다.");
+                modal.classList.add("hidden");
+                fetchUsers();
+              } catch (error) {
+                console.error("Error updating teacher status:", error);
+                alert("선생님 권한 업데이트에 실패했습니다.");
+              }
+            };
+          } else {
+            // 선생님 권한 해제
+            if (
+              confirm(
+                "선생님 권한을 해제하시겠습니까? 담당 반 정보도 함께 삭제됩니다."
+              )
+            ) {
+              await axios.post("/api/admin/set-teacher", {
+                userId,
+                isTeacher: false,
+              });
+              alert("선생님 권한이 해제되었습니다.");
+              fetchUsers();
+            }
+          }
+        } catch (error) {
+          console.error("Error updating teacher status:", error);
+          alert("선생님 권한 업데이트에 실패했습니다.");
         }
       }
 
@@ -576,11 +740,11 @@
       function addPageButton(text, pageNum) {
         const button = document.createElement("button");
         button.textContent = text;
-        button.className = `px-3 py-1 rounded ${
+        button.className = `px-4 py-2 text-base rounded-lg ${
           pageNum === currentPage
-            ? "bg-primary text-white"
-            : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-        }`;
+            ? "bg-primary-500 text-white hover:bg-primary-600"
+            : "bg-white text-secondary-700 hover:bg-secondary-50 border border-secondary-200"
+        } transition-colors duration-200`;
 
         if (pageNum) {
           button.addEventListener("click", () => {

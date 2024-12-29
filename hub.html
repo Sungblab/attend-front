@@ -4,23 +4,13 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>디지털 출결관리</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-      tailwind.config = {
-        theme: {
-          extend: {
-            colors: {
-              primary: "#4F46E5",
-              secondary: "#3730A3",
-              accent: "#EEF2FF",
-            },
-            fontFamily: {
-              sans: ["Inter", "sans-serif"],
-            },
-          },
-        },
-      };
-    </script>
+    <link href="css/output.css" rel="stylesheet" />
+    <link
+      rel="stylesheet"
+      as="style"
+      crossorigin
+      href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css"
+    />
     <link
       href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
       rel="stylesheet"
@@ -29,60 +19,90 @@
       href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css"
       rel="stylesheet"
     />
-    <meta name="theme-color" content="#4F46E5" />
-    <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="black" />
-    <meta name="apple-mobile-web-app-title" content="디지털 출결관리" />
+    <style>
+      @media (max-width: 640px) {
+        .container {
+          padding-left: 1rem;
+          padding-right: 1rem;
+        }
+        .hide-mobile {
+          display: none !important;
+        }
+      }
+
+      @media (min-width: 641px) and (max-width: 1024px) {
+        .container {
+          padding-left: 2rem;
+          padding-right: 2rem;
+        }
+      }
+
+      .hover-scale {
+        transition: transform 0.2s ease-in-out;
+      }
+
+      .hover-scale:hover {
+        transform: scale(1.02);
+      }
+
+      .menu-grid {
+        display: grid;
+        gap: 1rem;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      }
+
+      @media (min-width: 1024px) {
+        .menu-grid {
+          grid-template-columns: repeat(2, 1fr);
+          max-width: 800px;
+          margin: 0 auto;
+        }
+      }
+    </style>
+
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <script src="js/axios-config.js"></script>
   </head>
   <body class="bg-white text-gray-900 font-sans flex flex-col min-h-screen">
     <header>
       <nav
-        class="container mx-auto px-4 sm:px-6 lg:px-8 py-2 sm:py-4 flex justify-between items-center"
+        class="container mx-auto px-4 sm:px-6 lg:px-8 py-3 sm:py-4 flex justify-between items-center shadow-sm bg-white/80 backdrop-blur-md fixed top-0 left-0 right-0 z-50"
       >
         <a
           href="/hub.html"
-          class="text-xl sm:text-2xl font-bold text-primary flex items-center"
+          class="text-xl sm:text-2xl font-bold text-primary flex items-center hover-scale"
         >
           <i class="ri-calendar-check-fill mr-2"></i>
           디지털 출결관리
         </a>
+        <div id="user-info" class="text-sm sm:text-base text-gray-600"></div>
       </nav>
     </header>
 
     <main
-      class="flex-grow flex items-center justify-center px-4 sm:px-6 lg:px-8 py-4 sm:py-8"
+      class="flex-grow flex items-center justify-center px-4 sm:px-6 lg:px-8 py-4 sm:py-8 mt-12 sm:mt-16"
     >
-      <div class="w-full max-w-md my-4 sm:my-8">
+      <div class="w-full max-w-3xl my-4 sm:my-8">
         <div
           id="message-banner"
-          class="hidden mb-4 p-4 text-white text-center text-sm font-medium"
+          class="hidden mb-4 p-3 rounded-xl text-white text-center text-sm sm:text-base font-medium max-w-2xl mx-auto"
         ></div>
-        <div class="bg-white overflow-hidden">
-          <div class="sm:p-8">
-            <div id="menu-buttons" class="space-y-4">
-              <!-- 버튼들이 여기에 동적으로 추가됩니다 -->
-            </div>
-            <div class="mt-6 flex justify-center">
-              <a
-                href="change-password.html"
-                class="text-sm text-primary hover:text-secondary transition duration-200 flex items-center"
-              >
-                <i class="ri-lock-password-line mr-1"></i>
-                비밀번호 변경하기
-              </a>
-            </div>
+        <div
+          class="bg-white/80 backdrop-blur-md p-4 sm:p-6 rounded-2xl shadow-lg"
+        >
+          <div id="menu-buttons" class="menu-grid">
+            <!-- 버튼들이 여기에 동적으로 추가됩니다 -->
           </div>
         </div>
       </div>
     </main>
 
-    <footer class="bg-white text-gray-600 py-2 sm:py-4 mt-auto">
+    <footer
+      class="bg-white/80 backdrop-blur-md text-gray-600 py-4 sm:py-6 mt-auto border-t border-gray-100"
+    >
       <div class="container mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex flex-col items-center text-center">
-          <h4 class="text-lg font-semibold mb-2">연락</h4>
-          <p class="mb-2">이메일: ksb19558@naver.com</p>
+          <p class="mb-2">이메일: sungblab@gmail.com</p>
           <a
             href="https://sungblab.vercel.app/blog"
             target="_blank"
@@ -129,6 +149,10 @@
         const isAdmin = userInfo?.isAdmin || false;
         const isReader = userInfo?.isReader || false;
 
+        // 사용자 정보 표시
+        const userInfoElement = document.getElementById("user-info");
+        userInfoElement.textContent = `${userInfo.name} (${userInfo.studentId})`;
+
         const menuButtons = document.getElementById("menu-buttons");
         const messageBanner = document.getElementById("message-banner");
 
@@ -174,14 +198,14 @@
         if (isAdmin) {
           addButton(
             "관리자 대시보드",
-            "bg-primary hover:bg-secondary",
+            "bg-primary hover:bg-secondary hide-mobile",
             "dashboard.html",
             "ri-dashboard-line"
           );
           // 출석 통계 대시보드 버튼 (관리자에게만 표시)
           addButton(
             "출석 통계 대시보드",
-            "bg-primary hover:bg-secondary",
+            "bg-primary hover:bg-secondary hide-mobile",
             "statistics-dashboard.html",
             "ri-bar-chart-box-line"
           );
@@ -207,8 +231,8 @@
 
         function addButton(text, classes, destination, icon) {
           const button = document.createElement("button");
-          button.className = `w-full ${classes} text-white font-semibold py-3 px-4 rounded-lg transition duration-300 flex items-center justify-center`;
-          button.innerHTML = `<i class="${icon} mr-2"></i>${text}`;
+          button.className = `w-full ${classes} text-white font-medium py-2.5 px-4 rounded-xl transition duration-300 hover-scale flex items-center justify-center text-sm sm:text-base shadow-md`;
+          button.innerHTML = `<i class="${icon} mr-2 text-lg"></i>${text}`;
           button.addEventListener("click", () => {
             if (destination === "logout") {
               // 로그아웃 처리

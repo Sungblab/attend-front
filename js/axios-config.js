@@ -1,6 +1,5 @@
 // axios 기본 설정
-axios.defaults.baseURL =
-  "https://port-0-attend-backend-m0tl39wtc3a73922.sel4.cloudtype.app";
+axios.defaults.baseURL = "http://127.0.0.1:5000";
 
 // 토큰 갱신 타이머 설정
 let tokenRefreshTimer;
@@ -48,7 +47,7 @@ async function setupTokenRefresh() {
         if (!keepLoggedIn) {
           localStorage.clear();
           window.location.href =
-            "/index.html?error=" +
+            "index.html?error=" +
             encodeURIComponent("세션이 만료되었습니다. 다시 로그인해주세요.");
         }
       }
@@ -72,7 +71,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (Date.now() >= expiresIn) {
       localStorage.clear();
       window.location.href =
-        "/index.html?error=" +
+        "index.html?error=" +
         encodeURIComponent("세션이 만료되었습니다. 다시 로그인해주세요.");
     } else {
       setupTokenRefresh();

@@ -4,28 +4,18 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>디지털 출결관리</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="css/output.css" rel="stylesheet" />
     <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/moment-timezone/0.5.33/moment-timezone-with-data.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <script src="js/axios-config.js"></script>
-    <script>
-      tailwind.config = {
-        theme: {
-          extend: {
-            colors: {
-              primary: "#4F46E5",
-              secondary: "#3730A3",
-              accent: "#EEF2FF",
-            },
-            fontFamily: {
-              sans: ["Inter", "sans-serif"],
-            },
-          },
-        },
-      };
-    </script>
+    <link
+      rel="stylesheet"
+      as="style"
+      crossorigin
+      href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css"
+    />
     <link
       href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
       rel="stylesheet"
@@ -34,19 +24,59 @@
       href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css"
       rel="stylesheet"
     />
+    <style>
+      @media (max-width: 640px) {
+        .container {
+          padding-left: 1rem;
+          padding-right: 1rem;
+        }
+      }
+
+      @media (min-width: 641px) and (max-width: 1024px) {
+        .container {
+          padding-left: 2rem;
+          padding-right: 2rem;
+        }
+      }
+
+      .hover-scale {
+        transition: transform 0.2s ease-in-out;
+      }
+
+      .hover-scale:hover {
+        transform: scale(1.02);
+      }
+
+      #qrcode img {
+        margin: 0 auto;
+        border-radius: 1rem;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
+          0 2px 4px -1px rgba(0, 0, 0, 0.06);
+      }
+
+      .status-card {
+        background: rgba(255, 255, 255, 0.8);
+        backdrop-filter: blur(8px);
+        border-radius: 1rem;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
+          0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        transition: transform 0.2s ease-in-out;
+      }
+
+      .status-card:hover {
+        transform: translateY(-2px);
+      }
+    </style>
     <meta name="theme-color" content="#4F46E5" />
-    <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="black" />
-    <meta name="apple-mobile-web-app-title" content="디지털 출결관리" />
   </head>
   <body class="bg-white text-gray-900 font-sans flex flex-col min-h-screen">
     <header>
       <nav
-        class="container mx-auto px-4 sm:px-6 lg:px-8 py-2 sm:py-4 flex justify-between items-center"
+        class="container mx-auto px-4 sm:px-6 lg:px-8 py-3 sm:py-5 flex justify-between items-center shadow-sm bg-white/80 backdrop-blur-md fixed top-0 left-0 right-0 z-50"
       >
         <a
           href="/hub.html"
-          class="text-xl sm:text-2xl font-bold text-primary flex items-center"
+          class="text-xl sm:text-2xl font-bold text-primary flex items-center hover-scale"
         >
           <i class="ri-calendar-check-fill mr-2"></i>
           디지털 출결관리
@@ -55,40 +85,67 @@
     </header>
 
     <main
-      class="flex-grow flex items-center justify-center px-4 sm:px-6 lg:px-8 py-4 sm:py-8"
+      class="flex-grow flex items-center justify-center px-4 sm:px-6 lg:px-8 py-4 sm:py-8 mt-12 sm:mt-16"
     >
-      <div class="w-full max-w-md my-4 sm:my-8">
-        <div class="bg-white overflow-hidden">
-          <div class="sm:p-8">
-            <div id="qrcode" class="flex justify-center mb-4"></div>
-            <p
-              id="student-info"
-              class="text-center text-gray-600 mb-4 font-medium"
-            ></p>
-            <p class="text-center text-sm text-gray-500 mb-6">
-              이 QR 코드는 30초마다 갱신됩니다.
-            </p>
+      <div class="w-full max-w-lg my-4 sm:my-8">
+        <div
+          class="bg-white/80 backdrop-blur-md p-4 sm:p-6 rounded-2xl shadow-lg"
+        >
+          <div id="qrcode" class="flex justify-center mb-4 sm:mb-6"></div>
+          <p
+            id="student-info"
+            class="text-center text-gray-700 mb-2 font-medium text-base sm:text-lg"
+          ></p>
+          <p class="text-center text-xs sm:text-sm text-gray-500 mb-6">
+            이 QR 코드는 30초마다 갱신됩니다.
+          </p>
 
-            <div class="mt-6 bg-white rounded-lg shadow p-6">
-              <h3 class="text-xl font-bold mb-4">오늘의 출석 상태</h3>
-              <div class="space-y-4">
-                <div class="flex items-center justify-between">
-                  <span class="text-gray-600">현재 시간</span>
-                  <span id="currentTime" class="font-semibold"></span>
-                </div>
-                <div class="flex items-center justify-between">
-                  <span class="text-gray-600">출석 마감</span>
-                  <span class="font-semibold text-red-600">09:00</span>
-                </div>
-                <div id="todayStatus" class="mt-4">
-                  <!-- 동적으로 추가될 내용 -->
-                </div>
+          <div class="status-card p-4 sm:p-6 mb-4">
+            <h3 class="text-lg sm:text-xl font-bold mb-4 text-gray-800">
+              오늘의 출석 상태
+            </h3>
+            <div class="space-y-3">
+              <div class="flex items-center justify-between">
+                <span class="text-gray-600 text-sm">현재 시간</span>
+                <span
+                  id="currentTime"
+                  class="font-semibold text-base sm:text-lg"
+                ></span>
+              </div>
+              <div class="flex items-center justify-between">
+                <span class="text-gray-600 text-sm">출석 시작</span>
+                <span
+                  id="startTime"
+                  class="font-semibold text-base sm:text-lg text-gray-900"
+                  >-</span
+                >
+              </div>
+              <div class="flex items-center justify-between">
+                <span class="text-gray-600 text-sm">정상 출석 마감</span>
+                <span
+                  id="normalTime"
+                  class="font-semibold text-base sm:text-lg text-blue-600"
+                  >-</span
+                >
+              </div>
+              <div class="flex items-center justify-between">
+                <span class="text-gray-600 text-sm">지각 마감</span>
+                <span
+                  id="lateTime"
+                  class="font-semibold text-base sm:text-lg text-red-600"
+                  >-</span
+                >
+              </div>
+              <div id="todayStatus" class="mt-4">
+                <!-- 동적으로 추가될 내용 -->
               </div>
             </div>
+          </div>
 
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <button
               onclick="showAttendanceDetails()"
-              class="w-full bg-primary hover:bg-secondary text-white font-semibold py-3 px-4 rounded-lg transition duration-300 flex items-center justify-center mt-4"
+              class="w-full bg-primary hover:bg-secondary text-white font-medium py-2.5 px-4 rounded-xl transition duration-300 hover-scale flex items-center justify-center shadow-md text-sm"
             >
               <i class="ri-file-list-line mr-2"></i>
               출결 기록 보기
@@ -96,32 +153,45 @@
 
             <button
               id="refresh-btn"
-              class="w-full bg-primary hover:bg-secondary text-white font-semibold py-3 px-4 rounded-lg transition duration-300 mb-4 flex items-center justify-center mt-4"
+              class="w-full bg-primary hover:bg-secondary text-white font-medium py-2.5 px-4 rounded-xl transition duration-300 hover-scale flex items-center justify-center shadow-md text-sm"
             >
               <i class="ri-refresh-line mr-2"></i>
               QR 코드 새로고침
             </button>
-            <button
-              id="logout-btn"
-              class="w-full bg-red-500 hover:bg-red-600 text-white font-semibold py-3 px-4 rounded-lg transition duration-300 flex items-center justify-center"
-            >
-              <i class="ri-logout-box-r-line mr-2"></i>
-              로그아웃
-            </button>
-            <div
-              id="error-message"
-              class="mt-4 p-4 bg-red-100 text-red-700 rounded-lg text-center hidden"
-            ></div>
           </div>
+
+          <button
+            id="logout-btn"
+            class="w-full bg-red-500 hover:bg-red-600 text-white font-medium py-2.5 px-4 rounded-xl transition duration-300 hover-scale flex items-center justify-center mt-3 shadow-md text-sm"
+          >
+            <i class="ri-logout-box-r-line mr-2"></i>
+            로그아웃
+          </button>
+
+          <div
+            id="error-message"
+            class="mt-4 p-3 bg-red-100 text-red-700 rounded-xl text-center hidden text-sm"
+          ></div>
+        </div>
+
+        <div class="mt-6 flex justify-center">
+          <a
+            href="change-password.html"
+            class="text-primary hover:text-secondary transition duration-200 flex items-center hover-scale"
+          >
+            <i class="ri-lock-password-line mr-2"></i>
+            비밀번호 변경하기
+          </a>
         </div>
       </div>
     </main>
 
-    <footer class="bg-white text-gray-600 py-4 mt-auto">
-      <div class="container mx-auto px-4">
+    <footer
+      class="bg-white/80 backdrop-blur-md text-gray-600 py-4 sm:py-6 mt-auto border-t border-gray-100"
+    >
+      <div class="container mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex flex-col items-center text-center">
-          <h4 class="text-lg font-semibold mb-2">연락</h4>
-          <p class="mb-2">이메일: ksb19558@naver.com</p>
+          <p class="mb-2">이메일: sungblab@gmail.com</p>
           <a
             href="https://sungblab.vercel.app/blog"
             target="_blank"
@@ -131,10 +201,80 @@
           >
         </div>
         <div class="text-center">
-          <p>&copy; 2024 디지 출결관리. All rights reserved.</p>
+          <p>&copy; 2024 디지털 출결관리. All rights reserved.</p>
         </div>
       </div>
     </footer>
+
+    <!-- 모달 스타일 개선 -->
+    <div
+      id="attendanceModal"
+      class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50"
+    >
+      <div
+        class="relative mx-auto p-0 sm:p-6 border w-full sm:w-11/12 max-w-2xl shadow-lg rounded-2xl bg-white/90 backdrop-blur-md min-h-screen sm:min-h-0 sm:my-8"
+      >
+        <div
+          class="sticky top-0 bg-white/90 backdrop-blur-md z-10 p-4 border-b rounded-t-2xl"
+        >
+          <div class="flex justify-between items-center">
+            <h3 class="text-xl font-bold text-gray-800">출결 기록</h3>
+            <button
+              onclick="closeModal()"
+              class="p-2 hover:bg-gray-100 rounded-full transition duration-200"
+              aria-label="닫기"
+            >
+              <i class="ri-close-line text-2xl"></i>
+            </button>
+          </div>
+        </div>
+
+        <div class="p-4 sm:p-6">
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
+            <div class="bg-green-50 p-4 rounded-xl hover-scale">
+              <div class="flex flex-col items-center">
+                <span class="text-sm font-medium text-green-700">출석</span>
+                <span
+                  class="text-2xl font-bold text-green-900"
+                  id="presentCount"
+                  >-</span
+                >
+              </div>
+            </div>
+            <div class="bg-yellow-50 p-4 rounded-xl hover-scale">
+              <div class="flex flex-col items-center">
+                <span class="text-sm font-medium text-yellow-700">지각</span>
+                <span class="text-2xl font-bold text-yellow-900" id="lateCount"
+                  >-</span
+                >
+              </div>
+            </div>
+            <div class="bg-red-50 p-4 rounded-xl hover-scale">
+              <div class="flex flex-col items-center">
+                <span class="text-sm font-medium text-red-700">결석</span>
+                <span class="text-2xl font-bold text-red-900" id="absentCount"
+                  >-</span
+                >
+              </div>
+            </div>
+            <div class="bg-blue-50 p-4 rounded-xl hover-scale">
+              <div class="flex flex-col items-center">
+                <span class="text-sm font-medium text-blue-700">인정출결</span>
+                <span class="text-2xl font-bold text-blue-900" id="excusedCount"
+                  >-</span
+                >
+              </div>
+            </div>
+          </div>
+
+          <div class="bg-gray-50 rounded-xl">
+            <div id="attendanceList" class="divide-y divide-gray-200">
+              <!-- 동적으로 추가될 내용 -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
 
     <script>
       let studentId, studentName;
@@ -248,6 +388,9 @@
             "student-info"
           ).textContent = `학번: ${studentId} | 이름: ${studentName}`;
           hideError();
+
+          // 학생 정보를 가져온 후 QR 코드 생성
+          await generateQRCode();
         } catch (error) {
           console.error("Error fetching student info:", error);
           showError(`학생 정보를 가져오는데 실패했습니다: ${error.message}`);
@@ -260,6 +403,7 @@
 
           if (!studentId || !studentName) {
             await fetchStudentInfo();
+            return;
           }
 
           const response = await axios.post("/api/generate-qr", {
@@ -271,11 +415,22 @@
             throw new Error(data.message || "QR 코드 생성에 실패했습니다.");
           }
 
-          const qr = qrcode(0, "M");
+          const qr = qrcode(0, "L");
           qr.addData(data.encryptedData.trim());
           qr.make();
 
-          document.getElementById("qrcode").innerHTML = qr.createImgTag(5);
+          const qrDiv = document.getElementById("qrcode");
+          qrDiv.innerHTML = qr.createImgTag(6);
+
+          // QR 코드 이미지 스타일 적용
+          const qrImage = qrDiv.querySelector("img");
+          if (qrImage) {
+            qrImage.style.margin = "0 auto";
+            qrImage.style.borderRadius = "1rem";
+            qrImage.style.boxShadow =
+              "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)";
+          }
+
           hideError();
         } catch (error) {
           console.error("QR 코드 생성 오류:", error);
@@ -283,9 +438,19 @@
         }
       }
 
-      generateQRCode();
-      setInterval(generateQRCode, 30000); // 30초마다 QR 코드 갱신
+      // 페이지 로드 시 실행
+      document.addEventListener("DOMContentLoaded", async () => {
+        if (!checkAuth()) return;
+        await fetchAttendanceSettings();
+        await fetchStudentInfo();
+        await checkTodayAttendance();
+        updateCurrentTime();
+      });
 
+      // QR 코드 자동 갱신
+      setInterval(generateQRCode, 30000);
+
+      // 새로고침 버튼 이벤트
       document
         .getElementById("refresh-btn")
         .addEventListener("click", generateQRCode);
@@ -312,22 +477,6 @@
             showError(`로그아웃 중 오류가 발생했습니다: ${error.message}`);
           }
         });
-
-      // 페이지 로드 시 즉시 증 체크
-      document.addEventListener("DOMContentLoaded", () => {
-        if (!checkAuth()) return;
-        fetchStudentInfo();
-      });
-
-      function showToast(message, type = "info") {
-        const toast = document.createElement("div");
-        toast.className = `fixed bottom-4 right-4 p-4 rounded-lg ${
-          type === "error" ? "bg-red-500" : "bg-green-500"
-        } text-white`;
-        toast.textContent = message;
-        document.body.appendChild(toast);
-        setTimeout(() => toast.remove(), 3000);
-      }
 
       // 오늘의 출석 상태 조회 함수
       async function checkTodayAttendance() {
@@ -498,21 +647,7 @@
         );
       }
 
-      // 페이지 로드 시 출석 상태 확인
-      document.addEventListener("DOMContentLoaded", async () => {
-        if (!checkAuth()) return;
-        await fetchStudentInfo();
-        await checkTodayAttendance();
-      });
-
-      // ESC 키로 모달 닫기
-      document.addEventListener("keydown", (e) => {
-        if (e.key === "Escape") {
-          closeModal();
-        }
-      });
-
-      // 현재 시간 업데이트 함수
+      // 페재 시간 업데이트 함수
       function updateCurrentTime() {
         const currentTime = document.getElementById("currentTime");
         currentTime.textContent = moment().tz("Asia/Seoul").format("HH:mm:ss");
@@ -523,78 +658,24 @@
 
       // 페이지 로드 시 즉시 시간 표시
       updateCurrentTime();
+
+      // 출결 설정 가져오기 함수 추가
+      async function fetchAttendanceSettings() {
+        try {
+          const response = await axios.get("/api/settings/attendance");
+          const { settings } = response.data;
+
+          document.getElementById("startTime").textContent = settings.startTime;
+          document.getElementById("normalTime").textContent =
+            settings.normalTime;
+          document.getElementById("lateTime").textContent = settings.lateTime;
+
+          return settings;
+        } catch (error) {
+          console.error("출결 설정을 가져오는데 실패했습니다:", error);
+          showError("출결 설정을 가져오는데 실패했습니다.");
+        }
+      }
     </script>
-
-    <div
-      id="attendanceModal"
-      class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50"
-    >
-      <div
-        class="relative mx-auto p-0 sm:p-6 border w-full sm:w-11/12 max-w-2xl shadow-lg rounded-lg bg-white min-h-screen sm:min-h-0 sm:my-8"
-      >
-        <!-- 모달 헤더 수정 -->
-        <div class="sticky top-0 bg-white z-10 p-4 border-b">
-          <div class="flex justify-between items-center">
-            <h3 class="text-xl font-bold">출결 기록</h3>
-            <button
-              onclick="closeModal()"
-              class="p-2 hover:bg-gray-100 rounded-full"
-              aria-label="닫기"
-            >
-              <i class="ri-close-line text-2xl"></i>
-            </button>
-          </div>
-        </div>
-
-        <!-- 통계 카드 섹션 수정 -->
-        <div class="p-4">
-          <div class="grid grid-cols-2 gap-3">
-            <div class="bg-green-50 p-4 rounded-lg">
-              <div class="flex flex-col items-center">
-                <span class="text-sm font-medium text-green-700">출석</span>
-                <span
-                  class="text-2xl font-bold text-green-900"
-                  id="presentCount"
-                  >-</span
-                >
-              </div>
-            </div>
-            <div class="bg-yellow-50 p-4 rounded-lg">
-              <div class="flex flex-col items-center">
-                <span class="text-sm font-medium text-yellow-700">지각</span>
-                <span class="text-2xl font-bold text-yellow-900" id="lateCount"
-                  >-</span
-                >
-              </div>
-            </div>
-            <div class="bg-red-50 p-4 rounded-lg">
-              <div class="flex flex-col items-center">
-                <span class="text-sm font-medium text-red-700">결석</span>
-                <span class="text-2xl font-bold text-red-900" id="absentCount"
-                  >-</span
-                >
-              </div>
-            </div>
-            <div class="bg-blue-50 p-4 rounded-lg">
-              <div class="flex flex-col items-center">
-                <span class="text-sm font-medium text-blue-700">인정출결</span>
-                <span class="text-2xl font-bold text-blue-900" id="excusedCount"
-                  >-</span
-                >
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- 출결 기록 리스트 섹션 수정 -->
-        <div class="px-4 pb-4">
-          <div class="bg-gray-50 rounded-lg">
-            <div id="attendanceList" class="divide-y divide-gray-200">
-              <!-- 동적으로 추가될 내용 -->
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
   </body>
 </html>

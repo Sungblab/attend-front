@@ -5,25 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>디지털 출결관리</title>
     <script src="https://unpkg.com/html5-qrcode"></script>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="css/output.css" rel="stylesheet" />
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <script src="js/axios-config.js"></script>
-    <script>
-      tailwind.config = {
-        theme: {
-          extend: {
-            colors: {
-              primary: "#4F46E5",
-              secondary: "#3730A3",
-              accent: "#EEF2FF",
-            },
-            fontFamily: {
-              sans: ["Inter", "sans-serif"],
-            },
-          },
-        },
-      };
-    </script>
+
+    <link
+      rel="stylesheet"
+      as="style"
+      crossorigin
+      href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css"
+    />
     <link
       href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
       rel="stylesheet"
@@ -32,19 +23,57 @@
       href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css"
       rel="stylesheet"
     />
+    <style>
+      @media (max-width: 640px) {
+        .container {
+          padding-left: 1rem;
+          padding-right: 1rem;
+        }
+      }
+
+      @media (min-width: 641px) and (max-width: 1024px) {
+        .container {
+          padding-left: 2rem;
+          padding-right: 2rem;
+        }
+      }
+
+      .hover-scale {
+        transition: transform 0.2s ease-in-out;
+      }
+
+      .hover-scale:hover {
+        transform: scale(1.02);
+      }
+
+      #qr-reader {
+        border: none !important;
+        box-shadow: none !important;
+      }
+
+      #qr-reader__scan_region {
+        border-radius: 1rem;
+        overflow: hidden;
+      }
+
+      #qr-reader__dashboard {
+        padding: 0 !important;
+      }
+
+      #qr-reader__status_span {
+        display: none !important;
+      }
+    </style>
     <meta name="theme-color" content="#4F46E5" />
-    <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="black" />
-    <meta name="apple-mobile-web-app-title" content="디지털 출결관리" />
   </head>
   <body class="bg-white text-gray-900 font-sans flex flex-col min-h-screen">
     <header>
       <nav
-        class="container mx-auto px-4 sm:px-6 lg:px-8 py-2 sm:py-4 flex justify-between items-center"
+        class="container mx-auto px-4 sm:px-6 lg:px-8 py-3 sm:py-5 flex justify-between items-center shadow-sm bg-white/80 backdrop-blur-md fixed top-0 left-0 right-0 z-50"
       >
         <a
           href="/hub.html"
-          class="text-xl sm:text-2xl font-bold text-primary flex items-center"
+          class="text-xl sm:text-2xl font-bold text-primary flex items-center hover-scale"
         >
           <i class="ri-calendar-check-fill mr-2"></i>
           디지털 출결관리
@@ -52,69 +81,80 @@
       </nav>
     </header>
 
-    <main class="flex-grow flex items-center justify-center px-4 py-12">
-      <div class="w-full max-w-md">
-        <div class="bg-white overflow-hidden">
-          <div class="p-8">
-            <h1 class="text-3xl font-bold mb-6 text-center text-gray-800">
-              QR 코드 출석 확인
-            </h1>
-            <div class="mb-4 text-center">
-              <div
-                id="current-time"
-                class="text-xl font-semibold text-gray-700"
-              ></div>
-              <div
-                id="attendance-status"
-                class="mt-2 text-lg font-medium"
-              ></div>
-            </div>
-            <div id="camera-select" class="mb-4">
-              <select
-                id="camera-list"
-                class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition duration-200"
-              >
-                <option value="">카메라 선택</option>
-              </select>
-            </div>
+    <main class="flex-grow flex items-center justify-center px-4 py-12 mt-12">
+      <div class="w-full max-w-7xl grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div
+          class="bg-white/80 backdrop-blur-md p-6 sm:p-8 rounded-2xl shadow-lg"
+        >
+          <h1
+            class="text-2xl sm:text-3xl font-bold mb-6 text-center text-gray-800"
+          >
+            QR 코드 출석 확인
+          </h1>
+          <div class="mb-4 text-center">
             <div
-              id="qr-reader"
-              class="mx-auto mb-6 rounded-lg overflow-hidden"
+              id="current-time"
+              class="text-lg sm:text-xl font-semibold text-gray-700"
             ></div>
             <div
-              id="scan-result"
-              class="text-lg font-semibold text-gray-700 mb-4 h-12"
+              id="attendance-status"
+              class="mt-2 text-base sm:text-lg font-medium"
             ></div>
-            <div
-              id="attendance-log"
-              class="text-sm text-gray-600 mb-6 h-96 overflow-y-auto bg-gray-50 p-4 rounded-lg"
-            ></div>
-            <div class="flex space-x-4">
-              <button
-                id="start-button"
-                class="flex-1 bg-primary hover:bg-secondary text-white font-semibold py-3 px-4 rounded-lg transition duration-300 flex items-center justify-center"
-              >
-                <i class="ri-play-circle-line mr-2"></i>
-                스캔 시작
-              </button>
-              <button
-                id="stop-button"
-                class="flex-1 bg-red-500 hover:bg-red-600 text-white font-semibold py-3 px-4 rounded-lg transition duration-300 flex items-center justify-center"
-              >
-                <i class="ri-stop-circle-line mr-2"></i>
-                스캔 중지
-              </button>
-            </div>
           </div>
+          <div id="camera-select" class="mb-4">
+            <select
+              id="camera-list"
+              class="w-full p-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent transition duration-200 text-sm sm:text-base"
+            >
+              <option value="">카메라 선택</option>
+            </select>
+          </div>
+          <div
+            id="qr-reader"
+            class="mx-auto mb-6 rounded-xl overflow-hidden shadow-md"
+          ></div>
+          <div
+            id="scan-result"
+            class="text-base sm:text-lg font-semibold text-gray-700 mb-4 h-12 text-center"
+          ></div>
+          <div class="flex space-x-4">
+            <button
+              id="start-button"
+              class="flex-1 bg-primary hover:bg-secondary text-white font-medium py-2.5 px-4 rounded-xl transition duration-300 hover-scale flex items-center justify-center shadow-md text-sm sm:text-base"
+            >
+              <i class="ri-play-circle-line mr-2"></i>
+              스캔 시작
+            </button>
+            <button
+              id="stop-button"
+              class="flex-1 bg-red-500 hover:bg-red-600 text-white font-medium py-2.5 px-4 rounded-xl transition duration-300 hover-scale flex items-center justify-center shadow-md text-sm sm:text-base"
+            >
+              <i class="ri-stop-circle-line mr-2"></i>
+              스캔 중지
+            </button>
+          </div>
+        </div>
+
+        <div
+          class="bg-white/80 backdrop-blur-md p-6 sm:p-8 rounded-2xl shadow-lg"
+        >
+          <h2 class="text-xl sm:text-2xl font-bold mb-4 text-gray-800">
+            출석 확인 목록
+          </h2>
+          <div
+            id="attendance-log"
+            class="text-sm text-gray-600 h-[calc(100vh-20rem)] overflow-y-auto bg-gray-50 p-4 rounded-xl"
+          ></div>
         </div>
       </div>
     </main>
 
-    <footer class="bg-white text-gray-600 py-2 sm:py-4 mt-auto">
+    <footer
+      class="bg-white/80 backdrop-blur-md text-gray-600 py-4 sm:py-6 mt-auto border-t border-gray-100"
+    >
       <div class="container mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex flex-col items-center text-center">
-          <h4 class="text-lg font-semibold mb-2">연락</h4>
-          <p class="mb-2">이메일: ksb19558@naver.com</p>
+          <p class="mb-2">이메일: sungblab@gmail.com</p>
           <a
             href="https://sungblab.vercel.app/blog"
             target="_blank"
@@ -150,6 +190,10 @@
           });
         } catch (error) {
           console.error("카메라 목록을 가져오는 데 실패했습니다:", error);
+          scanResult.innerText =
+            "카메라를 찾을 수 없습니다. 카메라 연결을 확인해주세요.";
+          scanResult.classList.remove("text-green-600", "text-blue-600");
+          scanResult.classList.add("text-red-600");
         }
       }
 
@@ -160,8 +204,12 @@
           lastScannedCode = decodedText;
           clearTimeout(scanTimeout);
 
-          scanResult.innerText = `QR 코드 스캔 완료. 처리 중...`;
-          scanResult.classList.remove("text-red-600", "text-green-600");
+          scanResult.innerText = `QR 코드를 읽었습니다. 출석 처리 중...`;
+          scanResult.classList.remove(
+            "text-red-600",
+            "text-green-600",
+            "text-yellow-600"
+          );
           scanResult.classList.add("text-blue-600");
 
           sendAttendance(decodedText);
@@ -172,27 +220,31 @@
         }
       };
 
-      const config = { fps: 10, qrbox: { width: 250, height: 250 } };
+      const config = { fps: 10, qrbox: { width: 300, height: 300 } };
 
       startButton.addEventListener("click", () => {
         const selectedCameraId = cameraList.value;
         if (!selectedCameraId) {
-          alert("카메라를 선택해주세요.");
+          scanResult.innerText = "카메라를 선택해주세요.";
+          scanResult.classList.remove("text-green-600", "text-blue-600");
+          scanResult.classList.add("text-red-600");
           return;
         }
 
         html5QrCode
           .start(selectedCameraId, config, qrCodeSuccessCallback)
           .then(() => {
-            scanResult.innerText = "스캔 준비 완료";
-            scanResult.classList.remove("text-gray-600");
+            scanResult.innerText = "QR 코드를 스캔해주세요.";
+            scanResult.classList.remove("text-red-600", "text-green-600");
             scanResult.classList.add("text-blue-600");
             startButton.disabled = true;
             stopButton.disabled = false;
           })
           .catch((err) => {
             console.error("QR 코드 스캔 시작 실패:", err);
-            scanResult.innerText = `오류: ${err}`;
+            scanResult.innerText = `오메라 시작 오류: ${
+              err.message || "알 수 없는 오류가 발생했습니다."
+            }`;
             scanResult.classList.add("text-red-600");
           });
       });
@@ -201,7 +253,8 @@
         html5QrCode
           .stop()
           .then(() => {
-            scanResult.innerText = "스캔이 중지되었습니다.";
+            scanResult.innerText =
+              "스캔이 중지되었습니다. 시작 버튼을 눌러 다시 시작하세요.";
             scanResult.classList.remove(
               "text-green-600",
               "text-red-600",
@@ -213,66 +266,101 @@
           })
           .catch((err) => {
             console.error("QR 코드 스캔 중지 실패:", err);
+            scanResult.innerText =
+              "스캔 중지 중 오류가 발생했습니다. 페이지를 새로고침해주세요.";
+            scanResult.classList.add("text-red-600");
           });
       });
 
       const userInfo = JSON.parse(localStorage.getItem("userInfo"));
 
       if (!userInfo || !userInfo.isReader) {
-        const errorMessage = encodeURIComponent("리더 권한이 필요합니다.");
+        const errorMessage = encodeURIComponent(
+          "리더 권한이 필요합니다. 관리자에게 문의해주세요."
+        );
         window.location.href = `hub.html?error=${errorMessage}`;
       }
 
+      let attendanceSettings = {
+        startTime: "07:30",
+        normalTime: "08:03",
+        lateTime: "09:00",
+      };
+
+      async function fetchAttendanceSettings() {
+        try {
+          const response = await axios.get("/api/settings/attendance");
+          const { settings } = response.data;
+          attendanceSettings = settings;
+          updateCurrentTime();
+        } catch (error) {
+          console.error("출결 설정을 가져오는데 실패했습니다:", error);
+          scanResult.innerText =
+            "출결 설정을 가져오는데 실패했습니다. 관리자에게 문의해주세요.";
+          scanResult.classList.add("text-red-600");
+        }
+      }
+
       function updateCurrentTime() {
-  const now = new Date();
-  const timeElement = document.getElementById("current-time");
-  const statusElement = document.getElementById("attendance-status");
+        const now = new Date();
+        const timeElement = document.getElementById("current-time");
+        const statusElement = document.getElementById("attendance-status");
 
-  // 시간 표시 형식 유지
-  timeElement.textContent = now.toLocaleTimeString("ko-KR", {
-    hour: "2-digit",
-    minute: "2-digit",
-    second: "2-digit",
-  });
+        timeElement.textContent = now.toLocaleTimeString("ko-KR", {
+          hour: "2-digit",
+          minute: "2-digit",
+          second: "2-digit",
+        });
 
-  // 시간 계산 로직 수정
-  const currentHour = now.getHours();
-  const currentMinute = now.getMinutes();
-  const currentTime = currentHour * 60 + currentMinute;
+        const currentHour = now.getHours();
+        const currentMinute = now.getMinutes();
+        const currentTime = currentHour * 60 + currentMinute;
 
-  // 출석 시간 기준 설정
-  const attendanceStartTime = 7 * 60 + 30;    // 07:30
-const normalAttendanceEndTime = 8 * 60 + 3;  // 08:03
-const lateAttendanceEndTime = 9 * 60;  
+        const [startHour, startMinute] = attendanceSettings.startTime
+          .split(":")
+          .map(Number);
+        const [normalHour, normalMinute] = attendanceSettings.normalTime
+          .split(":")
+          .map(Number);
+        const [lateHour, lateMinute] = attendanceSettings.lateTime
+          .split(":")
+          .map(Number);
 
-  // 상태 업데이트
-  if (currentTime < attendanceStartTime) {
-    statusElement.textContent = "출석 시간 전입니다";
-    statusElement.className = "mt-2 text-lg font-medium text-gray-600";
-  } else if (currentTime <= normalAttendanceEndTime) {
-    statusElement.textContent = "정상 출석 시간입니다";
-    statusElement.className = "mt-2 text-lg font-medium text-green-600";
-  } else if (currentTime <= lateAttendanceEndTime) {
-    const lateMinutes = currentTime - normalAttendanceEndTime;
-    statusElement.textContent = `지각 처리됩니다 (${lateMinutes}분 지각)`;
-    statusElement.className = "mt-2 text-lg font-medium text-yellow-600";
-  } else {
-    statusElement.textContent = "결석 처리됩니다";
-    statusElement.className = "mt-2 text-lg font-medium text-red-600";
-  }
-}
+        const attendanceStartTime = startHour * 60 + startMinute;
+        const normalAttendanceEndTime = normalHour * 60 + normalMinute;
+        const lateAttendanceEndTime = lateHour * 60 + lateMinute;
 
-      setInterval(updateCurrentTime, 1000);
-      updateCurrentTime();
+        if (currentTime < attendanceStartTime) {
+          statusElement.textContent = `출석 시작 시간(${attendanceSettings.startTime}) 전입니다`;
+          statusElement.className = "mt-2 text-lg font-medium text-gray-600";
+        } else if (currentTime <= normalAttendanceEndTime) {
+          statusElement.textContent = `정상 출석 시간입니다 (${attendanceSettings.normalTime}까지)`;
+          statusElement.className = "mt-2 text-lg font-medium text-green-600";
+        } else if (currentTime <= lateAttendanceEndTime) {
+          const lateMinutes = currentTime - normalAttendanceEndTime;
+          statusElement.textContent = `지각 처리됩니다 (${lateMinutes}분 지각, ${attendanceSettings.lateTime}까지)`;
+          statusElement.className = "mt-2 text-lg font-medium text-yellow-600";
+        } else {
+          statusElement.textContent = `결석 처리됩니다 (지각 마감 시간 ${attendanceSettings.lateTime} 초과)`;
+          statusElement.className = "mt-2 text-lg font-medium text-red-600";
+        }
+      }
+
+      document.addEventListener("DOMContentLoaded", async () => {
+        await fetchAttendanceSettings();
+        setInterval(fetchAttendanceSettings, 60000);
+      });
 
       async function sendAttendance(encryptedData) {
         try {
           if (!encryptedData || typeof encryptedData !== "string") {
-            throw new Error("유효하지 않은 QR 코드 데이터입니다.");
+            throw new Error("QR 코드를 다시 스캔해주세요.");
           }
 
           if (!encryptedData.includes(":")) {
-            throw new Error("잘못된 QR 코드 형식입니다.");
+            throw new Error(
+              "잘못된 QR 코드입니다. 새로운 QR 코드를 생성해주세요."
+            );
           }
 
           const response = await axios.post("/api/attendance", {
@@ -294,11 +382,11 @@ const lateAttendanceEndTime = 9 * 60;
             "text-green-600"
           );
 
-          if (data.message.includes("결석 처리되었습니다")) {
+          if (data.message.includes("결석")) {
             scanResult.classList.add("text-red-600");
           } else if (data.message.includes("지각")) {
             scanResult.classList.add("text-yellow-600");
-          } else if (data.message.includes("이미 오늘 출석이 기록되었습니다")) {
+          } else if (data.message.includes("이미 오늘 출석이 처리되었습니다")) {
             scanResult.classList.add("text-blue-600");
           } else {
             scanResult.classList.add("text-green-600");
@@ -311,21 +399,29 @@ const lateAttendanceEndTime = 9 * 60;
             ? `[${data.attendance.studentId}] ${data.attendance.name || ""}`
             : "알 수 없는 학생";
 
-          logEntry.innerHTML = `
-            <span class="text-gray-500">${new Date().toLocaleTimeString()}</span>
-            <span class="font-medium ml-2">${studentInfo}</span>
-            <span class="ml-2">${data.message}</span>
-          `;
+          const timestamp = new Date().toLocaleTimeString("ko-KR", {
+            hour: "2-digit",
+            minute: "2-digit",
+            second: "2-digit",
+          });
 
-          logEntry.classList.add(
-            data.message.includes("결석 처리되었습니다")
-              ? "text-red-600"
-              : data.message.includes("지각")
-              ? "text-yellow-600"
-              : data.message.includes("이미 오늘 출석이 기록되었습니다")
-              ? "text-blue-600"
-              : "text-green-600"
-          );
+          logEntry.innerHTML = `
+            <div class="flex items-center justify-between">
+              <div>
+                <span class="text-gray-500">${timestamp}</span>
+                <span class="font-medium ml-2">${studentInfo}</span>
+              </div>
+              <span class="ml-2 ${
+                data.message.includes("결석")
+                  ? "text-red-600"
+                  : data.message.includes("지각")
+                  ? "text-yellow-600"
+                  : data.message.includes("이미 오늘 출석이 처리되었습니다")
+                  ? "text-blue-600"
+                  : "text-green-600"
+              }">${data.message}</span>
+            </div>
+          `;
 
           attendanceLog.prepend(logEntry);
 
@@ -334,7 +430,23 @@ const lateAttendanceEndTime = 9 * 60;
           }
         } catch (error) {
           console.error("출석 처리 오류:", error);
-          scanResult.innerText = `오류: ${error.message}`;
+
+          let errorMessage = "";
+          if (error.response) {
+            // 서버에서 응답이 왔지만 오류인 경우
+            errorMessage =
+              error.response.data.message ||
+              "출석 처리 중 오류가 발생했습니다.";
+          } else if (error.request) {
+            // 요청은 보냈지만 응답이 없는 경우
+            errorMessage =
+              "서버와 통신할 수 없습니다. 인터넷 연결을 확인해주세요.";
+          } else {
+            // 요청 자체를 보내지 못한 경우
+            errorMessage = error.message || "알 수 없는 오류가 발생했습니다.";
+          }
+
+          scanResult.innerText = errorMessage;
           scanResult.classList.remove(
             "text-green-600",
             "text-blue-600",
@@ -344,15 +456,21 @@ const lateAttendanceEndTime = 9 * 60;
 
           const logEntry = document.createElement("div");
           logEntry.classList.add("py-1", "border-b", "border-gray-200");
+          const timestamp = new Date().toLocaleTimeString("ko-KR", {
+            hour: "2-digit",
+            minute: "2-digit",
+            second: "2-digit",
+          });
           logEntry.innerHTML = `
-            <span class="text-gray-500">${new Date().toLocaleTimeString()}</span>
-            <span class="text-red-600 ml-2">오류: ${error.message}</span>
+            <div class="flex items-center justify-between">
+              <span class="text-gray-500">${timestamp}</span>
+              <span class="text-red-600 ml-2">${errorMessage}</span>
+            </div>
           `;
           attendanceLog.prepend(logEntry);
         }
       }
 
-      // 초기 상태 설정
       stopButton.disabled = true;
     </script>
   </body>

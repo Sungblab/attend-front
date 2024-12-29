@@ -4,22 +4,14 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>디지털 출결관리</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-      tailwind.config = {
-        theme: {
-          extend: {
-            colors: {
-              primary: "#4F46E5",
-              secondary: "#3730A3",
-            },
-            fontFamily: {
-              sans: ["Inter", "sans-serif"],
-            },
-          },
-        },
-      };
-    </script>
+    <link href="css/output.css" rel="stylesheet" />
+
+    <link
+      rel="stylesheet"
+      as="style"
+      crossorigin
+      href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css"
+    />
     <link
       href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
       rel="stylesheet"
@@ -28,48 +20,40 @@
       href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css"
       rel="stylesheet"
     />
-    <!-- 아이콘 경로 수정 또는 파일 추가 필요 -->
-    <link
-      rel="apple-touch-icon"
-      sizes="180x180"
-      href="/favicon/apple-touch-icon.png"
-    />
-    <link
-      rel="icon"
-      type="image/png"
-      sizes="32x32"
-      href="/favicon/favicon-32x32.png"
-    />
-    <link
-      rel="icon"
-      type="image/png"
-      sizes="16x16"
-      href="/favicon/favicon-16x16.png"
-    />
-    <!-- 올바른 아이콘 경로로 수정 -->
-    <link
-      rel="icon"
-      type="image/png"
-      sizes="192x192"
-      href="/favicon/android-chrome-192x192.png"
-    />
-    <link rel="manifest" href="/manifest.json" />
-    <meta name="theme-color" content="#4F46E5" />
-    <!-- 메타 태그 업데이트 -->
-    <meta name="mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="black" />
-    <meta name="apple-mobile-web-app-title" content="디지털 출결관리" />
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <script src="js/axios-config.js"></script>
+    <style>
+      @media (max-width: 640px) {
+        .container {
+          padding-left: 1rem;
+          padding-right: 1rem;
+        }
+      }
+
+      @media (min-width: 641px) and (max-width: 1024px) {
+        .container {
+          padding-left: 2rem;
+          padding-right: 2rem;
+        }
+      }
+
+      .hover-scale {
+        transition: transform 0.2s ease-in-out;
+      }
+
+      .hover-scale:hover {
+        transform: scale(1.02);
+      }
+    </style>
   </head>
   <body class="bg-white text-gray-900 font-sans flex flex-col min-h-screen">
     <header>
       <nav
-        class="container mx-auto px-4 sm:px-6 lg:px-8 py-2 sm:py-4 flex justify-between items-center"
+        class="container mx-auto px-4 sm:px-6 lg:px-8 py-3 sm:py-5 flex justify-between items-center shadow-sm bg-white/80 backdrop-blur-md fixed top-0 left-0 right-0 z-50"
       >
         <a
           href="/hub.html"
-          class="text-xl sm:text-2xl font-bold text-primary flex items-center"
+          class="text-xl sm:text-2xl font-bold text-primary-500 flex items-center hover-scale"
         >
           <i class="ri-calendar-check-fill mr-2"></i>
           디지털 출결관리
@@ -78,95 +62,99 @@
     </header>
 
     <main
-      class="flex-grow flex items-center justify-center px-4 sm:px-6 lg:px-8 py-4 sm:py-8"
+      class="flex-grow flex items-center justify-center px-4 sm:px-6 lg:px-8 py-4 sm:py-8 mt-16 sm:mt-20"
     >
-      <div class="w-full max-w-md my-4 sm:my-8">
+      <div
+        class="w-full max-w-md my-4 sm:my-8 bg-white/80 backdrop-blur-md p-6 sm:p-8 rounded-2xl shadow-lg"
+      >
         <div>
           <h2
-            class="text-2xl sm:text-3xl font-bold mb-4 sm:mb-6 text-center text-gray-800"
+            class="text-2xl sm:text-3xl font-bold mb-6 sm:mb-8 text-center text-gray-800"
           >
             로그인
           </h2>
           <div id="message-area" class="mb-6 text-center hidden"></div>
           <form id="loginForm" class="space-y-6">
-            <div>
-              <label
-                for="student-id"
-                class="block text-sm font-medium text-gray-700 mb-2"
-                >학번</label
-              >
-              <div class="relative">
-                <i
-                  class="ri-user-line absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
-                ></i>
+            <div class="space-y-4">
+              <div>
+                <label
+                  for="student-id"
+                  class="block text-sm font-medium text-gray-700 mb-2"
+                  >학번</label
+                >
+                <div class="relative">
+                  <i
+                    class="ri-user-line absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+                  ></i>
+                  <input
+                    type="text"
+                    id="student-id"
+                    name="student-id"
+                    class="w-full pl-10 pr-4 py-3 text-base rounded-xl border border-gray-300 focus:ring-2 focus:ring-primary-500 focus:border-transparent transition duration-200 hover:border-primary-500"
+                    required
+                  />
+                </div>
+              </div>
+              <div>
+                <label
+                  for="password"
+                  class="block text-sm font-medium text-gray-700 mb-2"
+                  >비밀번호</label
+                >
+                <div class="relative">
+                  <i
+                    class="ri-lock-line absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+                  ></i>
+                  <input
+                    type="password"
+                    id="password"
+                    name="password"
+                    aria-label="비밀번호 입력"
+                    aria-required="true"
+                    aria-describedby="password-requirements"
+                    class="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-primary-500 focus:border-transparent transition duration-200"
+                    required
+                  />
+                </div>
+                <div id="password-requirements" class="sr-only">
+                  비밀번호는 8자 이상이며, 대문자, 소문자, 숫자, 특수문자를
+                  포함해야 합니다.
+                </div>
+              </div>
+              <div class="flex items-center">
                 <input
-                  type="text"
-                  id="student-id"
-                  name="student-id"
-                  class="w-full pl-10 pr-4 py-2 sm:py-3 text-sm sm:text-base rounded-lg border border-gray-300 focus:ring-2 focus:ring-primary focus:border-transparent transition duration-200"
-                  required
+                  type="checkbox"
+                  id="keep-logged-in"
+                  name="keep-logged-in"
+                  class="h-4 w-4 text-primary-500 border-gray-300 rounded focus:ring-primary-500"
                 />
+                <label
+                  for="keep-logged-in"
+                  class="ml-2 block text-sm text-gray-700"
+                >
+                  로그인 상태 유지
+                </label>
               </div>
-            </div>
-            <div>
-              <label
-                for="password"
-                class="block text-sm font-medium text-gray-700 mb-2"
-                >비밀번호</label
-              >
-              <div class="relative">
-                <i
-                  class="ri-lock-line absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
-                ></i>
-                <input
-                  type="password"
-                  id="password"
-                  name="password"
-                  aria-label="비밀번호 입력"
-                  aria-required="true"
-                  aria-describedby="password-requirements"
-                  class="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-primary focus:border-transparent transition duration-200"
-                  required
-                />
-              </div>
-              <div id="password-requirements" class="sr-only">
-                비밀번호는 8자 이상이며, 대문자, 소문자, 숫자, 특수문자를
-                포함해야 합니다.
-              </div>
-            </div>
-            <div class="flex items-center">
-              <input
-                type="checkbox"
-                id="keep-logged-in"
-                name="keep-logged-in"
-                class="h-4 w-4 text-primary border-gray-300 rounded focus:ring-primary"
-              />
-              <label
-                for="keep-logged-in"
-                class="ml-2 block text-sm text-gray-700"
-              >
-                로그인 상태 유지
-              </label>
             </div>
             <button
               type="submit"
-              class="w-full bg-primary hover:bg-secondary text-white font-semibold py-2 sm:py-3 px-4 rounded-lg transition duration-300 transform hover:scale-105 flex items-center justify-center text-sm sm:text-base"
+              class="w-full bg-primary-500 hover:bg-primary-600 text-white font-semibold py-3 px-4 rounded-xl transition duration-300 hover-scale flex items-center justify-center text-base shadow-md"
             >
               <i class="ri-login-circle-line mr-2"></i>
               로그인
             </button>
           </form>
-          <div class="mt-6 flex justify-between items-center">
+          <div class="mt-8 flex justify-between items-center">
             <a
               href="find-password.html"
-              class="text-sm text-primary hover:text-secondary transition duration-200 flex items-center"
+              class="text-sm text-primary-500 hover:text-primary-600 transition duration-200 flex items-center hover-scale"
             >
               <i class="ri-key-line mr-1"></i>
               비밀번호 찾기
             </a>
             <a
               href="signup.html"
-              class="text-sm text-primary hover:text-secondary transition duration-200 flex items-center"
+              class="text-sm text-primary-500 hover:text-primary-600 transition duration-200 flex items-center hover-scale"
             >
               <i class="ri-user-add-line mr-1"></i>
               회원가입
@@ -176,11 +164,12 @@
       </div>
     </main>
 
-    <footer class="bg-white text-gray-600 py-2 sm:py-4 mt-auto">
+    <footer
+      class="bg-white/80 backdrop-blur-md text-gray-600 py-4 sm:py-6 mt-auto border-t border-gray-100"
+    >
       <div class="container mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex flex-col items-center text-center">
-          <h4 class="text-lg font-semibold mb-2">연락</h4>
-          <p class="mb-2">이메일: ksb19558@naver.com</p>
+          <p class="mb-2">이메일: sungblab@gmail.com</p>
           <a
             href="https://sungblab.vercel.app/blog"
             target="_blank"
@@ -195,35 +184,7 @@
       </div>
     </footer>
 
-    <!-- PWA 설치 배너 추가 -->
-    <div
-      id="pwa-install-banner"
-      class="hidden fixed bottom-0 left-0 right-0 bg-gray-800 text-white p-4 flex justify-between items-center"
-    >
-      <span>웹앱를 설치하시겠습니까?</span>
-      <button id="pwa-install-button" class="bg-primary px-4 py-2 rounded">
-        앱 설치하기
-      </button>
-    </div>
-
     <script>
-      // 서비스 워커 등록
-      if ("serviceWorker" in navigator) {
-        window.addEventListener("load", function () {
-          navigator.serviceWorker.register("/service-worker.js").then(
-            function (registration) {
-              console.log(
-                "ServiceWorker registration successful with scope: ",
-                registration.scope
-              );
-            },
-            function (err) {
-              console.log("ServiceWorker registration failed: ", err);
-            }
-          );
-        });
-      }
-
       // 메시지 표시 함수
       function showMessage(message, isError = false) {
         const messageArea = document.getElementById("message-area");
@@ -262,165 +223,74 @@
       window.addEventListener("load", checkLoginStatus);
 
       // 로그인 폼 제출 이벤트 리스너 수정
-      document.getElementById("loginForm").addEventListener("submit", async function (e) {
-        e.preventDefault();
-
-        const studentId = document.getElementById("student-id").value;
-        const password = document.getElementById("password").value;
-        const keepLoggedIn = document.getElementById("keep-logged-in").checked;
-
-        try {
-          const response = await axios.post("/api/login", {
-            studentId,
-            password,
-            keepLoggedIn,
-          });
-
-          if (response.data.success) {
-            // 토큰 저장
-            localStorage.setItem("token", response.data.accessToken);
-            localStorage.setItem("refreshToken", response.data.refreshToken);
-            
-            // 사용자 정보 저장
-            const userInfo = {
-              id: response.data.user.id,
-              studentId: response.data.user.studentId,
-              name: response.data.user.name,
-              isAdmin: response.data.user.isAdmin,
-              isReader: response.data.user.isReader
-            };
-            localStorage.setItem("userInfo", JSON.stringify(userInfo));
-            localStorage.setItem("keepLoggedIn", keepLoggedIn);
-
-            // 성공 메시지 표시
-            showMessage("로그인 성공!", false);
-
-            // 리다이렉트
-            setTimeout(() => {
-              window.location.href = response.data.redirectUrl;
-            }, 500);
-          }
-        } catch (error) {
-          console.error("Login error:", error);
-          let errorMessage = "서버 오류가 발생했습니다. 나중에 다시 시도해주세요.";
-
-          if (error.response) {
-            switch (error.response.status) {
-              case 429:
-                errorMessage = "너무 많은 로그인 시도가 있었습니다. 잠시 후 다시 시도해주세요.";
-                break;
-              case 401:
-                errorMessage = "아이디 또는 비밀번호가 올바르지 않습니다.";
-                break;
-              case 403:
-                errorMessage = "계정이 잠겼습니다. 관리자에게 문의하세요.";
-                break;
-              case 400:
-                errorMessage = error.response.data.message || "입력 정보를 확인해주세요.";
-                break;
-            }
-          }
-
-          showMessage(errorMessage, true);
-        }
-      });
-
-      // PWA 설치 관련 변수
-      let deferredPrompt;
-      const pwaInstallBanner = document.getElementById("pwa-install-banner");
-      const pwaInstallButton = document.getElementById("pwa-install-button");
-
-      // 요소 존재 여부 확인
-      if (pwaInstallButton) {
-        // PWA 설치 프롬프트 이벤트 처리
-        window.addEventListener("beforeinstallprompt", (e) => {
+      document
+        .getElementById("loginForm")
+        .addEventListener("submit", async function (e) {
           e.preventDefault();
-          deferredPrompt = e;
-          showInstallPrompt();
-        });
 
-        // PWA 설치 버튼 클릭 이벤트
-        pwaInstallButton.addEventListener("click", async () => {
-          if (deferredPrompt) {
-            deferredPrompt.prompt();
-            const { outcome } = await deferredPrompt.userChoice;
-            console.log(`사용자 선택: ${outcome}`);
-            deferredPrompt = null;
-            pwaInstallBanner.classList.add("hidden");
-          } else {
-            showBrowserSpecificInstallInstructions();
+          const studentId = document.getElementById("student-id").value;
+          const password = document.getElementById("password").value;
+          const keepLoggedIn =
+            document.getElementById("keep-logged-in").checked;
+
+          try {
+            const response = await axios.post("/api/login", {
+              studentId,
+              password,
+              keepLoggedIn,
+            });
+
+            if (response.data.success) {
+              // 토큰 저장
+              localStorage.setItem("token", response.data.accessToken);
+              localStorage.setItem("refreshToken", response.data.refreshToken);
+
+              // 사용자 정보 저장
+              const userInfo = {
+                id: response.data.user.id,
+                studentId: response.data.user.studentId,
+                name: response.data.user.name,
+                isAdmin: response.data.user.isAdmin,
+                isReader: response.data.user.isReader,
+              };
+              localStorage.setItem("userInfo", JSON.stringify(userInfo));
+              localStorage.setItem("keepLoggedIn", keepLoggedIn);
+
+              // 성공 메시지 표시
+              showMessage("로그인 성공!", false);
+
+              // 리다이렉트
+              setTimeout(() => {
+                window.location.href = response.data.redirectUrl;
+              }, 500);
+            }
+          } catch (error) {
+            console.error("Login error:", error);
+            let errorMessage =
+              "서버 오류가 발생했습니다. 나중에 다시 시도해주세요.";
+
+            if (error.response) {
+              switch (error.response.status) {
+                case 429:
+                  errorMessage =
+                    "너무 많은 로그인 시도가 있었습니다. 잠시 후 다시 시도해주세요.";
+                  break;
+                case 401:
+                  errorMessage = "아이디 또는 비밀번호가 올바르지 않습니다.";
+                  break;
+                case 403:
+                  errorMessage = "계정이 잠겼습니다. 관리자에게 문의하세요.";
+                  break;
+                case 400:
+                  errorMessage =
+                    error.response.data.message || "입력 정보를 확인해주세요.";
+                  break;
+              }
+            }
+
+            showMessage(errorMessage, true);
           }
         });
-      }
-
-      // 브라우저별 설치 안내 함수
-      function showBrowserSpecificInstallInstructions() {
-        if (/SamsungBrowser/i.test(navigator.userAgent)) {
-          alert(
-            "브라우저 메뉴에서 현재 페이지 추가에 들어가서 '홈 화면에 추가' 옵션을 선택하세요."
-          );
-        } else if (
-          /iPad|iPhone|iPod/.test(navigator.userAgent) &&
-          !window.MSStream
-        ) {
-          alert(
-            "Safari 브라우저의 공유 버튼을 누른 후 '홈 화면에 추가'를 선택하세요."
-          );
-        } else {
-          alert(
-            "크롬 브라우저 설정에서 우측 상단 점 3개 메뉴를 클릭한 후 '페이지를 앱으로 설치'를 눌러주세요."
-          );
-        }
-      }
-
-      // 설치 프롬프트 표시 함수
-      function showInstallPrompt() {
-        if (pwaInstallBanner) {
-          pwaInstallBanner.classList.remove("hidden");
-          if (/SamsungBrowser/i.test(navigator.userAgent)) {
-            pwaInstallButton.textContent = "삼성 브라우저 설치 방법";
-          } else if (
-            /iPad|iPhone|iPod/.test(navigator.userAgent) &&
-            !window.MSStream
-          ) {
-            pwaInstallButton.textContent = "iOS 설치 방법";
-          } else {
-            pwaInstallButton.textContent = "앱 설치하기";
-          }
-        }
-      }
-
-      // 페이지 로드 시 설치 상태 확인
-      window.addEventListener("load", () => {
-        if (
-          !navigator.standalone &&
-          !window.matchMedia("(display-mode: standalone)").matches
-        ) {
-          showInstallPrompt();
-        }
-      });
-
-      // 앱 설치 완료 이벤트
-      window.addEventListener("appinstalled", (evt) => {
-        console.log("앱이 설치되었습니다.");
-        if (pwaInstallBanner) {
-          pwaInstallBanner.classList.add("hidden");
-        }
-      });
-
-      // 설치 가능 여부 확인 및 디버깅 (선택적)
-      if ("getInstalledRelatedApps" in navigator) {
-        navigator.getInstalledRelatedApps().then((relatedApps) => {
-          console.log("설치된 관련 앱:", relatedApps);
-        });
-      }
-
-      // PWA 상태 디버깅 (선택적)
-      if ("serviceWorker" in navigator) {
-        navigator.serviceWorker.getRegistrations().then((registrations) => {
-          console.log("등록된 서비스 워커:", registrations);
-        });
-      }
 
       // 비밀번호 정책 추가
       function validatePassword(password) {
