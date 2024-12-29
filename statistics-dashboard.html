@@ -269,7 +269,7 @@
             전체 통계
           </h2>
           <div
-            class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6"
+            class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-6"
           >
             <!-- 전체 학생 카드 -->
             <div
@@ -361,6 +361,25 @@
               </div>
               <h3 class="text-sm font-medium text-gray-600 mb-1">인정출결률</h3>
               <p class="text-2xl font-bold text-gray-900" id="excusedRate">-</p>
+            </div>
+
+            <!-- 전체 출석일수 카드 -->
+            <div
+              class="bg-gradient-to-br from-gray-50 to-slate-50 rounded-xl p-4 border border-gray-100"
+            >
+              <div class="flex items-center justify-between mb-3">
+                <span class="text-gray-600 bg-gray-100 p-2 rounded-lg">
+                  <i class="ri-calendar-line text-xl"></i>
+                </span>
+                <span
+                  class="text-xs font-medium text-gray-600 bg-gray-100 px-2 py-1 rounded-full"
+                  >기간</span
+                >
+              </div>
+              <h3 class="text-sm font-medium text-gray-600 mb-1">
+                전체 출석일수
+              </h3>
+              <p class="text-2xl font-bold text-gray-900" id="totalDays">-</p>
             </div>
           </div>
         </section>
@@ -1265,6 +1284,14 @@
             (stats.totalPresent + stats.totalLate + stats.totalAbsent)) *
           100
         ).toFixed(1)}%`;
+
+        // 전체 출석일수 계산 수정
+        const totalDays =
+          stats.totalPresent +
+          stats.totalLate +
+          stats.totalAbsent +
+          stats.totalExcused;
+        document.getElementById("totalDays").textContent = `${totalDays}일`;
       }
 
       function updateStudentStats(stats) {
@@ -1286,6 +1313,23 @@
             if (!student) return "";
 
             const { summary } = student;
+
+            // 오늘의 출석 상태 표시 부분 수정
+            const todayStatusHtml = student.todayStatus ? `
+              <span class="${getStatusBadgeClass(student.todayStatus.status)}">
+                ${getStatusText(student.todayStatus.status)}
+                ${student.todayStatus.lateMinutes ? ` (${student.todayStatus.lateMinutes}분)` : ''}
+                ${student.todayStatus.timestamp ? `
+                  <br><span class="text-xs text-gray-500">
+                    ${moment(student.todayStatus.timestamp).format('HH:mm:ss')}
+                  </span>
+                ` : ''}
+                ${student.todayStatus.isExcused ? `
+                  <br><span class="text-xs text-blue-600">인정출결</span>
+                  ${student.todayStatus.reason ? `<br><span class="text-xs text-gray-500">${student.todayStatus.reason}</span>` : ''}
+                ` : ''}
+              </span>` : '<span class="text-gray-400 text-sm">미출석</span>';
+
             return `
               <tr class="hover:bg-gray-50 transition-colors">
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-medium">
@@ -1335,29 +1379,7 @@
                   }
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap">
-                  ${
-                    student.todayStatus
-                      ? `<span class="${getStatusBadgeClass(
-                          student.todayStatus.status
-                        )}">
-                          ${getStatusText(student.todayStatus.status)}
-                          ${
-                            student.todayStatus.lateMinutes
-                              ? `(${student.todayStatus.lateMinutes}분)`
-                              : ""
-                          }
-                          ${
-                            student.todayStatus.timestamp
-                              ? `<br><span class="text-xs text-gray-500">
-                                ${moment(student.todayStatus.timestamp).format(
-                                  "HH:mm:ss"
-                                )}
-                              </span>`
-                              : ""
-                          }
-                        </span>`
-                      : '<span class="text-gray-400 text-sm">미출석</span>'
-                  }
+                  ${todayStatusHtml}
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap">
                   <button
@@ -1908,14 +1930,7 @@
       function updateStudentDetailModal(data) {
         if (!data) return;
 
-        const {
-          student,
-          totalStats,
-          monthlyStats,
-          improvements,
-          attendances,
-          todayStatus,
-        } = data;
+        const { student, totalStats, monthlyStats, improvements, attendances, todayStatus } = data;
 
         try {
           // 기본 정보 업데이트
@@ -1938,28 +1953,34 @@
             modalTodayStatus.innerHTML = todayStatus
               ? `
                 <div class="bg-gray-50 p-4 rounded-lg mb-4">
-                  <h4 class="text-lg font-semibold mb-2">오늘의 출석 상태</h4>
+                  <h4 class="text-lg font-semibold mb-2">늘의 출석 상태</h4>
                   <div class="flex items-center space-x-4">
                     <span class="${getStatusBadgeClass(todayStatus.status)}">
                       ${getStatusText(todayStatus.status)}
-                      ${
-                        todayStatus.lateMinutes
-                          ? `(${todayStatus.lateMinutes}분)`
-                          : ""
-                      }
+                      ${todayStatus.lateMinutes ? ` (${todayStatus.lateMinutes}분)` : ''}
                     </span>
-                    ${
-                      todayStatus.isExcused
-                        ? `<span class="text-blue-600">인정출결</span>
-                         <span class="text-sm text-gray-500">${
-                           todayStatus.reason || ""
-                         }</span>`
-                        : ""
-                    }
+                    ${todayStatus.timestamp ? `
+                      <span class="text-sm text-gray-500">
+                        ${moment(todayStatus.timestamp).format('HH:mm:ss')}
+                      </span>
+                    ` : ''}
+                    ${todayStatus.isExcused ? `
+                      <span class="px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">인정출결</span>
+                      ${todayStatus.reason ? `
+                        <span class="text-sm text-gray-500">(${todayStatus.reason})</span>
+                      ` : ''}
+                    ` : ''}
                   </div>
                 </div>
-              `
-              : '<div class="text-gray-500">오늘의 출석 정보가 없습니다.</div>';
+              `;
+            } else {
+              modalTodayStatus.innerHTML = `
+                <div class="bg-gray-50 p-4 rounded-lg">
+                  <h4 class="text-lg font-semibold mb-2">오늘의 출석 상태</h4>
+                  <div class="text-sm text-gray-500">아직 출석하지 않았습니다.</div>
+                </div>
+              `;
+            }
           }
 
           // 전체 통계 요약 업데이트
@@ -2020,23 +2041,6 @@
                     </div>
                   </div>
                 </div>
-
-                <!-- 인정출결 카드 -->
-                <div class="flex-1 min-w-[240px] bg-gradient-to-br from-blue-50 to-blue-100 p-6 rounded-xl shadow-sm">
-                  <div class="flex flex-col">
-                    <h5 class="text-sm font-semibold text-blue-800 mb-1">인정출결</h5>
-                    <p class="text-3xl font-bold text-blue-700 mb-2">${
-                      totalStats.excused
-                    }회</p>
-                    <div class="flex items-center text-blue-600">
-                      <i class="ri-calendar-check-line mr-1"></i>
-                      <span class="text-sm">${(
-                        (totalStats.excused / totalStats.total) *
-                        100
-                      ).toFixed(1)}%</span>
-                    </div>
-                  </div>
-                </div>
               </div>
 
               <!-- 출석 진행도 -->
@@ -2067,16 +2071,11 @@
                       (totalStats.absent / totalStats.total) *
                       100
                     ).toFixed(1)}%" class="bg-red-500"></div>
-                    <div style="width:${(
-                      (totalStats.excused / totalStats.total) *
-                      100
-                    ).toFixed(1)}%" class="bg-blue-500"></div>
                   </div>
                   <div class="flex justify-between text-xs text-gray-600">
                     <span class="flex items-center"><span class="w-2 h-2 bg-green-500 rounded-full mr-1"></span> 출석</span>
                     <span class="flex items-center"><span class="w-2 h-2 bg-yellow-500 rounded-full mr-1"></span> 지각</span>
                     <span class="flex items-center"><span class="w-2 h-2 bg-red-500 rounded-full mr-1"></span> 결석</span>
-                    <span class="flex items-center"><span class="w-2 h-2 bg-blue-500 rounded-full mr-1"></span> 인정출결</span>
                   </div>
                 </div>
               </div>
@@ -2320,16 +2319,14 @@
 
       // 상태 텍스트 변환 함수
       function getStatusText(status) {
-        switch (status) {
-          case "present":
-            return "출석";
-          case "late":
-            return "지각";
-          case "absent":
-            return "결석";
-          default:
-            return "미출석";
-        }
+        const statusMap = {
+          'present': '출석',
+          'late': '지각',
+          'absent': '결석',
+          'excused': '인정출결',
+          'not_checked': '미출석'
+        };
+        return statusMap[status] || '미출석';
       }
 
       // 모달 닫기 함수 개선
@@ -2364,16 +2361,14 @@
       // 상태별 배지 스타일 클래스
       function getStatusBadgeClass(status) {
         const baseClasses = "px-2 py-1 rounded-full text-xs font-medium";
-        switch (status) {
-          case "present":
-            return `${baseClasses} bg-green-100 text-green-800`;
-          case "late":
-            return `${baseClasses} bg-yellow-100 text-yellow-800`;
-          case "absent":
-            return `${baseClasses} bg-red-100 text-red-800`;
-          default:
-            return `${baseClasses} bg-gray-100 text-gray-800`;
-        }
+        const statusClasses = {
+          'present': `${baseClasses} bg-green-100 text-green-800`,
+          'late': `${baseClasses} bg-yellow-100 text-yellow-800`,
+          'absent': `${baseClasses} bg-red-100 text-red-800`,
+          'excused': `${baseClasses} bg-blue-100 text-blue-800`,
+          'not_checked': `${baseClasses} bg-gray-100 text-gray-800`
+        };
+        return statusClasses[status] || statusClasses.not_checked;
       }
 
       // 월별 통계 차트 업데이트 최적화

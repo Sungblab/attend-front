@@ -100,41 +100,16 @@
             이 QR 코드는 30초마다 갱신됩니다.
           </p>
 
-          <div class="status-card p-4 sm:p-6 mb-4">
-            <h3 class="text-lg sm:text-xl font-bold mb-4 text-gray-800">
-              오늘의 출석 상태
-            </h3>
-            <div class="space-y-3">
+          <div class="mt-6 bg-white rounded-lg shadow p-6">
+            <h3 class="text-xl font-bold mb-4">오늘의 출석 상태</h3>
+            <div class="space-y-4">
               <div class="flex items-center justify-between">
-                <span class="text-gray-600 text-sm">현재 시간</span>
-                <span
-                  id="currentTime"
-                  class="font-semibold text-base sm:text-lg"
-                ></span>
+                <span class="text-gray-600">현재 시간</span>
+                <span id="currentTime" class="font-semibold"></span>
               </div>
               <div class="flex items-center justify-between">
-                <span class="text-gray-600 text-sm">출석 시작</span>
-                <span
-                  id="startTime"
-                  class="font-semibold text-base sm:text-lg text-gray-900"
-                  >-</span
-                >
-              </div>
-              <div class="flex items-center justify-between">
-                <span class="text-gray-600 text-sm">정상 출석 마감</span>
-                <span
-                  id="normalTime"
-                  class="font-semibold text-base sm:text-lg text-blue-600"
-                  >-</span
-                >
-              </div>
-              <div class="flex items-center justify-between">
-                <span class="text-gray-600 text-sm">지각 마감</span>
-                <span
-                  id="lateTime"
-                  class="font-semibold text-base sm:text-lg text-red-600"
-                  >-</span
-                >
+                <span class="text-gray-600">출석 마감</span>
+                <span class="font-semibold text-red-600">09:00</span>
               </div>
               <div id="todayStatus" class="mt-4">
                 <!-- 동적으로 추가될 내용 -->
@@ -478,6 +453,22 @@
           }
         });
 
+      // 페이지 로드 시 즉시 증 체크
+      document.addEventListener("DOMContentLoaded", () => {
+        if (!checkAuth()) return;
+        fetchStudentInfo();
+      });
+
+      function showToast(message, type = "info") {
+        const toast = document.createElement("div");
+        toast.className = `fixed bottom-4 right-4 p-4 rounded-lg ${
+          type === "error" ? "bg-red-500" : "bg-green-500"
+        } text-white`;
+        toast.textContent = message;
+        document.body.appendChild(toast);
+        setTimeout(() => toast.remove(), 3000);
+      }
+
       // 오늘의 출석 상태 조회 함수
       async function checkTodayAttendance() {
         try {
@@ -647,7 +638,21 @@
         );
       }
 
-      // 페재 시간 업데이트 함수
+      // 페이지 로드 시 출석 상태 확인
+      document.addEventListener("DOMContentLoaded", async () => {
+        if (!checkAuth()) return;
+        await fetchStudentInfo();
+        await checkTodayAttendance();
+      });
+
+      // ESC 키로 모달 닫기
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") {
+          closeModal();
+        }
+      });
+
+      // 현재 시간 업데이트 함수
       function updateCurrentTime() {
         const currentTime = document.getElementById("currentTime");
         currentTime.textContent = moment().tz("Asia/Seoul").format("HH:mm:ss");

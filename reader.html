@@ -306,42 +306,36 @@
         const timeElement = document.getElementById("current-time");
         const statusElement = document.getElementById("attendance-status");
 
+        // 시간 표시 형식 유지
         timeElement.textContent = now.toLocaleTimeString("ko-KR", {
           hour: "2-digit",
           minute: "2-digit",
           second: "2-digit",
         });
 
+        // 시간 계산 로직 수정
         const currentHour = now.getHours();
         const currentMinute = now.getMinutes();
         const currentTime = currentHour * 60 + currentMinute;
 
-        const [startHour, startMinute] = attendanceSettings.startTime
-          .split(":")
-          .map(Number);
-        const [normalHour, normalMinute] = attendanceSettings.normalTime
-          .split(":")
-          .map(Number);
-        const [lateHour, lateMinute] = attendanceSettings.lateTime
-          .split(":")
-          .map(Number);
+        // 출석 시간 기준 설정
+        const attendanceStartTime = 7 * 60 + 30; // 07:30
+        const normalAttendanceEndTime = 8 * 60 + 3; // 08:03
+        const lateAttendanceEndTime = 9 * 60;
 
-        const attendanceStartTime = startHour * 60 + startMinute;
-        const normalAttendanceEndTime = normalHour * 60 + normalMinute;
-        const lateAttendanceEndTime = lateHour * 60 + lateMinute;
-
+        // 상태 업데이트
         if (currentTime < attendanceStartTime) {
-          statusElement.textContent = `출석 시작 시간(${attendanceSettings.startTime}) 전입니다`;
+          statusElement.textContent = "출석 시간 전입니다";
           statusElement.className = "mt-2 text-lg font-medium text-gray-600";
         } else if (currentTime <= normalAttendanceEndTime) {
-          statusElement.textContent = `정상 출석 시간입니다 (${attendanceSettings.normalTime}까지)`;
+          statusElement.textContent = "정상 출석 시간입니다";
           statusElement.className = "mt-2 text-lg font-medium text-green-600";
         } else if (currentTime <= lateAttendanceEndTime) {
           const lateMinutes = currentTime - normalAttendanceEndTime;
-          statusElement.textContent = `지각 처리됩니다 (${lateMinutes}분 지각, ${attendanceSettings.lateTime}까지)`;
+          statusElement.textContent = `지각 처리됩니다 (${lateMinutes}분 지각)`;
           statusElement.className = "mt-2 text-lg font-medium text-yellow-600";
         } else {
-          statusElement.textContent = `결석 처리됩니다 (지각 마감 시간 ${attendanceSettings.lateTime} 초과)`;
+          statusElement.textContent = "결석 처리됩니다";
           statusElement.className = "mt-2 text-lg font-medium text-red-600";
         }
       }
@@ -354,13 +348,11 @@
       async function sendAttendance(encryptedData) {
         try {
           if (!encryptedData || typeof encryptedData !== "string") {
-            throw new Error("QR 코드를 다시 스캔해주세요.");
+            throw new Error("유효하지 않은 QR 코드 데이터입니다.");
           }
 
           if (!encryptedData.includes(":")) {
-            throw new Error(
-              "잘못된 QR 코드입니다. 새로운 QR 코드를 생성해주세요."
-            );
+            throw new Error("잘못된 QR 코드 형식입니다.");
           }
 
           const response = await axios.post("/api/attendance", {
@@ -368,12 +360,9 @@
           });
 
           const data = response.data;
+          console.log("출석 처리 응답:", data);
 
-          if (!data.success) {
-            throw new Error(data.message || "출석 처리에 실패했습니다.");
-          }
-
-          console.log("출석 처리 성공:", data);
+          // 결과 메시지 표시
           scanResult.innerText = data.message;
           scanResult.classList.remove(
             "text-red-600",
@@ -382,16 +371,17 @@
             "text-green-600"
           );
 
-          if (data.message.includes("결석")) {
+          if (data.message.includes("결석 처리되었습니다")) {
             scanResult.classList.add("text-red-600");
-          } else if (data.message.includes("지각")) {
+          } else if (data.attendance.status === "late") {
             scanResult.classList.add("text-yellow-600");
-          } else if (data.message.includes("이미 오늘 출석이 처리되었습니다")) {
+          } else if (data.message.includes("이미 오늘 출석이 기록되었습니다")) {
             scanResult.classList.add("text-blue-600");
           } else {
             scanResult.classList.add("text-green-600");
           }
 
+          // 로그 항목 생성
           const logEntry = document.createElement("div");
           logEntry.classList.add("py-1", "border-b", "border-gray-200");
 
@@ -406,25 +396,24 @@
           });
 
           logEntry.innerHTML = `
-            <div class="flex items-center justify-between">
-              <div>
-                <span class="text-gray-500">${timestamp}</span>
-                <span class="font-medium ml-2">${studentInfo}</span>
-              </div>
-              <span class="ml-2 ${
-                data.message.includes("결석")
-                  ? "text-red-600"
-                  : data.message.includes("지각")
-                  ? "text-yellow-600"
-                  : data.message.includes("이미 오늘 출석이 처리되었습니다")
-                  ? "text-blue-600"
-                  : "text-green-600"
-              }">${data.message}</span>
-            </div>
+            <span class="text-gray-500">${new Date().toLocaleTimeString()}</span>
+            <span class="font-medium ml-2">${studentInfo}</span>
+            <span class="ml-2">${data.message}</span>
           `;
+
+          logEntry.classList.add(
+            data.message.includes("결석 처리되었습니다")
+              ? "text-red-600"
+              : data.message.includes("지각")
+              ? "text-yellow-600"
+              : data.message.includes("이미 오늘 출석이 기록되었습니다")
+              ? "text-blue-600"
+              : "text-green-600"
+          );
 
           attendanceLog.prepend(logEntry);
 
+          // 로그 항목 제한
           if (attendanceLog.children.length > 100) {
             attendanceLog.removeChild(attendanceLog.lastChild);
           }
@@ -456,16 +445,9 @@
 
           const logEntry = document.createElement("div");
           logEntry.classList.add("py-1", "border-b", "border-gray-200");
-          const timestamp = new Date().toLocaleTimeString("ko-KR", {
-            hour: "2-digit",
-            minute: "2-digit",
-            second: "2-digit",
-          });
           logEntry.innerHTML = `
-            <div class="flex items-center justify-between">
-              <span class="text-gray-500">${timestamp}</span>
-              <span class="text-red-600 ml-2">${errorMessage}</span>
-            </div>
+            <span class="text-gray-500">${new Date().toLocaleTimeString()}</span>
+            <span class="text-red-600 ml-2">오류: ${error.message}</span>
           `;
           attendanceLog.prepend(logEntry);
         }
