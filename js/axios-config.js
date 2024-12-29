@@ -1,5 +1,6 @@
 // axios 기본 설정
-axios.defaults.baseURL = "http://127.0.0.1:5000";
+axios.defaults.baseURL =
+  "https://port-0-attend-backend-m0tl39wtc3a73922.sel4.cloudtype.app";
 
 // 토큰 갱신 타이머 설정
 let tokenRefreshTimer;
