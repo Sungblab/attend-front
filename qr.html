@@ -532,7 +532,6 @@
           const response = await axios.get(
             `/api/attendance/student/${studentId}`
           );
-
           const data = response.data;
 
           if (!data.success) {
@@ -551,53 +550,62 @@
 
           // 출결 기록 테이블 업데이트
           const attendanceList = document.getElementById("attendanceList");
-          attendanceList.innerHTML = data.attendances
-            .sort((a, b) => moment(b.date).valueOf() - moment(a.date).valueOf())
-            .map(
-              (attendance) => `
-              <div class="p-4 bg-white">
-                <div class="flex flex-col space-y-2">
-                  <div class="flex justify-between items-center">
-                    <span class="text-gray-900 font-medium">
-                      ${moment(attendance.date).format("YYYY-MM-DD")}
-                    </span>
-                    <span class="text-gray-500 text-sm">
-                      ${moment(attendance.date).format("(ddd)")}
-                    </span>
-                  </div>
-                  
-                  <div class="flex flex-wrap gap-2 items-center">
-                    <span class="${getStatusBadgeClass(attendance.status)}">
-                      ${getStatusText(attendance.status)}
-                    </span>
-                    ${
-                      attendance.lateMinutes
-                        ? `<span class="text-yellow-600 text-sm">
-                            ${attendance.lateMinutes}분 지각
-                          </span>`
-                        : ""
-                    }
-                    ${
-                      attendance.isExcused
-                        ? `<span class="text-blue-600 text-sm bg-blue-50 px-2 py-1 rounded">
-                            인정출결
-                          </span>`
-                        : ""
-                    }
-                  </div>
-                  
-                  ${
-                    attendance.reason
-                      ? `<div class="text-sm text-gray-600 mt-1">
-                          ${attendance.reason}
-                        </div>`
-                      : ""
-                  }
-                </div>
-              </div>
-            `
-            )
-            .join("");
+          attendanceList.innerHTML = "";
+
+          // data.attendances가 객체인 경우 처리
+          if (data.attendances && typeof data.attendances === "object") {
+            Object.entries(data.attendances).forEach(
+              ([month, monthAttendances]) => {
+                if (Array.isArray(monthAttendances)) {
+                  monthAttendances.forEach((attendance) => {
+                    const attendanceDiv = document.createElement("div");
+                    attendanceDiv.className = "p-4 bg-white";
+                    attendanceDiv.innerHTML = `
+                    <div class="flex flex-col space-y-2">
+                      <div class="flex justify-between items-center">
+                        <span class="text-gray-900 font-medium">
+                          ${moment(attendance.date).format("YYYY-MM-DD")}
+                        </span>
+                        <span class="text-gray-500 text-sm">
+                          ${moment(attendance.date).format("(ddd)")}
+                        </span>
+                      </div>
+                      
+                      <div class="flex flex-wrap gap-2 items-center">
+                        <span class="${getStatusBadgeClass(attendance.status)}">
+                          ${getStatusText(attendance.status)}
+                        </span>
+                        ${
+                          attendance.lateMinutes
+                            ? `<span class="text-yellow-600 text-sm">
+                                ${attendance.lateMinutes}분 지각
+                              </span>`
+                            : ""
+                        }
+                        ${
+                          attendance.isExcused
+                            ? `<span class="text-blue-600 text-sm bg-blue-50 px-2 py-1 rounded">
+                                인정출결
+                              </span>`
+                            : ""
+                        }
+                      </div>
+                      
+                      ${
+                        attendance.reason
+                          ? `<div class="text-sm text-gray-600 mt-1">
+                              ${attendance.reason}
+                            </div>`
+                          : ""
+                      }
+                    </div>
+                  `;
+                    attendanceList.appendChild(attendanceDiv);
+                  });
+                }
+              }
+            );
+          }
 
           // 모달 표시
           document.getElementById("attendanceModal").classList.remove("hidden");
@@ -670,10 +678,9 @@
           const response = await axios.get("/api/settings/attendance");
           const { settings } = response.data;
 
-          document.getElementById("startTime").textContent = settings.startTime;
-          document.getElementById("normalTime").textContent =
-            settings.normalTime;
-          document.getElementById("lateTime").textContent = settings.lateTime;
+          // 출결 마감 시간만 표시
+          document.querySelector(".text-red-600").textContent =
+            settings.lateTime;
 
           return settings;
         } catch (error) {
