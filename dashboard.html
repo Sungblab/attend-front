@@ -918,12 +918,16 @@
             </div>
             ${user.deviceId ? `
               <div>
-                <p class="text-sm font-medium text-gray-500">디바이스 ID</p>
-                <p class="mt-1 font-mono text-sm">${user.deviceId}</p>
+                <p class="text-sm font-medium text-gray-500">디바이스 정보</p>
+                <div class="mt-1 space-y-1 text-sm">
+                  <p>모델: ${user.deviceInfo?.model || '알 수 없음'}</p>
+                  <p>플랫폼: ${user.deviceInfo?.platform || '알 수 없음'}</p>
+                  <p>버전: ${user.deviceInfo?.version || '알 수 없음'}</p>
+                </div>
               </div>
               <div>
                 <p class="text-sm font-medium text-gray-500">마지막 로그인</p>
-                <p class="mt-1">${new Date(user.lastLogin).toLocaleString()}</p>
+                <p class="mt-1">${user.deviceInfo?.lastLogin ? new Date(user.deviceInfo.lastLogin).toLocaleString() : '기록 없음'}</p>
               </div>
             ` : ''}
           `;
