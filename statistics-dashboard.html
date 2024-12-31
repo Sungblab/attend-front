@@ -803,7 +803,7 @@
           <h2 class="text-2xl font-bold mb-4">출결 시간 설정</h2>
           <div class="bg-gray-50 p-4 rounded-lg">
             <form id="attendanceSettingsForm" class="space-y-6">
-              <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
                 <div>
                   <label class="block text-sm font-medium text-gray-700 mb-1">
                     출석 시작 시간
@@ -846,6 +846,20 @@
                     이 시간 이후는 결석으로 처리됩니다.
                   </p>
                 </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">
+                    자동 결석 처리 시간
+                  </label>
+                  <input
+                    type="time"
+                    id="autoAbsentTime"
+                    class="w-full rounded-lg border-gray-300"
+                    required
+                  />
+                  <p class="mt-1 text-sm text-gray-500">
+                    이 시간에 미출석자는 자동으로 결석 처리됩니다.
+                  </p>
+                </div>
               </div>
               <div class="flex justify-end">
                 <button
@@ -864,6 +878,54 @@
             <h3 class="text-lg font-semibold mb-3">현재 설정 정보</h3>
             <div id="currentSettings" class="bg-gray-50 p-4 rounded-lg">
               <!-- 동적으로 추가될 내용 -->
+            </div>
+          </div>
+        </section>
+
+        <!-- 수동 지각/결석 처리 섹션 추가 -->
+        <section class="bg-white rounded-lg shadow mb-6 p-6">
+          <h2 class="text-2xl font-bold mb-4">수동 출결 처리</h2>
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <!-- 수동 지각 처리 -->
+            <div class="bg-gray-50 p-4 rounded-lg">
+              <h3 class="text-lg font-semibold mb-3">수동 지각 처리</h3>
+              <button
+                onclick="processManualLate()"
+                class="w-full bg-yellow-500 text-white px-4 py-2 rounded-lg hover:bg-yellow-600 transition-colors flex items-center justify-center gap-2"
+              >
+                <i class="ri-time-line"></i>
+                미출석자 지각 처리
+              </button>
+              <p class="mt-2 text-sm text-gray-600">
+                <i class="ri-information-line mr-1"></i>
+                현재 시간 기준으로 미출석자를 지각 처리합니다.
+              </p>
+            </div>
+
+            <!-- 수동 결석 처리 -->
+            <div class="bg-gray-50 p-4 rounded-lg">
+              <h3 class="text-lg font-semibold mb-3">수동 결석 처리</h3>
+              <button
+                onclick="processManualAbsent()"
+                class="w-full bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition-colors flex items-center justify-center gap-2"
+              >
+                <i class="ri-close-circle-line"></i>
+                미출석자 결석 처리
+              </button>
+              <p class="mt-2 text-sm text-gray-600">
+                <i class="ri-information-line mr-1"></i>
+                현재 시간 기준으로 미출석자를 결석 처리합니다.
+              </p>
+            </div>
+
+            <!-- 처리 결과 표시 영역 -->
+            <div class="lg:col-span-2">
+              <div
+                id="processResult"
+                class="hidden bg-white p-4 rounded-lg border border-gray-200"
+              >
+                <!-- 처리 결과가 여기에 표시됩니다 -->
+              </div>
             </div>
           </div>
         </section>
@@ -2912,6 +2974,8 @@
             document.getElementById("startTime").value = settings.startTime;
             document.getElementById("normalTime").value = settings.normalTime;
             document.getElementById("lateTime").value = settings.lateTime;
+            document.getElementById("autoAbsentTime").value =
+              settings.autoAbsentTime;
 
             // 현재 설정 정보 표시
             updateCurrentSettings(settings);
@@ -2941,6 +3005,10 @@
                   <i class="ri-time-line mr-2"></i>
                   지각 마감: ${settings.lateTime}
                 </li>
+                <li class="flex items-center text-red-600">
+                  <i class="ri-time-line mr-2"></i>
+                  자동 결석 처리: ${settings.autoAbsentTime}
+                </li>
               </ul>
             </div>
             <div>
@@ -2964,7 +3032,7 @@
         `;
       }
 
-      // 출결 설정 폼 제출 이벤트 리스너
+      // 출결 설정 폼 제출 이벤트 리스너 수정
       document
         .getElementById("attendanceSettingsForm")
         .addEventListener("submit", async (e) => {
@@ -2974,10 +3042,12 @@
             const startTime = document.getElementById("startTime").value;
             const normalTime = document.getElementById("normalTime").value;
             const lateTime = document.getElementById("lateTime").value;
+            const autoAbsentTime =
+              document.getElementById("autoAbsentTime").value;
 
             const response = await axios.put(
               "/api/settings/attendance",
-              { startTime, normalTime, lateTime },
+              { startTime, normalTime, lateTime, autoAbsentTime },
               {
                 headers: {
                   Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -3312,6 +3382,126 @@
             "error"
           );
         }
+      }
+
+      // 수동 지각 처리 함수
+      async function processManualLate() {
+        if (!confirm("미출석자를 지각 처리하시겠습니까?")) {
+          return;
+        }
+
+        try {
+          const response = await axios.post(
+            "/api/attendance/process-late",
+            {},
+            {
+              headers: {
+                Authorization: `Bearer ${localStorage.getItem("token")}`,
+              },
+            }
+          );
+
+          if (response.data.success) {
+            showProcessResult(response.data);
+            showToast("지각 처리가 완료되었습니다.", "success");
+          }
+        } catch (error) {
+          console.error("지각 처리 중 오류:", error);
+          showToast(
+            error.response?.data?.message ||
+              "지각 처리 중 오류가 발생했습니다.",
+            "error"
+          );
+        }
+      }
+
+      // 수동 결석 처리 함수
+      async function processManualAbsent() {
+        if (!confirm("미출석자를 결석 처리하시겠습니까?")) {
+          return;
+        }
+
+        try {
+          const response = await axios.post(
+            "/api/attendance/process-absent",
+            {},
+            {
+              headers: {
+                Authorization: `Bearer ${localStorage.getItem("token")}`,
+              },
+            }
+          );
+
+          if (response.data.success) {
+            showProcessResult(response.data);
+            showToast("결석 처리가 완료되었습니다.", "success");
+          }
+        } catch (error) {
+          console.error("결석 처리 중 오류:", error);
+          showToast(
+            error.response?.data?.message ||
+              "결석 처리 중 오류가 발생했습니다.",
+            "error"
+          );
+        }
+      }
+
+      // 처리 결과 표시 함수
+      function showProcessResult(data) {
+        const resultDiv = document.getElementById("processResult");
+        resultDiv.innerHTML = `
+          <div class="space-y-4">
+            <div class="flex justify-between items-center">
+              <h4 class="text-lg font-semibold">처리 결과</h4>
+              <span class="text-sm text-gray-500">${moment().format(
+                "YYYY-MM-DD HH:mm:ss"
+              )}</span>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div class="bg-gray-50 p-3 rounded-lg">
+                <p class="text-sm text-gray-600">처리된 학생 수</p>
+                <p class="text-2xl font-bold text-gray-900">${
+                  data.processedCount
+                }명</p>
+              </div>
+              <div class="bg-gray-50 p-3 rounded-lg">
+                <p class="text-sm text-gray-600">성공</p>
+                <p class="text-2xl font-bold text-green-600">${
+                  data.successCount
+                }명</p>
+              </div>
+              <div class="bg-gray-50 p-3 rounded-lg">
+                <p class="text-sm text-gray-600">실패</p>
+                <p class="text-2xl font-bold text-red-600">${
+                  data.failedCount
+                }명</p>
+              </div>
+            </div>
+            ${
+              data.details
+                ? `
+            <div class="mt-4">
+              <h5 class="font-medium mb-2">상세 내역</h5>
+              <div class="bg-gray-50 p-3 rounded-lg max-h-40 overflow-y-auto">
+                ${data.details
+                  .map(
+                    (detail) => `
+                  <div class="text-sm ${
+                    detail.success ? "text-green-600" : "text-red-600"
+                  } mb-1">
+                    ${detail.message}
+                  </div>
+                `
+                  )
+                  .join("")}
+              </div>
+            </div>
+            `
+                : ""
+            }
+          </div>
+        `;
+        resultDiv.classList.remove("hidden");
       }
     </script>
   </body>
