@@ -2971,11 +2971,14 @@
             const { settings } = response.data;
 
             // 폼 입력값 설정
-            document.getElementById("startTime").value = settings.startTime;
-            document.getElementById("normalTime").value = settings.normalTime;
-            document.getElementById("lateTime").value = settings.lateTime;
+            document.getElementById("startTime").value =
+              settings.startTime || "07:30";
+            document.getElementById("normalTime").value =
+              settings.normalTime || "08:03";
+            document.getElementById("lateTime").value =
+              settings.lateTime || "09:00";
             document.getElementById("autoAbsentTime").value =
-              settings.autoAbsentTime;
+              settings.autoAbsentTime || "09:00";
 
             // 현재 설정 정보 표시
             updateCurrentSettings(settings);
@@ -2995,19 +2998,19 @@
               <ul class="mt-2 space-y-2 text-sm">
                 <li class="flex items-center text-green-600">
                   <i class="ri-time-line mr-2"></i>
-                  출석 시작: ${settings.startTime}
+                  출석 시작: ${settings.startTime || "07:30"}
                 </li>
                 <li class="flex items-center text-blue-600">
                   <i class="ri-time-line mr-2"></i>
-                  정상 출석 마감: ${settings.normalTime}
+                  정상 출석 마감: ${settings.normalTime || "08:03"}
                 </li>
                 <li class="flex items-center text-yellow-600">
                   <i class="ri-time-line mr-2"></i>
-                  지각 마감: ${settings.lateTime}
+                  지각 마감: ${settings.lateTime || "09:00"}
                 </li>
                 <li class="flex items-center text-red-600">
                   <i class="ri-time-line mr-2"></i>
-                  자동 결석 처리: ${settings.autoAbsentTime}
+                  자동 결석 처리: ${settings.autoAbsentTime || "09:00"}
                 </li>
               </ul>
             </div>
@@ -3422,12 +3425,22 @@
         }
 
         try {
+          const token = localStorage.getItem("token");
+          const userInfo = JSON.parse(localStorage.getItem("userInfo"));
+          console.log("토큰 확인:", token);
+          console.log("사용자 정보:", userInfo);
+
           const response = await axios.post(
             "/api/attendance/process-absent",
-            {},
+            {
+              debug: true,
+              userRole: userInfo?.role,
+              timestamp: new Date().toISOString(),
+            },
             {
               headers: {
-                Authorization: `Bearer ${localStorage.getItem("token")}`,
+                Authorization: `Bearer ${token}`,
+                "Content-Type": "application/json",
               },
             }
           );
@@ -3438,11 +3451,25 @@
           }
         } catch (error) {
           console.error("결석 처리 중 오류:", error);
-          showToast(
-            error.response?.data?.message ||
-              "결석 처리 중 오류가 발생했습니다.",
-            "error"
-          );
+          console.error("에러 상세:", error.response?.data);
+          console.error("에러 상태:", error.response?.status);
+          console.error("에러 헤더:", error.response?.headers);
+
+          let errorMessage = "결석 처리 중 오류가 발생했습니다.";
+          if (error.response?.data?.message) {
+            errorMessage = error.response.data.message;
+          } else if (error.response?.status === 401) {
+            errorMessage = "인증이 만료되었습니다. 다시 로그인해주세요.";
+            // 로그인 페이지로 리다이렉트
+            window.location.href = "/login.html";
+          } else if (error.response?.status === 403) {
+            errorMessage = "권한이 없습니다.";
+          } else if (error.response?.status === 500) {
+            errorMessage =
+              "서버 내부 오류가 발생했습니다. 잠시 후 다시 시도해주세요.";
+          }
+
+          showToast(errorMessage, "error");
         }
       }
 
