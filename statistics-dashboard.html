@@ -991,41 +991,6 @@
       axios.defaults.baseURL =
         "https://port-0-attend-backend-m0tl39wtc3a73922.sel4.cloudtype.app";
 
-      // CORS 설정
-      axios.defaults.withCredentials = true;
-      axios.defaults.headers.common["Content-Type"] = "application/json";
-
-      // 에러 인터셉터 설정
-      axios.interceptors.response.use(
-        (response) => response,
-        async (error) => {
-          if (error.response?.status === 401) {
-            // 토큰이 만료된 경우
-            const refreshToken = localStorage.getItem("refreshToken");
-            if (refreshToken) {
-              try {
-                const response = await axios.post("/api/refresh-token", {
-                  refreshToken,
-                });
-                if (response.data.success) {
-                  localStorage.setItem("token", response.data.accessToken);
-                  error.config.headers[
-                    "Authorization"
-                  ] = `Bearer ${response.data.accessToken}`;
-                  return axios(error.config);
-                }
-              } catch (refreshError) {
-                localStorage.removeItem("token");
-                localStorage.removeItem("refreshToken");
-                window.location.href = "/index.html";
-                return Promise.reject(refreshError);
-              }
-            }
-          }
-          return Promise.reject(error);
-        }
-      );
-
       // 페이지 전환을 위한 함수 추가
       function showPage(pageId) {
         // 모든 페이지 숨기기
@@ -2986,30 +2951,21 @@
             const { settings } = response.data;
 
             // 폼 입력값 설정
-            const elements = {
-              startTime: document.getElementById("startTime"),
-              normalTime: document.getElementById("normalTime"),
-              lateTime: document.getElementById("lateTime"),
-              autoAbsentTime: document.getElementById("autoAbsentTime"),
-            };
-
-            // 각 요소가 존재할 때만 값을 설정
-            if (elements.startTime)
-              elements.startTime.value = settings.startTime || "07:30";
-            if (elements.normalTime)
-              elements.normalTime.value = settings.normalTime || "08:03";
-            if (elements.lateTime)
-              elements.lateTime.value = settings.lateTime || "09:00";
-            if (elements.autoAbsentTime)
-              elements.autoAbsentTime.value =
-                settings.autoAbsentTime || "09:00";
+            document.getElementById("startTime").value =
+              settings.startTime || "07:30";
+            document.getElementById("normalTime").value =
+              settings.normalTime || "08:03";
+            document.getElementById("lateTime").value =
+              settings.lateTime || "09:00";
+            document.getElementById("autoAbsentTime").value =
+              settings.autoAbsentTime || "09:00";
 
             // 현재 설정 정보 표시
             updateCurrentSettings(settings);
           }
         } catch (error) {
           console.error("출결 설정 로드 중 오류:", error);
-          showToast("error", "출결 설정을 불러오는데 실패했습니다.");
+          showToast("출결 설정을 불러오는데 실패했습니다.", "error");
         }
       }
 
@@ -3019,10 +2975,6 @@
           console.warn("currentSettings 요소를 찾을 수 없습니다.");
           return;
         }
-
-        const updatedAt = settings.updatedAt
-          ? moment(settings.updatedAt).format("YYYY년 MM월 DD일 HH:mm")
-          : "설정 없음";
 
         currentSettings.innerHTML = `
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -3051,7 +3003,7 @@
               <h4 class="font-medium text-gray-700">최근 업데이트</h4>
               <p class="mt-2 text-sm text-gray-600">
                 <i class="ri-history-line mr-2"></i>
-                ${updatedAt}
+                ${moment(settings.updatedAt).format("YYYY년 MM월 DD일 HH:mm")}
               </p>
               ${
                 settings.updatedBy
@@ -3641,37 +3593,28 @@
 
           if (response.data.success && response.data.logs) {
             const logsContainer = document.getElementById("processLogs");
-            if (!logsContainer) {
-              console.warn("processLogs 요소를 찾을 수 없습니다.");
-              return;
-            }
-
-            if (response.data.logs.length === 0) {
-              logsContainer.innerHTML =
-                '<p class="text-center text-gray-500">처리 로그가 없습니다.</p>';
-              return;
-            }
-
-            logsContainer.innerHTML = response.data.logs
-              .map(
-                (log) => `
-                <div class="bg-white p-4 rounded-lg shadow mb-4">
-                  <div class="font-semibold">${
-                    log.type === "auto_absent"
-                      ? "자동 결석 처리"
-                      : log.type === "manual_absent"
-                      ? "수동 결석 처리"
-                      : "수동 지각 처리"
-                  }</div>
-                  <div class="text-sm text-gray-600">
-                    <p>처리 일시: ${log.processDate} ${log.processTime}</p>
-                    <p>처리 건수: ${log.processedCount}명</p>
-                    ${log.details ? `<p class="mt-2">${log.details}</p>` : ""}
+            if (logsContainer) {
+              logsContainer.innerHTML = response.data.logs
+                .map(
+                  (log) => `
+                  <div class="bg-white p-4 rounded-lg shadow">
+                    <div class="font-semibold">${
+                      log.type === "auto_absent"
+                        ? "자동 결석 처리"
+                        : log.type === "manual_absent"
+                        ? "수동 결석 처리"
+                        : "수동 지각 처리"
+                    }</div>
+                    <div class="text-sm text-gray-600">
+                      처리 일시: ${log.processDate} ${log.processTime}<br>
+                      처리 건수: ${log.processedCount}명<br>
+                      ${log.details || ""}
+                    </div>
                   </div>
-                </div>
-              `
-              )
-              .join("");
+                `
+                )
+                .join("");
+            }
           }
         } catch (error) {
           console.error("로그 로드 중 오류:", error);
@@ -3768,6 +3711,18 @@
           }
         });
       }
+
+      // 페이지 로드 시 초기화
+      document.addEventListener("DOMContentLoaded", async function () {
+        try {
+          await checkAuthAndRedirect();
+          await loadAttendanceSettings();
+          await loadProcessLogs();
+        } catch (error) {
+          console.error("초기화 중 오류:", error);
+          showToast("error", "페이지 초기화 중 오류가 발생했습니다.");
+        }
+      });
     </script>
   </body>
 </html>
