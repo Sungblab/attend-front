@@ -853,7 +853,23 @@
                   />
                 </div>
               </div>
-              <div class="flex justify-end">
+              <div class="flex justify-between items-center">
+                <div class="flex gap-4">
+                  <button
+                    type="button"
+                    id="processAbsentBtn"
+                    class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700"
+                  >
+                    수동 결석 처리
+                  </button>
+                  <button
+                    type="button"
+                    id="processLateBtn"
+                    class="bg-yellow-600 text-white px-4 py-2 rounded-lg hover:bg-yellow-700"
+                  >
+                    수동 지각 처리
+                  </button>
+                </div>
                 <button
                   type="submit"
                   class="bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary-dark"
@@ -862,6 +878,16 @@
                 </button>
               </div>
             </form>
+          </div>
+        </section>
+
+        <!-- 처리 로그 섹션 추가 -->
+        <section class="bg-white rounded-lg shadow p-6">
+          <h2 class="text-2xl font-bold mb-4">처리 로그</h2>
+          <div class="bg-gray-50 p-4 rounded-lg">
+            <div id="processLogs" class="space-y-4">
+              <!-- 동적으로 로그가 추가될 영역 -->
+            </div>
           </div>
         </section>
       </div>
@@ -1712,17 +1738,35 @@
       }
 
       // 토스트 메시지 표시 함수
-      function showToast(message, type = "info") {
+      function showToast(type, message) {
         const toast = document.createElement("div");
-        toast.className = `fixed bottom-4 right-4 p-4 rounded-lg ${
-          type === "error" ? "bg-red-500" : "bg-green-500"
-        } text-white shadow-lg z-50 transition-opacity duration-300`;
+        let bgColor = "bg-blue-500"; // 기본값 (info)
+
+        switch (type) {
+          case "success":
+            bgColor = "bg-green-500";
+            break;
+          case "error":
+            bgColor = "bg-red-500";
+            break;
+          case "info":
+            bgColor = "bg-blue-500";
+            break;
+        }
+
+        toast.className = `fixed bottom-4 right-4 px-6 py-3 rounded-lg text-white ${bgColor} shadow-lg z-50 transition-opacity duration-300`;
         toast.textContent = message;
+
+        // 기존 토스트 제거
+        const existingToast = document.querySelector(".fixed.bottom-4.right-4");
+        if (existingToast) {
+          existingToast.remove();
+        }
 
         document.body.appendChild(toast);
         setTimeout(() => {
           toast.style.opacity = "0";
-          setTimeout(() => toast.remove(), 3000);
+          setTimeout(() => toast.remove(), 300);
         }, 3000);
       }
 
@@ -3583,6 +3627,9 @@
         processAbsentBtn.addEventListener("click", async function () {
           if (confirm("미출석 학생들을 결석 처리하시겠습니까?")) {
             try {
+              showToast("info", "결석 처리 중입니다...");
+              console.log("결석 처리 요청 시작");
+
               const response = await axios.post(
                 "/api/attendance/process-absent",
                 {},
@@ -3593,12 +3640,19 @@
                 }
               );
 
+              console.log("결석 처리 응답:", response.data);
+
               if (response.data.success) {
                 showToast(
                   "success",
                   `${response.data.processedCount}명의 학생이 결석 처리되었습니다.`
                 );
-                loadProcessLogs(); // 로그 새로고침
+                await loadProcessLogs(); // 로그 새로고침
+                await fetchAttendanceStats(); // 통계 새로고침
+              } else {
+                throw new Error(
+                  response.data.message || "결석 처리에 실패했습니다."
+                );
               }
             } catch (error) {
               console.error("결석 처리 중 오류:", error);
@@ -3618,6 +3672,9 @@
         processLateBtn.addEventListener("click", async function () {
           if (confirm("미출석 학생들을 지각 처리하시겠습니까?")) {
             try {
+              showToast("info", "지각 처리 중입니다...");
+              console.log("지각 처리 요청 시작");
+
               const response = await axios.post(
                 "/api/attendance/process-late",
                 {},
@@ -3628,12 +3685,19 @@
                 }
               );
 
+              console.log("지각 처리 응답:", response.data);
+
               if (response.data.success) {
                 showToast(
                   "success",
                   `${response.data.processedCount}명의 학생이 지각 처리되었습니다.`
                 );
-                loadProcessLogs(); // 로그 새로고침
+                await loadProcessLogs(); // 로그 새로고침
+                await fetchAttendanceStats(); // 통계 새로고침
+              } else {
+                throw new Error(
+                  response.data.message || "지각 처리에 실패했습니다."
+                );
               }
             } catch (error) {
               console.error("지각 처리 중 오류:", error);
