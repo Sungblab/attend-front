@@ -855,7 +855,20 @@
               </div>
               <div class="flex justify-between items-center">
                 <div class="flex gap-4">
-                  <!-- 수동 출결 처리 버튼 제거 -->
+                  <button
+                    type="button"
+                    id="processAbsentBtn"
+                    class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700"
+                  >
+                    수동 결석 처리
+                  </button>
+                  <button
+                    type="button"
+                    id="processLateBtn"
+                    class="bg-yellow-600 text-white px-4 py-2 rounded-lg hover:bg-yellow-700"
+                  >
+                    수동 지각 처리
+                  </button>
                 </div>
                 <button
                   type="submit"
@@ -2930,7 +2943,7 @@
         try {
           const response = await axios.get("/api/settings/attendance", {
             headers: {
-              Authorization: `Bearer ${getToken()}`,
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
             },
           });
 
@@ -2938,14 +2951,11 @@
             const { settings } = response.data;
 
             // 폼 입력값 설정
-            document.getElementById("startTime").value =
-              settings.startTime || "07:30";
-            document.getElementById("normalTime").value =
-              settings.normalTime || "08:03";
-            document.getElementById("lateTime").value =
-              settings.lateTime || "09:00";
+            document.getElementById("startTime").value = settings.startTime;
+            document.getElementById("normalTime").value = settings.normalTime;
+            document.getElementById("lateTime").value = settings.lateTime;
             document.getElementById("autoAbsentTime").value =
-              settings.autoAbsentTime || "09:00";
+              settings.autoAbsentTime;
 
             // 현재 설정 정보 표시
             updateCurrentSettings(settings);
@@ -2970,19 +2980,19 @@
               <ul class="mt-2 space-y-2 text-sm">
                 <li class="flex items-center text-green-600">
                   <i class="ri-time-line mr-2"></i>
-                  출석 시작: ${settings.startTime || "07:30"}
+                  출석 시작: ${settings.startTime}
                 </li>
                 <li class="flex items-center text-blue-600">
                   <i class="ri-time-line mr-2"></i>
-                  정상 출석 마감: ${settings.normalTime || "08:03"}
+                  정상 출석 마감: ${settings.normalTime}
                 </li>
                 <li class="flex items-center text-yellow-600">
                   <i class="ri-time-line mr-2"></i>
-                  지각 마감: ${settings.lateTime || "09:00"}
+                  지각 마감: ${settings.lateTime}
                 </li>
                 <li class="flex items-center text-red-600">
                   <i class="ri-time-line mr-2"></i>
-                  자동 결석 처리: ${settings.autoAbsentTime || "09:00"}
+                  자동 결석 처리: ${settings.autoAbsentTime}
                 </li>
               </ul>
             </div>
@@ -3505,47 +3515,7 @@
 
       // 출결 설정 관련 스크립트
       document.addEventListener("DOMContentLoaded", function () {
-        // 출결 설정 관련 함수들
-        async function loadAttendanceSettings() {
-          try {
-            const response = await axios.get("/api/settings/attendance", {
-              headers: {
-                Authorization: `Bearer ${getToken()}`,
-              },
-            });
-
-            if (response.data.success) {
-              const { settings } = response.data;
-
-              // 폼 입력값 설정
-              const startTimeEl = document.getElementById("startTime");
-              const normalTimeEl = document.getElementById("normalTime");
-              const lateTimeEl = document.getElementById("lateTime");
-              const autoAbsentTimeEl =
-                document.getElementById("autoAbsentTime");
-              const currentSettingsEl =
-                document.getElementById("currentSettings");
-
-              if (startTimeEl)
-                startTimeEl.value = settings.startTime || "07:30";
-              if (normalTimeEl)
-                normalTimeEl.value = settings.normalTime || "08:03";
-              if (lateTimeEl) lateTimeEl.value = settings.lateTime || "09:00";
-              if (autoAbsentTimeEl)
-                autoAbsentTimeEl.value = settings.autoAbsentTime || "09:00";
-
-              // 현재 설정 정보 표시
-              if (currentSettingsEl) {
-                updateCurrentSettings(settings);
-              }
-            }
-          } catch (error) {
-            console.error("출결 설정 로드 중 오류:", error);
-            showToast("error", "출결 설정을 불러오는데 실패했습니다.");
-          }
-        }
-
-        // 처기 데이터 로드
+        // 출기 데이터 로드
         loadAttendanceSettings();
         loadProcessLogs();
       });
@@ -3609,96 +3579,6 @@
         }
       }
 
-      // 수동 결석 처리 버튼 이벤트
-      const processAbsentBtn = document.getElementById("processAbsentBtn");
-      if (processAbsentBtn) {
-        processAbsentBtn.addEventListener("click", async function () {
-          if (confirm("미출석 학생들을 결석 처리하시겠습니까?")) {
-            try {
-              showToast("info", "결석 처리 중입니다...");
-              console.log("결석 처리 요청 시작");
-
-              const response = await axios.post(
-                "/api/attendance/process-absent",
-                {},
-                {
-                  headers: {
-                    Authorization: `Bearer ${getToken()}`,
-                  },
-                }
-              );
-
-              console.log("결석 처리 응답:", response.data);
-
-              if (response.data.success) {
-                showToast(
-                  "success",
-                  `${response.data.processedCount}명의 학생이 결석 처리되었습니다.`
-                );
-                await loadProcessLogs(); // 로그 새로고침
-                await fetchAttendanceStats(); // 통계 새로고침
-              } else {
-                throw new Error(
-                  response.data.message || "결석 처리에 실패했습니다."
-                );
-              }
-            } catch (error) {
-              console.error("결석 처리 중 오류:", error);
-              showToast(
-                "error",
-                error.response?.data?.message ||
-                  "결석 처리 중 오류가 발생했습니다."
-              );
-            }
-          }
-        });
-      }
-
-      // 수동 지각 처리 버튼 이벤트
-      const processLateBtn = document.getElementById("processLateBtn");
-      if (processLateBtn) {
-        processLateBtn.addEventListener("click", async function () {
-          if (confirm("미출석 학생들을 지각 처리하시겠습니까?")) {
-            try {
-              showToast("info", "지각 처리 중입니다...");
-              console.log("지각 처리 요청 시작");
-
-              const response = await axios.post(
-                "/api/attendance/process-late",
-                {},
-                {
-                  headers: {
-                    Authorization: `Bearer ${getToken()}`,
-                  },
-                }
-              );
-
-              console.log("지각 처리 응답:", response.data);
-
-              if (response.data.success) {
-                showToast(
-                  "success",
-                  `${response.data.processedCount}명의 학생이 지각 처리되었습니다.`
-                );
-                await loadProcessLogs(); // 로그 새로고침
-                await fetchAttendanceStats(); // 통계 새로고침
-              } else {
-                throw new Error(
-                  response.data.message || "지각 처리에 실패했습니다."
-                );
-              }
-            } catch (error) {
-              console.error("지각 처리 중 오류:", error);
-              showToast(
-                "error",
-                error.response?.data?.message ||
-                  "지각 처리 중 오류가 발생했습니다."
-              );
-            }
-          }
-        });
-      }
-
       // 페이지 로드 시 초기화
       document.addEventListener("DOMContentLoaded", async function () {
         try {
@@ -3708,6 +3588,59 @@
         } catch (error) {
           console.error("초기화 중 오류:", error);
           showToast("error", "페이지 초기화 중 오류가 발생했습니다.");
+        }
+      });
+
+      async function saveAttendanceSettings(event) {
+        event.preventDefault();
+
+        const startTime = document.getElementById("startTime").value;
+        const normalTime = document.getElementById("normalTime").value;
+        const lateTime = document.getElementById("lateTime").value;
+        const autoAbsentTime = document.getElementById("autoAbsentTime").value;
+
+        try {
+          const response = await axios.put(
+            "/api/settings/attendance",
+            {
+              startTime,
+              normalTime,
+              lateTime,
+              autoAbsentTime,
+            },
+            {
+              headers: {
+                Authorization: `Bearer ${localStorage.getItem("token")}`,
+              },
+            }
+          );
+
+          if (response.data.success) {
+            showToast("success", "출결 설정이 저장되었습니다.");
+            // 설정 저장 후 즉시 설정을 다시 불러와서 화면 갱신
+            await loadAttendanceSettings();
+            // 처리 로그도 함께 갱신
+            await loadProcessLogs();
+          }
+        } catch (error) {
+          console.error("출결 설정 저장 중 오류:", error);
+          showToast(
+            "error",
+            error.response?.data?.message ||
+              "출결 설정 저장 중 오류가 발생했습니다."
+          );
+        }
+      }
+
+      // 페이지 로드 시 설정 로드
+      document.addEventListener("DOMContentLoaded", async () => {
+        await loadAttendanceSettings();
+        await loadProcessLogs();
+
+        // 설정 폼 제출 이벤트 리스너 등록
+        const settingsForm = document.getElementById("attendanceSettingsForm");
+        if (settingsForm) {
+          settingsForm.addEventListener("submit", saveAttendanceSettings);
         }
       });
     </script>
