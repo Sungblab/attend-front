@@ -829,7 +829,7 @@
                     required
                   />
                   <p class="mt-1 text-sm text-gray-500">
-                    이 시간까지는 정상 출석으로 처리됩니다.
+                    이 시간까지 정상 출석으로 인정됩니다.
                   </p>
                 </div>
                 <div>
@@ -843,9 +843,10 @@
                     required
                   />
                   <p class="mt-1 text-sm text-gray-500">
-                    이 시간 이후는 결석으로 처리됩니다.
+                    이 시간까지 지각으로 처리됩니다.
                   </p>
                 </div>
+                <!-- 자동 결석 처리 시간 설정 추가 -->
                 <div>
                   <label class="block text-sm font-medium text-gray-700 mb-1">
                     자동 결석 처리 시간
@@ -857,75 +858,47 @@
                     required
                   />
                   <p class="mt-1 text-sm text-gray-500">
-                    이 시간에 미출석자는 자동으로 결석 처리됩니다.
+                    이 시간에 미출석자가 자동으로 결석 처리됩니다.
                   </p>
                 </div>
               </div>
-              <div class="flex justify-end">
+
+              <!-- 수동 결석/지각 처리 버튼 추가 -->
+              <div class="mt-6 flex gap-4">
+                <button
+                  type="button"
+                  id="processAbsentBtn"
+                  class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
+                >
+                  수동 결석 처리
+                </button>
+                <button
+                  type="button"
+                  id="processLateBtn"
+                  class="px-4 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2"
+                >
+                  수동 지각 처리
+                </button>
+              </div>
+
+              <div class="mt-6">
                 <button
                   type="submit"
-                  class="bg-primary text-white px-6 py-2 rounded-lg hover:bg-secondary transition-colors"
+                  class="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
                 >
-                  <i class="ri-save-line mr-2"></i>
                   설정 저장
                 </button>
               </div>
             </form>
           </div>
-
-          <!-- 현재 설정 정보 -->
-          <div class="mt-6">
-            <h3 class="text-lg font-semibold mb-3">현재 설정 정보</h3>
-            <div id="currentSettings" class="bg-gray-50 p-4 rounded-lg">
-              <!-- 동적으로 추가될 내용 -->
-            </div>
-          </div>
         </section>
 
-        <!-- 수동 지각/결석 처리 섹션 추가 -->
-        <section class="bg-white rounded-lg shadow mb-6 p-6">
-          <h2 class="text-2xl font-bold mb-4">수동 출결 처리</h2>
-          <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <!-- 수동 지각 처리 -->
-            <div class="bg-gray-50 p-4 rounded-lg">
-              <h3 class="text-lg font-semibold mb-3">수동 지각 처리</h3>
-              <button
-                onclick="processManualLate()"
-                class="w-full bg-yellow-500 text-white px-4 py-2 rounded-lg hover:bg-yellow-600 transition-colors flex items-center justify-center gap-2"
-              >
-                <i class="ri-time-line"></i>
-                미출석자 지각 처리
-              </button>
-              <p class="mt-2 text-sm text-gray-600">
-                <i class="ri-information-line mr-1"></i>
-                현재 시간 기준으로 미출석자를 지각 처리합니다.
-              </p>
-            </div>
-
-            <!-- 수동 결석 처리 -->
-            <div class="bg-gray-50 p-4 rounded-lg">
-              <h3 class="text-lg font-semibold mb-3">수동 결석 처리</h3>
-              <button
-                onclick="processManualAbsent()"
-                class="w-full bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition-colors flex items-center justify-center gap-2"
-              >
-                <i class="ri-close-circle-line"></i>
-                미출석자 결석 처리
-              </button>
-              <p class="mt-2 text-sm text-gray-600">
-                <i class="ri-information-line mr-1"></i>
-                현재 시간 기준으로 미출석자를 결석 처리합니다.
-              </p>
-            </div>
-
-            <!-- 처리 결과 표시 영역 -->
-            <div class="lg:col-span-2">
-              <div
-                id="processResult"
-                class="hidden bg-white p-4 rounded-lg border border-gray-200"
-              >
-                <!-- 처리 결과가 여기에 표시됩니다 -->
-              </div>
+        <!-- 처리 로그 섹션 추가 -->
+        <section class="bg-white rounded-lg shadow p-6">
+          <h2 class="text-2xl font-bold mb-4">처리 로그</h2>
+          <div class="bg-gray-50 p-4 rounded-lg">
+            <div id="processLogs" class="space-y-4">
+              <!-- 동적으로 로그가 추가될 영역 -->
             </div>
           </div>
         </section>
@@ -3530,6 +3503,139 @@
         `;
         resultDiv.classList.remove("hidden");
       }
+
+      // 출결 설정 관련 스크립트
+      document.addEventListener("DOMContentLoaded", function () {
+        // 출결 설정 폼 제출 처리
+        const settingsForm = document.getElementById("attendanceSettingsForm");
+        settingsForm.addEventListener("submit", async function (e) {
+          e.preventDefault();
+
+          try {
+            const response = await fetch("/api/settings/attendance", {
+              method: "PUT",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${getToken()}`,
+              },
+              body: JSON.stringify({
+                startTime: document.getElementById("startTime").value,
+                normalTime: document.getElementById("normalTime").value,
+                lateTime: document.getElementById("lateTime").value,
+                autoAbsentTime: document.getElementById("autoAbsentTime").value,
+              }),
+            });
+
+            const data = await response.json();
+            if (data.success) {
+              showToast("success", "출결 설정이 저장되었습니다.");
+            } else {
+              showToast("error", data.message);
+            }
+          } catch (error) {
+            showToast("error", "설정 저장 중 오류가 발생했습니다.");
+          }
+        });
+
+        // 수동 결석 처리 버튼 이벤트
+        document
+          .getElementById("processAbsentBtn")
+          .addEventListener("click", async function () {
+            if (confirm("미출석 학생들을 결석 처리하시겠습니까?")) {
+              try {
+                const response = await fetch("/api/attendance/process-absent", {
+                  method: "POST",
+                  headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${getToken()}`,
+                  },
+                });
+
+                const data = await response.json();
+                if (data.success) {
+                  showToast(
+                    "success",
+                    `${data.processedCount}명의 학생이 결석 처리되었습니다.`
+                  );
+                  loadProcessLogs(); // 로그 새로고침
+                } else {
+                  showToast("error", data.message);
+                }
+              } catch (error) {
+                showToast("error", "결석 처리 중 오류가 발생했습니다.");
+              }
+            }
+          });
+
+        // 수동 지각 처리 버튼 이벤트
+        document
+          .getElementById("processLateBtn")
+          .addEventListener("click", async function () {
+            if (confirm("미출석 학생들을 지각 처리하시겠습니까?")) {
+              try {
+                const response = await fetch("/api/attendance/process-late", {
+                  method: "POST",
+                  headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${getToken()}`,
+                  },
+                });
+
+                const data = await response.json();
+                if (data.success) {
+                  showToast(
+                    "success",
+                    `${data.processedCount}명의 학생이 지각 처리되었습니다.`
+                  );
+                  loadProcessLogs(); // 로그 새로고침
+                } else {
+                  showToast("error", data.message);
+                }
+              } catch (error) {
+                showToast("error", "지각 처리 중 오류가 발생했습니다.");
+              }
+            }
+          });
+
+        // 처리 로그 로드 함수
+        async function loadProcessLogs() {
+          try {
+            const response = await fetch("/api/process-logs", {
+              headers: {
+                Authorization: `Bearer ${getToken()}`,
+              },
+            });
+
+            const data = await response.json();
+            if (data.success) {
+              const logsContainer = document.getElementById("processLogs");
+              logsContainer.innerHTML = data.logs
+                .map(
+                  (log) => `
+                <div class="bg-white p-4 rounded-lg shadow">
+                  <div class="font-semibold">${
+                    log.type === "auto_absent"
+                      ? "자동 결석 처리"
+                      : "수동 결석 처리"
+                  }</div>
+                  <div class="text-sm text-gray-600">
+                    처리 일시: ${log.processDate} ${log.processTime}<br>
+                    처리 건수: ${log.processedCount}명<br>
+                    ${log.details}
+                  </div>
+                </div>
+              `
+                )
+                .join("");
+            }
+          } catch (error) {
+            console.error("로그 로드 중 오류:", error);
+          }
+        }
+
+        // 초기 로그 로드
+        loadProcessLogs();
+      });
     </script>
   </body>
 </html>
