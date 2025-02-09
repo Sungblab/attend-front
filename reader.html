@@ -67,6 +67,7 @@
     <meta name="theme-color" content="#4F46E5" />
   </head>
   <body class="bg-white text-gray-900 font-sans flex flex-col min-h-screen">
+    <audio id="checkSound" src="체크.mp3" preload="auto"></audio>
     <header>
       <nav
         class="container mx-auto px-4 sm:px-6 lg:px-8 py-3 sm:py-5 flex justify-between items-center shadow-sm bg-white/80 backdrop-blur-md fixed top-0 left-0 right-0 z-50"
@@ -176,6 +177,7 @@
       const startButton = document.getElementById("start-button");
       const stopButton = document.getElementById("stop-button");
       const cameraList = document.getElementById("camera-list");
+      const checkSound = document.getElementById("checkSound");
       let lastScannedCode = "";
       let scanTimeout = null;
 
@@ -203,6 +205,11 @@
         if (decodedText !== lastScannedCode) {
           lastScannedCode = decodedText;
           clearTimeout(scanTimeout);
+
+          // QR 코드 인식 시 소리 재생
+          checkSound.play().catch((error) => {
+            console.error("소리 재생 실패:", error);
+          });
 
           scanResult.innerText = `QR 코드를 읽었습니다. 출석 처리 중...`;
           scanResult.classList.remove(
