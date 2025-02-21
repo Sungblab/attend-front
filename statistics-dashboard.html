@@ -46,11 +46,13 @@
     <main class="container mx-auto px-4 py-8">
       <!-- 네비게이션 탭 추가 -->
       <div class="mb-6">
-        <nav class="flex space-x-4 border-b border-gray-200">
+        <nav
+          class="grid grid-cols-2 sm:flex sm:space-x-4 gap-2 border-b border-gray-200"
+        >
           <button
             onclick="showPage('statistics')"
             id="statisticsTab"
-            class="px-4 py-2 text-sm font-medium text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap active"
+            class="px-4 py-2 text-sm font-medium text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap active flex items-center justify-center"
           >
             <i class="ri-bar-chart-line mr-2"></i>
             통계
@@ -58,7 +60,7 @@
           <button
             onclick="showPage('excused')"
             id="excusedTab"
-            class="px-4 py-2 text-sm font-medium text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap"
+            class="px-4 py-2 text-sm font-medium text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap flex items-center justify-center"
           >
             <i class="ri-calendar-check-line mr-2"></i>
             인정출결 관리
@@ -66,7 +68,7 @@
           <button
             onclick="showPage('holiday')"
             id="holidayTab"
-            class="px-4 py-2 text-sm font-medium text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap"
+            class="px-4 py-2 text-sm font-medium text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap flex items-center justify-center"
           >
             <i class="ri-calendar-event-line mr-2"></i>
             휴일 관리
@@ -74,7 +76,7 @@
           <button
             onclick="showPage('settings')"
             id="settingsTab"
-            class="px-4 py-2 text-sm font-medium text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap"
+            class="px-4 py-2 text-sm font-medium text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap flex items-center justify-center"
           >
             <i class="ri-settings-3-line mr-2"></i>
             출결 설정
@@ -157,14 +159,14 @@
                 class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg flex items-center gap-2"
               >
                 <i class="ri-file-excel-line"></i>
-                요약 엑셀 다운로드
+                요약 엑셀
               </button>
               <button
                 onclick="downloadDetailExcel()"
                 class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center gap-2"
               >
                 <i class="ri-file-excel-line"></i>
-                상세 엑셀 다운로드
+                상세 엑셀
               </button>
             </div>
             <button
@@ -885,7 +887,10 @@
         <section class="bg-white rounded-lg shadow p-6">
           <h2 class="text-2xl font-bold mb-4">처리 로그</h2>
           <div class="bg-gray-50 p-4 rounded-lg">
-            <div id="processLogs" class="space-y-4">
+            <div
+              id="processLogs"
+              class="space-y-4 max-h-[400px] overflow-y-auto"
+            >
               <!-- 동적으로 로그가 추가될 영역 -->
             </div>
           </div>
