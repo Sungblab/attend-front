@@ -17,10 +17,7 @@
     />
     <meta name="apple-mobile-web-app-title" content="출결관리" />
     <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
-    <meta
-      name="description"
-      content="디지털 출결관리 - 관리자 시스템 - 관리자"
-    />
+    <meta name="description" content="디지털 출결관리" />
     <!-- PWA 설정 끝 -->
 
     <link
@@ -148,20 +145,6 @@
                   포함해야 합니다.
                 </div>
               </div>
-              <div class="flex items-center">
-                <input
-                  type="checkbox"
-                  id="keep-logged-in"
-                  name="keep-logged-in"
-                  class="h-4 w-4 text-primary-500 border-gray-300 rounded focus:ring-primary-500"
-                />
-                <label
-                  for="keep-logged-in"
-                  class="ml-2 block text-sm text-gray-700"
-                >
-                  로그인 상태 유지
-                </label>
-              </div>
             </div>
             <button
               type="submit"
@@ -267,8 +250,6 @@
 
           const studentId = document.getElementById("student-id").value;
           const password = document.getElementById("password").value;
-          const keepLoggedIn =
-            document.getElementById("keep-logged-in").checked;
 
           // 입력값 검증
           if (!studentId || !password) {
@@ -280,7 +261,7 @@
             const response = await axios.post("/api/login", {
               studentId,
               password,
-              keepLoggedIn,
+              keepLoggedIn: true,
               isWeb: true, // 웹 접속임을 표시
             });
 
@@ -298,7 +279,6 @@
                 isReader: response.data.user.isReader,
               };
               localStorage.setItem("userInfo", JSON.stringify(userInfo));
-              localStorage.setItem("keepLoggedIn", keepLoggedIn);
 
               // 성공 메시지 표시
               showMessage("로그인 성공! 이동합니다...", false);
@@ -395,6 +375,14 @@
                 if (response.data.accessToken) {
                   // 새 토큰 저장
                   localStorage.setItem("token", response.data.accessToken);
+
+                  // 새 리프레시 토큰도 저장
+                  if (response.data.refreshToken) {
+                    localStorage.setItem(
+                      "refreshToken",
+                      response.data.refreshToken
+                    );
+                  }
 
                   // 새 토큰으로 헤더 업데이트
                   originalRequest.headers.Authorization = `Bearer ${response.data.accessToken}`;
