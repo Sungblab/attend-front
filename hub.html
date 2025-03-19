@@ -124,7 +124,6 @@
         if (!token) {
           localStorage.removeItem("userInfo");
           localStorage.removeItem("token");
-          localStorage.removeItem("refreshToken");
           window.location.href =
             "index.html?error=" + encodeURIComponent("로그인이 필요합니다.");
           return false;
@@ -228,7 +227,6 @@
               // 로그아웃 처리
               localStorage.removeItem("userInfo");
               localStorage.removeItem("token");
-              localStorage.removeItem("refreshToken");
               localStorage.removeItem("keepLoggedIn");
               showMessage("로그아웃되었습니다.", "success");
               setTimeout(() => {
