@@ -291,84 +291,15 @@
 
       function checkAuth() {
         const token = localStorage.getItem("token");
-        const refreshToken = localStorage.getItem("refreshToken");
-
-        if (!token || !refreshToken) {
-          localStorage.clear();
+        
+        if (!token) {
+          localStorage.removeItem("token");
+          localStorage.removeItem("userInfo");
           window.location.href =
             "index.html?error=" + encodeURIComponent("로그인이 필요합니다.");
           return false;
         }
-        axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
         return true;
-      }
-
-      async function apiRequest(url, options = {}) {
-        try {
-          if (!checkAuth()) return;
-
-          const response = await fetch(url, {
-            ...options,
-          });
-
-          if (response.status === 401) {
-            const refreshToken = localStorage.getItem("refreshToken");
-            if (!refreshToken) {
-              throw new Error("리프레시 토큰이 없습니다.");
-            }
-
-            try {
-              console.log("Attempting token refresh..."); // 디버깅용
-              const refreshResponse = await fetch(
-                `${API_BASE_URL}/refresh-token`,
-                {
-                  method: "POST",
-                  headers: {
-                    "Content-Type": "application/json",
-                  },
-                  body: JSON.stringify({ refreshToken }),
-                }
-              );
-
-              const refreshData = await refreshResponse.json();
-              console.log("Refresh response:", refreshData); // 디버깅용
-
-              if (!refreshResponse.ok || !refreshData.success) {
-                throw new Error(
-                  refreshData.message || "토큰 갱신에 실패했습니다."
-                );
-              }
-
-              // 새로운 토큰 저장
-              localStorage.setItem("token", refreshData.accessToken);
-              localStorage.setItem("refreshToken", refreshData.refreshToken);
-
-              // 원래 요청 재시도
-              return await fetch(url, {
-                ...options,
-                headers: {
-                  ...options.headers,
-                  Authorization: `Bearer ${refreshData.accessToken}`,
-                  "Content-Type": "application/json",
-                },
-              });
-            } catch (refreshError) {
-              console.error("Token refresh error:", refreshError);
-              localStorage.clear();
-              window.location.href =
-                "index.html?error=" +
-                encodeURIComponent(
-                  "세션이 만료되었습니다. 다시 로그인해주세요."
-                );
-              throw refreshError;
-            }
-          }
-
-          return response;
-        } catch (error) {
-          console.error("API request error:", error);
-          throw error;
-        }
       }
 
       async function fetchStudentInfo() {
@@ -441,6 +372,11 @@
       // 페이지 로드 시 실행
       document.addEventListener("DOMContentLoaded", async () => {
         if (!checkAuth()) return;
+        // 토큰을 axios 기본 헤더에 설정
+        const token = localStorage.getItem("token");
+        if (token) {
+          axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+        }
         await fetchAttendanceSettings();
         await fetchStudentInfo();
         await checkTodayAttendance();
@@ -471,7 +407,9 @@
               throw new Error(data.message || "Logout failed");
             }
             localStorage.removeItem("token");
-            window.location.href = "index.html"; // hub.html로 리다이렉트
+            localStorage.removeItem("userInfo");
+            localStorage.removeItem("keepLoggedIn");
+            window.location.href = "index.html"; // 로그인 페이지로 리다이렉트
           } catch (error) {
             console.error("Error during logout:", error);
             showError(`로그아웃 중 오류가 발생했습니다: ${error.message}`);

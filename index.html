@@ -301,10 +301,10 @@
               // 성공 메시지 표시
               showMessage("로그인 성공! 이동합니다...", false);
 
-              // 리다이렉트
+              // 리다이렉트 - 딜레이 증가
               setTimeout(() => {
                 window.location.href = response.data.redirectUrl;
-              }, 500);
+              }, 1000);
             }
           } catch (error) {
             console.error("Login error:", error);
@@ -347,49 +347,14 @@
         return regex.test(password);
       }
 
-      // axios 인터셉터 설정을 수정합니다
+      // axios 인터셉터 설정을 제거합니다 (axios-config.js에서 이미 설정됨)
       const setupAxiosInterceptors = () => {
-        // 요청 인터셉터
-        axios.interceptors.request.use(
-          (config) => {
-            // 로그인 요청인 경우 토큰을 추가하지 않음
-            if (config.url === "/api/login") {
-              return config;
-            }
-
-            const token = localStorage.getItem("token");
-            if (token) {
-              config.headers.Authorization = `Bearer ${token}`;
-            }
-            return config;
-          },
-          (error) => {
-            return Promise.reject(error);
-          }
-        );
-
-        // 응답 인터셉터
-        axios.interceptors.response.use(
-          (response) => response,
-          (error) => {
-            // 토큰 만료 에러(401)인 경우
-            if (error.response && error.response.status === 401) {
-              // 로그인 페이지로 리다이렉트
-              localStorage.clear();
-              window.location.href =
-                "/index.html?error=" +
-                encodeURIComponent(
-                  "세션이 만료되었습니다. 다시 로그인해주세요."
-                );
-            }
-            return Promise.reject(error);
-          }
-        );
+        // 중복된 인터셉터 설정 제거
       };
 
       // 페이지 로드 시 인터셉터 설정
       window.addEventListener("load", () => {
-        setupAxiosInterceptors();
+        // setupAxiosInterceptors(); // 이 부분 주석 처리 또는 제거
         checkLoginStatus();
 
         // URL 파라미터에서 에러 메시지 확인

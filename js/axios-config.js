@@ -16,13 +16,24 @@ function checkTokenExpiration() {
 
     // 토큰이 만료된 경우
     if (currentTime >= expiresIn) {
-      localStorage.clear();
+      localStorage.removeItem("token");
+      localStorage.removeItem("userInfo");
+      localStorage.removeItem("keepLoggedIn");
       window.location.href =
         "index.html?error=" + 
         encodeURIComponent("세션이 만료되었습니다. 다시 로그인해주세요.");
     }
   } catch (error) {
     console.error("Error checking token expiration:", error);
+    // 토큰 파싱 오류가 발생했지만 로그인 페이지에서는 리다이렉트 하지 않음
+    if (!window.location.pathname.includes('index.html')) {
+      localStorage.removeItem("token");
+      localStorage.removeItem("userInfo");
+      localStorage.removeItem("keepLoggedIn");
+      window.location.href =
+        "index.html?error=" + 
+        encodeURIComponent("세션 처리 중 오류가 발생했습니다. 다시 로그인해주세요.");
+    }
   }
 }
 
@@ -30,7 +41,13 @@ function checkTokenExpiration() {
 document.addEventListener("DOMContentLoaded", () => {
   const token = localStorage.getItem("token");
   if (token) {
-    checkTokenExpiration();
+    // 현재 페이지가 로그인 페이지가 아닌 경우에만 토큰 체크 실행
+    if (!window.location.pathname.includes('index.html')) {
+      // 약간의 지연 후 토큰 체크 실행 (로그인 후 토큰이 제대로 저장되도록)
+      setTimeout(() => {
+        checkTokenExpiration();
+      }, 500);
+    }
   }
 });
 
@@ -52,7 +69,9 @@ axios.interceptors.response.use(
   (error) => {
     // 토큰이 만료된 경우(401)
     if (error.response?.status === 401) {
-      localStorage.clear();
+      localStorage.removeItem("token");
+      localStorage.removeItem("userInfo");
+      localStorage.removeItem("keepLoggedIn");
       window.location.href =
         "index.html?error=" +
         encodeURIComponent("세션이 만료되었습니다. 다시 로그인해주세요.");
