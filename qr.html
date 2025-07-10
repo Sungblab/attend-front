@@ -139,7 +139,7 @@
             </div>
           </div>
 
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <button
               onclick="showAttendanceDetails()"
               class="w-full bg-primary hover:bg-secondary text-white font-medium py-2.5 px-4 rounded-xl transition duration-300 hover-scale flex items-center justify-center shadow-md text-sm"
@@ -154,6 +154,14 @@
             >
               <i class="ri-refresh-line mr-2"></i>
               QR 코드 새로고침
+            </button>
+
+            <button
+              onclick="showSelfAbsentModal()"
+              class="w-full bg-orange-500 hover:bg-orange-600 text-white font-medium py-2.5 px-4 rounded-xl transition duration-300 hover-scale flex items-center justify-center shadow-md text-sm"
+            >
+              <i class="ri-file-text-line mr-2"></i>
+              자진 결석 신고
             </button>
           </div>
 
@@ -269,6 +277,79 @@
               <!-- 동적으로 추가될 내용 -->
             </div>
           </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 자진 결석 신고 모달 -->
+    <div
+      id="selfAbsentModal"
+      class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50"
+    >
+      <div
+        class="relative mx-auto p-0 sm:p-6 border w-full sm:w-11/12 max-w-lg shadow-lg rounded-2xl bg-white/90 backdrop-blur-md min-h-screen sm:min-h-0 sm:my-8"
+      >
+        <div
+          class="sticky top-0 bg-white/90 backdrop-blur-md z-10 p-4 border-b rounded-t-2xl"
+        >
+          <div class="flex justify-between items-center">
+            <h3 class="text-xl font-bold text-gray-800">자진 결석 신고</h3>
+            <button
+              onclick="closeSelfAbsentModal()"
+              class="p-2 hover:bg-gray-100 rounded-full transition duration-200"
+              aria-label="닫기"
+            >
+              <i class="ri-close-line text-2xl"></i>
+            </button>
+          </div>
+        </div>
+
+        <div class="p-4 sm:p-6">
+          <div class="mb-4">
+            <div class="bg-yellow-50 p-4 rounded-lg border border-yellow-200">
+              <div class="flex items-center mb-2">
+                <i class="ri-alert-line text-yellow-600 mr-2"></i>
+                <span class="text-yellow-800 font-medium">주의사항</span>
+              </div>
+              <ul class="text-sm text-yellow-700 space-y-1">
+                <li>• 자진 결석 신고는 하루에 한 번만 가능합니다.</li>
+                <li>• 신고 후 관리자의 승인이 필요합니다.</li>
+                <li>• 거짓 신고 시 불이익이 있을 수 있습니다.</li>
+              </ul>
+            </div>
+          </div>
+
+          <form id="selfAbsentForm">
+            <div class="mb-4">
+              <label for="absentReason" class="block text-sm font-medium text-gray-700 mb-2">
+                결석 사유 <span class="text-red-500">*</span>
+              </label>
+              <textarea
+                id="absentReason"
+                name="reason"
+                rows="4"
+                placeholder="결석 사유를 자세히 입력해주세요..."
+                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none"
+                required
+              ></textarea>
+            </div>
+
+            <div class="flex gap-3">
+              <button
+                type="button"
+                onclick="closeSelfAbsentModal()"
+                class="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-700 font-medium py-2.5 px-4 rounded-xl transition duration-300"
+              >
+                취소
+              </button>
+              <button
+                type="submit"
+                class="flex-1 bg-orange-500 hover:bg-orange-600 text-white font-medium py-2.5 px-4 rounded-xl transition duration-300"
+              >
+                신고하기
+              </button>
+            </div>
+          </form>
         </div>
       </div>
     </div>
@@ -453,6 +534,7 @@
                 present: "bg-green-100 text-green-800",
                 late: "bg-yellow-100 text-yellow-800",
                 absent: "bg-red-100 text-red-800",
+                pending: "bg-orange-100 text-orange-800",
               }[status.status] || "bg-gray-100 text-gray-800";
 
             const statusText =
@@ -460,6 +542,7 @@
                 present: "출석",
                 late: "지각",
                 absent: "결석",
+                pending: "신고 대기중",
               }[status.status] || "미출석";
 
             todayStatusDiv.innerHTML = `
@@ -593,6 +676,8 @@
             return `${baseClasses} bg-yellow-100 text-yellow-800`;
           case "absent":
             return `${baseClasses} bg-red-100 text-red-800`;
+          case "pending":
+            return `${baseClasses} bg-orange-100 text-orange-800`;
           default:
             return `${baseClasses} bg-gray-100 text-gray-800`;
         }
@@ -605,6 +690,7 @@
             present: "출석",
             late: "지각",
             absent: "결석",
+            pending: "신고 대기중",
           }[status] || "미출석"
         );
       }
@@ -620,6 +706,7 @@
       document.addEventListener("keydown", (e) => {
         if (e.key === "Escape") {
           closeModal();
+          closeSelfAbsentModal();
         }
       });
 
@@ -650,6 +737,68 @@
           console.error("출결 설정을 가져오는데 실패했습니다:", error);
           showError("출결 설정을 가져오는데 실패했습니다.");
         }
+      }
+
+      // 자진 결석 신고 모달 표시 함수
+      function showSelfAbsentModal() {
+        document.getElementById("selfAbsentModal").classList.remove("hidden");
+        document.getElementById("absentReason").focus();
+      }
+
+      // 자진 결석 신고 모달 닫기 함수
+      function closeSelfAbsentModal() {
+        document.getElementById("selfAbsentModal").classList.add("hidden");
+        document.getElementById("selfAbsentForm").reset();
+      }
+
+      // 자진 결석 신고 폼 제출 처리
+      document.getElementById("selfAbsentForm").addEventListener("submit", async (e) => {
+        e.preventDefault();
+        
+        const reason = document.getElementById("absentReason").value.trim();
+        
+        if (!reason) {
+          showError("결석 사유를 입력해주세요.");
+          return;
+        }
+
+        try {
+          const response = await axios.post("/api/attendance/self-absent", {
+            reason: reason
+          });
+
+          if (response.data.success) {
+            showToast("자진 결석 신고가 완료되었습니다. 관리자 승인을 기다려주세요.", "success");
+            closeSelfAbsentModal();
+            // 오늘의 출석 상태 새로고침
+            await checkTodayAttendance();
+          } else {
+            showError(response.data.message || "자진 결석 신고에 실패했습니다.");
+          }
+        } catch (error) {
+          console.error("자진 결석 신고 중 오류:", error);
+          if (error.response && error.response.data) {
+            showError(error.response.data.message || "자진 결석 신고에 실패했습니다.");
+          } else {
+            showError("자진 결석 신고 중 오류가 발생했습니다.");
+          }
+        }
+      });
+
+      // 토스트 메시지 표시 함수 개선
+      function showToast(message, type = "info") {
+        const toast = document.createElement("div");
+        toast.className = `fixed top-4 right-4 p-4 rounded-lg shadow-lg z-50 ${
+          type === "error" ? "bg-red-500" : 
+          type === "success" ? "bg-green-500" : 
+          "bg-blue-500"
+        } text-white`;
+        toast.textContent = message;
+        document.body.appendChild(toast);
+        setTimeout(() => {
+          toast.style.opacity = "0";
+          setTimeout(() => toast.remove(), 300);
+        }, 3000);
       }
     </script>
   </body>
